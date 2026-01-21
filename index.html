@@ -1,74 +1,152 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>DSSSB Smart Notes</title>
+<meta charset="utf-8">
+<title>All Tests – DSSSB Smart Notes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body{margin:0;font-family:Arial;background:#f2f2f2;}
-header{background:#0b2c4d;color:white;padding:20px;text-align:center;font-size:28px;font-weight:bold;}
-nav{background:#102f52;padding:10px;text-align:center;}
-nav a{color:white;text-decoration:none;padding:10px 15px;display:inline-block;font-weight:bold;}
-nav a:hover{background:#1c4b7a;}
-.container{padding:20px;}
-.card{background:white;padding:20px;margin:15px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);text-align:center;}
-.card a{display:block;margin-top:10px;padding:10px;background:#0b2c4d;color:white;text-decoration:none;border-radius:5px;}
-.card a:hover{background:#133e73;}
-.footer{background:#0b2c4d;color:white;text-align:center;padding:10px;margin-top:30px;}
+body{margin:0;font-family:Arial;background:#eef2f7;}
+.header{
+  background:linear-gradient(135deg,#1a237e,#3949ab);
+  color:#fff;padding:22px 16px;font-size:20px;font-weight:bold;
+  border-bottom-left-radius:18px;border-bottom-right-radius:18px;
+}
+.search-box{padding:14px;}
+.search-box input{
+  width:100%;padding:12px;font-size:15px;border-radius:12px;
+  border:none;box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+.tabs{display:flex;justify-content:space-around;margin:8px 12px;}
+.tab{
+  background:#fff;padding:8px 14px;border-radius:20px;font-size:14px;
+  cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.08);
+}
+.tab.active{background:#1a237e;color:#fff;}
+.container{padding:12px;}
+.folder{
+  background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;
+  box-shadow:0 6px 14px rgba(0,0,0,0.1);
+}
+.folder-title{font-size:17px;font-weight:700;margin-bottom:10px;}
+.test-card{
+  background:#f9fafc;border-radius:14px;padding:12px;margin-bottom:10px;
+}
+.test-title{font-size:15px;font-weight:600;}
+.test-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.attempts{
+  font-size:13px;background:#fff3e0;color:#e65100;
+  padding:4px 10px;border-radius:12px;font-weight:600;
+}
+.start-btn{
+  text-decoration:none;background:linear-gradient(135deg,#2e7d32,#43a047);
+  color:#fff;padding:8px 16px;border-radius:20px;font-size:14px;
+  font-weight:bold;
+}
+.footer{text-align:center;font-size:12px;color:#666;margin:18px 0;}
 </style>
 </head>
+
 <body>
 
-<header>DSSSB SMART NOTES</header>
-
-<nav>
-<a href="#">MTS CBT</a>
-<a href="#">Combined Test</a>
-<a href="#">English</a>
-<a href="#">GK</a>
-<a href="#">Maths</a>
-<a href="#">Reasoning</a>
-<a href="https://t.me/DSSSBSmartNotes" target="_blank">Telegram</a>
-</nav>
-
-<div class="container">
-
-<div class="card">
-<h2>DSSSB MTS 2026</h2>
-<p>Full CBT based mock tests with All India Rank</p>
-<a href="#">Start Test</a>
+<div class="header">
+📘 DSSSB Smart Notes<br>
+<span style="font-size:13px;font-weight:normal;">Auto Test System</span>
 </div>
 
-<div class="card">
-<h2>DSSSB Combined Mega Test</h2>
-<p>MTS + AT + JE + GK + English + Maths + Reasoning</p>
-<a href="#">Start Test</a>
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="🔍 Search test...">
 </div>
 
-<div class="card">
-<h2>English Practice</h2>
-<a href="#">Open</a>
+<div class="tabs">
+  <div class="tab active" onclick="filterCat('all')">All</div>
+  <div class="tab" onclick="filterCat('english')">English</div>
+  <div class="tab" onclick="filterCat('reasoning')">Reasoning</div>
+  <div class="tab" onclick="filterCat('gk')">GK</div>
+  <div class="tab" onclick="filterCat('maths')">Maths</div>
 </div>
 
-<div class="card">
-<h2>GK Practice</h2>
-<a href="#">Open</a>
-</div>
-
-<div class="card">
-<h2>Maths Practice</h2>
-<a href="#">Open</a>
-</div>
-
-<div class="card">
-<h2>Reasoning Practice</h2>
-<a href="#">Open</a>
-</div>
-
-</div>
+<div class="container" id="output"></div>
 
 <div class="footer">
-© 2026 DSSSB Smart Notes | Powered by RankShot
+© DSSSB Smart Notes | Powered by RankShot
 </div>
+
+<script>
+/* ================= AUTO DATA ZONE ================= */
+/* 👉 SIRF YAHA TEST ADD KARO */
+const TESTS = [
+  {
+    name: "English PYQ Test – 01",
+    subject: "english",
+    pyq: true,
+    attempts: 3240,
+    link: "https://rankshot.in/english-pyq-01"
+  },
+  {
+    name: "GK PYQ Test – 01",
+    subject: "gk",
+    pyq: true,
+    attempts: 1980,
+    link: "https://rankshot.in/gk-pyq-01"
+  },
+  {
+    name: "Maths PYQ Test – 01",
+    subject: "maths",
+    pyq: true,
+    attempts: 1760,
+    link: "https://rankshot.in/maths-pyq-01"
+  },
+  {
+    name: "Reasoning Mock Test – 01",
+    subject: "reasoning",
+    pyq: false,
+    attempts: 860,
+    link: "https://rankshot.in/reasoning-01"
+  }
+];
+/* ================= AUTO DATA ZONE END ================= */
+
+const out = document.getElementById("output");
+
+function render(cat="all"){
+  out.innerHTML="";
+  const pyq = TESTS.filter(t=>t.pyq && (cat==="all"||t.subject===cat));
+  const normal = TESTS.filter(t=>!t.pyq && (cat==="all"||t.subject===cat));
+
+  if(pyq.length){
+    out.innerHTML += `<div class="folder"><div class="folder-title">📁 PYQ Tests</div>
+    ${pyq.map(card).join("")}</div>`;
+  }
+  out.innerHTML += normal.map(card).join("");
+}
+
+function card(t){
+  return `
+  <div class="test-card ${t.subject}">
+    <div class="test-title">${t.name}</div>
+    <div class="test-meta">
+      <div class="attempts">🔥 ${t.attempts} Attempts</div>
+      <a class="start-btn" href="${t.link}" target="_blank">Start</a>
+    </div>
+  </div>`;
+}
+
+function filterCat(cat){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  event.target.classList.add("active");
+  render(cat);
+}
+
+document.getElementById("searchInput").addEventListener("keyup",e=>{
+  const v=e.target.value.toLowerCase();
+  document.querySelectorAll(".test-card").forEach(c=>{
+    c.style.display = c.innerText.toLowerCase().includes(v) ? "block":"none";
+  });
+});
+
+render();
+</script>
 
 </body>
 </html>
