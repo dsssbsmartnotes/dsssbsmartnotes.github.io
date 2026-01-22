@@ -1,152 +1,564 @@
+
 <!doctype html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
-<title>All Tests – DSSSB Smart Notes</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PYQ Eng Nov – DSSSB Smart Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
 <style>
-body{margin:0;font-family:Arial;background:#eef2f7;}
-.header{
-  background:linear-gradient(135deg,#1a237e,#3949ab);
-  color:#fff;padding:22px 16px;font-size:20px;font-weight:bold;
-  border-bottom-left-radius:18px;border-bottom-right-radius:18px;
+body{
+ font-family:Arial;
+ background:#f5f7fa;
+ margin:0;
+ padding-bottom:110px;
 }
-.search-box{padding:14px;}
-.search-box input{
-  width:100%;padding:12px;font-size:15px;border-radius:12px;
-  border:none;box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+/* HEADER */
+header{
+ background:#fff;
+ padding:10px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ box-shadow:0 2px 8px rgba(0,0,0,.1);
+ position:sticky;
+ top:0;
+ z-index:50;
 }
-.tabs{display:flex;justify-content:space-around;margin:8px 12px;}
-.tab{
-  background:#fff;padding:8px 14px;border-radius:20px;font-size:14px;
-  cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.08);
+
+/* QUESTION CARD */
+.card{
+ background:#fff;
+ margin:8px;
+ padding:14px;
+ border-radius:10px;
 }
-.tab.active{background:#1a237e;color:#fff;}
-.container{padding:12px;}
-.folder{
-  background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;
-  box-shadow:0 6px 14px rgba(0,0,0,0.1);
+
+/* OPTIONS */
+.opt{
+ border:1px solid #ddd;
+ padding:14px;
+ margin:8px 0;
+ border-radius:8px;
+ cursor:pointer;
 }
-.folder-title{font-size:17px;font-weight:700;margin-bottom:10px;}
-.test-card{
-  background:#f9fafc;border-radius:14px;padding:12px;margin-bottom:10px;
+.opt.sel{background:#e3f2fd;border-color:#2196f3}
+.opt.correct{background:#e8f5e9;border-color:#2e7d32}
+.opt.wrong{background:#ffebee;border-color:#c62828}
+
+/* QUESTION IMAGE */
+.q-img{
+ width:100%;
+ max-width:420px;
+ display:block;
+ margin:10px auto;
+ border-radius:8px;
+ border:1px solid #ddd;
+ cursor:zoom-in;   /* 👈 ADD THIS */
 }
-.test-title{font-size:15px;font-weight:600;}
-.test-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
-.attempts{
-  font-size:13px;background:#fff3e0;color:#e65100;
-  padding:4px 10px;border-radius:12px;font-weight:600;
+
+/* FIXED TIMER */
+#timer{
+ position:fixed;
+ top:64px;
+ right:12px;
+ z-index:9999;
+ background:#e3f2fd;
+ color:#1565c0;
+ padding:6px 10px;
+ border-radius:8px;
+ font-weight:bold;
+ min-width:70px;
+ text-align:center;
+ white-space:nowrap;
+ box-shadow:0 2px 6px rgba(0,0,0,.25);
 }
-.start-btn{
-  text-decoration:none;background:linear-gradient(135deg,#2e7d32,#43a047);
-  color:#fff;padding:8px 16px;border-radius:20px;font-size:14px;
-  font-weight:bold;
+
+/* FULLSCREEN BUTTON */
+#fsBtn{
+background:#000;
+color:#fff;
+border:none;
+padding:6px 10px;
+border-radius:6px;
+font-size:12px;
 }
-.footer{text-align:center;font-size:12px;color:#666;margin:18px 0;}
+
+.card{background:#fff;margin:8px;padding:14px;border-radius:10px}
+
+.opt{border:1px solid #ddd;padding:14px;margin:8px 0;border-radius:8px}
+.opt.sel{background:#e3f2fd;border-color:#2196f3}
+.opt.correct{background:#e8f5e9;border-color:#2e7d32}
+.opt.wrong{background:#ffebee;border-color:#c62828}
+
+button{background:#2196f3;color:#fff;border:none;padding:10px 12px;border-radius:8px}
+#langBtn{background:#673ab7}
+
+#palettePanel{position:fixed;top:0;right:-85%;width:85%;height:100%;
+background:#fff;transition:.3s;z-index:1000;padding:10px}
+#palettePanel.show{right:0}
+
+.qbtn{width:42px;height:42px;margin:5px;border-radius:8px;border:none;color:#fff}
+.qbtn.visited{background:#9e9e9e}
+.qbtn.answered{background:#1565c0}
+.qbtn.review{background:#f9a825}
+.qbtn.correct{background:#2e7d32}
+.qbtn.wrong{background:#c62828}
+/* ===== DSSSB EXAM LOOK POLISH ===== */
+
+/* Question text */
+#qtext{
+ font-size:16px;
+ line-height:1.6;
+ margin-top:10px;
+ color:#111;
+}
+
+/* Hindi text thoda readable */
+body[lang="HI"] #qtext{
+ font-size:17px;
+}
+
+/* Options – exam style */
+.opt{
+ background:#fff;
+ transition:all .15s ease;
+}
+.opt:hover{
+ background:#f5f9ff;
+ border-color:#1976d2;
+}
+.opt.sel{
+ background:#e3f2fd;
+ border-color:#1976d2;
+ font-weight:600;
+}
+
+/* Correct / Wrong after submit */
+.opt.correct{
+ background:#e8f5e9;
+ border-color:#2e7d32;
+ font-weight:600;
+}
+.opt.wrong{
+ background:#ffebee;
+ border-color:#c62828;
+ font-weight:600;
+}
+
+/* Question number header */
+.card b{
+ font-size:15px;
+}
+
+/* Palette panel polish */
+#palettePanel{
+ box-shadow:-4px 0 20px rgba(0,0,0,.2);
+}
+#palette h3{
+ margin:8px 0 12px;
+}
+
+/* Bottom navigation bar */
+body > div[style*="position:fixed"][style*="bottom"]{
+ box-shadow:0 -2px 10px rgba(0,0,0,.15);
+}
+
+/* Result card */
+#result{
+ font-size:15px;
+ line-height:1.6;
+}
+#result h3{
+ margin-top:0;
+ color:#1565c0;
+}
+
+/* Solution box */
+#expBox{
+ font-size:15px;
+ line-height:1.6;
+ border-left:4px solid #2196f3;
+}
+
+/* Buttons polish */
+button{
+ transition:transform .1s ease, box-shadow .1s ease;
+}
+button:active{
+ transform:scale(.97);
+ box-shadow:0 2px 4px rgba(0,0,0,.3) inset;
+}
+
+/* Mobile exam feel */
+@media(max-width:480px){
+ #qtext{font-size:15.5px}
+ .opt{padding:13px}
+ button{padding:9px 10px;font-size:14px}
+}
+  
+
+#tgPopup{
+position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+background:#fff;padding:20px;width:85%;max-width:320px;
+border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.4);
+z-index:9999;text-align:center;display:none
+}
+#tgPopup a{display:block;background:#0088cc;color:#fff;padding:10px;
+border-radius:8px;text-decoration:none;margin-top:10px;font-weight:bold}
 </style>
+ 
+<!-- MATHJAX CONFIG -->
+<script>
+window.MathJax = {
+ tex: {
+  inlineMath: [['$', '$'], ['\\(', '\\)']],
+  displayMath: [['$$', '$$']]
+ },
+ svg: { fontCache: 'global' }
+};
+</script>
+
+<!-- MATHJAX CDN -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+ 
 </head>
 
-<body>
+<body onload="initExam();autoFullScreen()">
 
-<div class="header">
-📘 DSSSB Smart Notes<br>
-<span style="font-size:13px;font-weight:normal;">Auto Test System</span>
+<div id="tgPopup">
+ <b>📢 Join DSSSB Smart Notes</b><br><br>
+ Daily CBT Tests • PDFs • Results
+ <a href="https://t.me/DSSSBSmartNotes" target="_blank">Join Telegram</a><br><br>
+ <button onclick="closeTg()">Continue Test</button>
 </div>
 
-<div class="search-box">
-  <input type="text" id="searchInput" placeholder="🔍 Search test...">
+<header>
+ <b>English PYQ – DSSSB Smart Notes</b>
+ <div style="display:flex;gap:6px">
+  <button id="fsBtn" onclick="toggleFullScreen()">⛶</button>
+  <button id="langBtn" onclick="toggleLang()">ENG</button>
+ </div>
+</header>
+
+<div id="timer">00:00</div>
+
+<div class="card">
+ <input id="stuName" placeholder="Enter Your Name"
+ style="width:100%;padding:12px;border-radius:8px;border:2px solid #2196f3">
 </div>
 
-<div class="tabs">
-  <div class="tab active" onclick="filterCat('all')">All</div>
-  <div class="tab" onclick="filterCat('english')">English</div>
-  <div class="tab" onclick="filterCat('reasoning')">Reasoning</div>
-  <div class="tab" onclick="filterCat('gk')">GK</div>
-  <div class="tab" onclick="filterCat('maths')">Maths</div>
+<div class="card">
+ <b>Q <span id="qno"></span>/<span id="total"></span></b>
+ <div id="qtext"></div>
+ 
+ <div id="opts"></div>
+<!-- ✅ QUESTION IMAGE -->
+<img id="qImg" class="q-img" style="display:none;">
+
+ <button onclick="markReview()">⭐ Mark for Review</button>
+
+ <div id="expBox" style="display:none;background:#eef;padding:12px;margin-top:10px;border-radius:8px"></div>
+ <button id="expBtn" onclick="toggleExp()" style="display:none;margin-top:8px">
+  📘 Show / Hide Solution
+ </button>
 </div>
 
-<div class="container" id="output"></div>
+<div class="card" id="result" style="display:none"></div>
 
-<div class="footer">
-© DSSSB Smart Notes | Powered by RankShot
+<div id="palettePanel">
+ <h3>Questions</h3>
+ <div id="palette"></div>
+ <button onclick="togglePalette()">Close</button>
+</div>
+
+<div style="position:fixed;bottom:0;left:0;right:0;background:#fff;padding:10px;
+display:flex;gap:8px;justify-content:space-between">
+ <button onclick="prev()">Prev</button>
+ <button onclick="next()">Next</button>
+ <button onclick="togglePalette()">Palette</button>
+ <button onclick="submit()">Submit</button>
 </div>
 
 <script>
-/* ================= AUTO DATA ZONE ================= */
-/* 👉 SIRF YAHA TEST ADD KARO */
-const TESTS = [
-  {
-    name: "English PYQ Test – 01",
-    subject: "english",
-    pyq: true,
-    attempts: 3240,
-    link: "https://dsssbsmartnotes.github.io/dsssb-mts-cbt/eng01-10-25p12ndsft.html"
-  },
-  {
-    name: "GK PYQ Test – 01",
-    subject: "gk",
-    pyq: true,
-    attempts: 1980,
-    link: "https://dsssbsmartnotes.github.io/dsssb-mts-cbt/DSSSB%20gk%20pyq.html"
-  },
-  {
-    name: "Maths PYQ Test – 01",
-    subject: "maths",
-    pyq: true,
-    attempts: 18,
-    link: "https://dsssbsmartnotes.github.io/dsssb-mts-cbt/Math.html"
-  },
-  {
-    name: "Reasoning Mock Test – 01",
-    subject: "reasoning",
-    pyq: false,
-    attempts: 0,
-    link: "https://rankshot.in/reasoning-01"
-  }
+/* FULLSCREEN */
+function toggleFullScreen(){
+ if(!document.fullscreenElement){
+  document.documentElement.requestFullscreen().catch(()=>{});
+ }else{
+  document.exitFullscreen();
+ }
+}
+function autoFullScreen(){
+ setTimeout(()=>{toggleFullScreen()},500);
+}
+ 
+function openImgZoom(src){
+ document.getElementById("imgZoomed").src = src;
+ document.getElementById("imgZoom").style.display = "flex";
+}
+
+function closeImgZoom(){
+ document.getElementById("imgZoom").style.display = "none";
+}
+
+/* TELEGRAM */
+const TELEGRAM_BOT_TOKEN="8486464606:AAFT_Bd0P2HYqKNPjCm3s7TGgfM4HWmOYvs";
+const TELEGRAM_CHAT_ID="@dsssbcbtresult";
+
+/* CBT CORE */
+let LANG="EN",i=0,submitted=false,totalTime=0;
+const NEGATIVE_MARK=0.25;
+
+const QUESTIONS = [
+
+{
+ q_en: "If the <u>ratio</u> of two numbers is <u>3 : 5</u> and their <u>sum</u> is <u>64</u>, then find the <u>larger number</u>.",
+ q_hi: "",
+ o_en: ["36", "40", "24", "28"],
+ o_hi: ["36", "40", "24", "28"],
+ a: 1,
+ e_en: "Let the numbers be 3x and 5x. Then 3x + 5x = 64 ⇒ 8x = 64 ⇒ x = 8. Larger number = 5 × 8 = 40.",
+ e_hi: ""
+},
+
+{
+ q_en: "A train travels <u>360 km</u> at a speed of <u>60 km/h</u>. How much <u>time</u> will it take?",
+ q_hi: "",
+ o_en: ["5 hours", "6 hours", "7 hours", "8 hours"],
+ o_hi: ["5 hours", "6 hours", "7 hours", "8 hours"],
+ a: 1,
+ e_en: "Time = Distance ÷ Speed = 360 ÷ 60 = 6 hours.",
+ e_hi: ""
+},
+
+{
+ q_en: "The <u>average</u> of 5 numbers is <u>20</u>. If one number is excluded, the <u>average</u> becomes <u>18</u>. Find the <u>excluded number</u>.",
+ q_hi: "",
+ o_en: ["26", "28", "30", "32"],
+ o_hi: ["26", "28", "30", "32"],
+ a: 2,
+ e_en: "Sum of 5 numbers = 5 × 20 = 100. Sum of remaining 4 numbers = 4 × 18 = 72. Excluded number = 100 − 72 = 28.",
+ e_hi: ""
+},
+
+{
+ q_en: "Find the <u>missing number</u> in the series: <u>2, 6, 12, 20, ?</u>",
+ q_hi: "",
+ o_en: ["28", "30", "32", "42"],
+ o_hi: ["28", "30", "32", "42"],
+ a: 0,
+ e_en: "Pattern: n² + n → 1²+1=2, 2²+2=6, 3²+3=12, 4²+4=20, 5²+5=30 (next).",
+ e_hi: ""
+},
+
+{
+ q_en: "If <u>CAT</u> is written as <u>XZG</u>, then how will <u>DOG</u> be written?",
+ q_hi: "",
+ o_en: ["WLT", "WLO", "VLO", "XLO"],
+ o_hi: ["WLT", "WLO", "VLO", "XLO"],
+ a: 1,
+ e_en: "Each letter is replaced by its opposite letter in the alphabet. D → W, O → L, G → T (option closest is WLO).",
+ e_hi: ""
+},
+
+{
+ q_en: "Pointing to a photograph, Ramesh said, “This is the <u>son of my grandfather’s only son</u>.” How is the person related to Ramesh?",
+ q_hi: "",
+ o_en: ["Brother", "Cousin", "Son", "Ramesh himself"],
+ o_hi: ["Brother", "Cousin", "Son", "Ramesh himself"],
+ a: 3,
+ e_en: "Grandfather’s only son = Ramesh’s father. Son of that person = Ramesh himself.",
+ e_hi: ""
+},
+
+{
+ q_en: "The <u>largest planet</u> in the <u>solar system</u> is:",
+ q_hi: "",
+ o_en: ["Earth", "Saturn", "Jupiter", "Mars"],
+ o_hi: ["Earth", "Saturn", "Jupiter", "Mars"],
+ a: 2,
+ e_en: "Jupiter is the largest planet in the solar system.",
+ e_hi: ""
+},
+
+{
+ q_en: "The <u>Indian Constitution</u> came into force on:",
+ q_hi: "",
+ o_en: ["15 August 1947", "26 January 1950", "26 November 1949", "2 October 1950"],
+ o_hi: ["15 August 1947", "26 January 1950", "26 November 1949", "2 October 1950"],
+ a: 1,
+ e_en: "The Constitution of India came into force on 26 January 1950.",
+ e_hi: ""
+},
+
+{
+ q_en: "Who is known as the <u>Father of the Indian Constitution</u>?",
+ q_hi: "",
+ o_en: ["Jawaharlal Nehru", "Mahatma Gandhi", "B. R. Ambedkar", "Rajendra Prasad"],
+ o_hi: ["Jawaharlal Nehru", "Mahatma Gandhi", "B. R. Ambedkar", "Rajendra Prasad"],
+ a: 2,
+ e_en: "Dr. B. R. Ambedkar is known as the Father of the Indian Constitution.",
+ e_hi: ""
+}
+
 ];
-/* ================= AUTO DATA ZONE END ================= */
 
-const out = document.getElementById("output");
+let ans=new Array(QUESTIONS.length).fill(null);
+let review=new Array(QUESTIONS.length).fill(false);
+total.innerText=QUESTIONS.length;
 
-function render(cat="all"){
-  out.innerHTML="";
-  const pyq = TESTS.filter(t=>t.pyq && (cat==="all"||t.subject===cat));
-  const normal = TESTS.filter(t=>!t.pyq && (cat==="all"||t.subject===cat));
+/* TIMER */
+setInterval(()=>{
+ if(submitted) return;
+ totalTime++;
+ let m=Math.floor(totalTime/60),s=totalTime%60;
+ timer.innerText=m.toString().padStart(2,"0")+":"+s.toString().padStart(2,"0");
+},1000);
 
-  if(pyq.length){
-    out.innerHTML += `<div class="folder"><div class="folder-title">📁 PYQ Tests</div>
-    ${pyq.map(card).join("")}</div>`;
-  }
-  out.innerHTML += normal.map(card).join("");
+/* INIT */
+function initExam(){load();tgPopup.style.display="block"}
+function closeTg(){tgPopup.style.display="none"}
+function toggleLang(){LANG=LANG==="EN"?"HI":"EN";langBtn.innerText=LANG;load()}
+
+/* LOAD */
+function load(){
+ let q=QUESTIONS[i];
+ qno.innerText=i+1;
+qtext.innerHTML = LANG==="EN" ? q.q_en : q.q_hi;
+expBox.innerHTML = LANG==="EN" ? q.e_en : q.e_hi;
+
+ /* ✅ IMAGE RENDER FIX */
+ const qImg=document.getElementById("qImg");
+ if(q.img && q.img.startsWith("data:image")){
+  qImg.src=q.img;
+  qImg.style.display="block";
+ qImg.onclick = () => openImgZoom(q.img); 
+ }else{
+  qImg.src="";
+  qImg.style.display="none";
+ }
+
+ let arr=LANG==="EN"?q.o_en:q.o_hi;
+ let h="";
+ arr.forEach((op,idx)=>{
+  let cls="";
+  if(submitted){
+   if(idx===q.a) cls="correct";
+   else if(ans[i]===idx) cls="wrong";
+  }else if(ans[i]===idx) cls="sel";
+  h+=`<div class="opt ${cls}" onclick="selectOpt(${idx})">${op}</div>`;
+ });
+ opts.innerHTML=h;
+ drawPalette();
+ 
+// ✅ MathJax re-render (STEP 2)
+if (window.MathJax) {
+ MathJax.typesetPromise();
+}
 }
 
-function card(t){
-  return `
-  <div class="test-card ${t.subject}">
-    <div class="test-title">${t.name}</div>
-    <div class="test-meta">
-      <div class="attempts">🔥 ${t.attempts} Attempts</div>
-      <a class="start-btn" href="${t.link}" target="_blank">Start</a>
-    </div>
-  </div>`;
+
+/* ACTIONS */
+function selectOpt(x){if(submitted)return;ans[i]=x;load()}
+function next(){if(i<QUESTIONS.length-1){i++;load()}}
+function prev(){if(i>0){i--;load()}}
+function togglePalette(){palettePanel.classList.toggle("show")}
+function markReview(){review[i]=!review[i];drawPalette()}
+function toggleExp(){expBox.style.display=expBox.style.display==="none"?"block":"none"}
+
+/* PALETTE */
+function drawPalette(){
+ let p="";
+ for(let k=0;k<QUESTIONS.length;k++){
+  let cls="";
+  if(submitted){
+   if(ans[k]===QUESTIONS[k].a) cls="correct";
+   else if(ans[k]!=null) cls="wrong";
+  }else if(review[k]) cls="review";
+  else if(ans[k]!=null) cls="answered";
+  else if(k<i) cls="visited";
+  p+=`<button class="qbtn ${cls}" onclick="i=${k};load();palettePanel.classList.remove('show')">${k+1}</button>`;
+ }
+ palette.innerHTML=p;
 }
 
-function filterCat(cat){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  event.target.classList.add("active");
-  render(cat);
+/* SUBMIT */
+function submit(){
+ let name=stuName.value.trim();
+ if(!name){alert("Enter name");return}
+ submitted=true;
+
+ let c=0,w=0,s=0,score=0;
+ QUESTIONS.forEach((q,idx)=>{
+  if(ans[idx]==null)s++;
+  else if(ans[idx]===q.a){c++;score++}
+  else{w++;score-=NEGATIVE_MARK}
+ });
+
+ let attempted=c+w;
+ let accuracy=attempted?((c/attempted)*100):0;
+ let rankScore=(score*100)+accuracy;
+ let estRank=Math.max(1,Math.round(1000-rankScore));
+
+ result.innerHTML=`
+ <h3>Result</h3>
+ Correct: ${c}<br>
+ Wrong: ${w}<br>
+ Skipped: ${s}<br>
+ Accuracy: <b>${accuracy.toFixed(2)}%</b><br>
+ Estimated Rank: <b>${estRank}</b><br><br>
+ <b>Final Score: ${score.toFixed(2)}</b>`;
+ result.style.display="block";
+
+ expBox.style.display="block";
+ expBtn.style.display="block";
+
+ sendResultToTelegram(name,score.toFixed(2),c,w,s,timer.innerText,accuracy,estRank);
+ load();
 }
 
-document.getElementById("searchInput").addEventListener("keyup",e=>{
-  const v=e.target.value.toLowerCase();
-  document.querySelectorAll(".test-card").forEach(c=>{
-    c.style.display = c.innerText.toLowerCase().includes(v) ? "block":"none";
-  });
-});
+/* TELEGRAM */
+function sendResultToTelegram(name,score,c,w,s,time,accuracy,estRank){
+ fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   chat_id:TELEGRAM_CHAT_ID,
+   text:
+`📘 Eng PYQ 01 CBT Result
 
-render();
+👤 Name: ${name}
+⏱ Time: ${time}
+✅ Correct: ${c}
+❌ Wrong: ${w}
+➖ Skipped: ${s}
+🎯 Score: ${score}
+📊 Accuracy: ${accuracy.toFixed(2)}%
+🏆 Estimated Rank: ${estRank}
+
+🔥 DSSSB Smart Notes`
+  })
+ });
+}
 </script>
+ 
+ <!-- IMAGE ZOOM OVERLAY -->
+<div id="imgZoom" onclick="closeImgZoom()" style="
+ display:none;
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,0.85);
+ z-index:10000;
+ align-items:center;
+ justify-content:center;">
+ 
+ <img id="imgZoomed" style="
+  max-width:95%;
+  max-height:95%;
+  border-radius:10px;">
+</div>
 
 </body>
 </html>
