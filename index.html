@@ -1,564 +1,239 @@
-
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>PYQ Eng Nov – DSSSB Smart Notes</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>DSSSB Smart Notes – Auto Test System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+/* ===== BASE ===== */
 body{
- font-family:Arial;
- background:#f5f7fa;
- margin:0;
- padding-bottom:110px;
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#eef2f7;
 }
 
-/* HEADER */
-header{
- background:#fff;
- padding:10px;
- display:flex;
- justify-content:space-between;
- align-items:center;
- box-shadow:0 2px 8px rgba(0,0,0,.1);
- position:sticky;
- top:0;
- z-index:50;
+/* ===== HEADER ===== */
+.header{
+  background:linear-gradient(135deg,#1e3c72,#2a5298);
+  color:#fff;
+  padding:18px;
+}
+.header h1{
+  margin:0;
+  font-size:20px;
+}
+.header p{
+  margin:4px 0 0;
+  font-size:13px;
+  opacity:.9;
 }
 
-/* QUESTION CARD */
+/* ===== SEARCH ===== */
+.search-box{
+  padding:12px;
+}
+.search-box input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  font-size:15px;
+}
+
+/* ===== SOCIAL BUTTONS ===== */
+.social-bar{
+  display:flex;
+  gap:12px;
+  padding:0 12px 12px;
+}
+.social-bar a{
+  flex:1;
+  text-align:center;
+  padding:12px;
+  border-radius:14px;
+  color:#fff;
+  text-decoration:none;
+  font-weight:600;
+  font-size:15px;
+}
+.tg-btn{
+  background:linear-gradient(135deg,#0088cc,#00aaff);
+}
+.yt-btn{
+  background:linear-gradient(135deg,#ff0000,#cc0000);
+}
+
+/* ===== FILTERS ===== */
+.filters{
+  display:flex;
+  gap:10px;
+  padding:0 12px 12px;
+  overflow-x:auto;
+}
+.filters button{
+  padding:8px 16px;
+  border-radius:20px;
+  border:none;
+  background:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* ===== SECTIONS ===== */
+.section{
+  padding:12px;
+}
+.section h3{
+  margin:8px 0 12px;
+}
+
+/* ===== TEST CARDS ===== */
 .card{
- background:#fff;
- margin:8px;
- padding:14px;
- border-radius:10px;
+  background:#fff;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.card h3{
+  margin:0;
+  font-size:16px;
+}
+.attempts{
+  margin-top:6px;
+  color:#ff6b00;
+  font-size:14px;
+  font-weight:600;
 }
 
-/* OPTIONS */
-.opt{
- border:1px solid #ddd;
- padding:14px;
- margin:8px 0;
- border-radius:8px;
- cursor:pointer;
-}
-.opt.sel{background:#e3f2fd;border-color:#2196f3}
-.opt.correct{background:#e8f5e9;border-color:#2e7d32}
-.opt.wrong{background:#ffebee;border-color:#c62828}
-
-/* QUESTION IMAGE */
-.q-img{
- width:100%;
- max-width:420px;
- display:block;
- margin:10px auto;
- border-radius:8px;
- border:1px solid #ddd;
- cursor:zoom-in;   /* 👈 ADD THIS */
+/* ===== START BUTTON ===== */
+.start-btn{
+  background:#2e7d32;
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:20px;
+  font-weight:600;
+  text-decoration:none;
+  display:inline-block;
 }
 
-/* FIXED TIMER */
-#timer{
- position:fixed;
- top:64px;
- right:12px;
- z-index:9999;
- background:#e3f2fd;
- color:#1565c0;
- padding:6px 10px;
- border-radius:8px;
- font-weight:bold;
- min-width:70px;
- text-align:center;
- white-space:nowrap;
- box-shadow:0 2px 6px rgba(0,0,0,.25);
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;
+  padding:20px;
+  font-size:13px;
+  color:#666;
 }
-
-/* FULLSCREEN BUTTON */
-#fsBtn{
-background:#000;
-color:#fff;
-border:none;
-padding:6px 10px;
-border-radius:6px;
-font-size:12px;
-}
-
-.card{background:#fff;margin:8px;padding:14px;border-radius:10px}
-
-.opt{border:1px solid #ddd;padding:14px;margin:8px 0;border-radius:8px}
-.opt.sel{background:#e3f2fd;border-color:#2196f3}
-.opt.correct{background:#e8f5e9;border-color:#2e7d32}
-.opt.wrong{background:#ffebee;border-color:#c62828}
-
-button{background:#2196f3;color:#fff;border:none;padding:10px 12px;border-radius:8px}
-#langBtn{background:#673ab7}
-
-#palettePanel{position:fixed;top:0;right:-85%;width:85%;height:100%;
-background:#fff;transition:.3s;z-index:1000;padding:10px}
-#palettePanel.show{right:0}
-
-.qbtn{width:42px;height:42px;margin:5px;border-radius:8px;border:none;color:#fff}
-.qbtn.visited{background:#9e9e9e}
-.qbtn.answered{background:#1565c0}
-.qbtn.review{background:#f9a825}
-.qbtn.correct{background:#2e7d32}
-.qbtn.wrong{background:#c62828}
-/* ===== DSSSB EXAM LOOK POLISH ===== */
-
-/* Question text */
-#qtext{
- font-size:16px;
- line-height:1.6;
- margin-top:10px;
- color:#111;
-}
-
-/* Hindi text thoda readable */
-body[lang="HI"] #qtext{
- font-size:17px;
-}
-
-/* Options – exam style */
-.opt{
- background:#fff;
- transition:all .15s ease;
-}
-.opt:hover{
- background:#f5f9ff;
- border-color:#1976d2;
-}
-.opt.sel{
- background:#e3f2fd;
- border-color:#1976d2;
- font-weight:600;
-}
-
-/* Correct / Wrong after submit */
-.opt.correct{
- background:#e8f5e9;
- border-color:#2e7d32;
- font-weight:600;
-}
-.opt.wrong{
- background:#ffebee;
- border-color:#c62828;
- font-weight:600;
-}
-
-/* Question number header */
-.card b{
- font-size:15px;
-}
-
-/* Palette panel polish */
-#palettePanel{
- box-shadow:-4px 0 20px rgba(0,0,0,.2);
-}
-#palette h3{
- margin:8px 0 12px;
-}
-
-/* Bottom navigation bar */
-body > div[style*="position:fixed"][style*="bottom"]{
- box-shadow:0 -2px 10px rgba(0,0,0,.15);
-}
-
-/* Result card */
-#result{
- font-size:15px;
- line-height:1.6;
-}
-#result h3{
- margin-top:0;
- color:#1565c0;
-}
-
-/* Solution box */
-#expBox{
- font-size:15px;
- line-height:1.6;
- border-left:4px solid #2196f3;
-}
-
-/* Buttons polish */
-button{
- transition:transform .1s ease, box-shadow .1s ease;
-}
-button:active{
- transform:scale(.97);
- box-shadow:0 2px 4px rgba(0,0,0,.3) inset;
-}
-
-/* Mobile exam feel */
-@media(max-width:480px){
- #qtext{font-size:15.5px}
- .opt{padding:13px}
- button{padding:9px 10px;font-size:14px}
-}
-  
-
-#tgPopup{
-position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-background:#fff;padding:20px;width:85%;max-width:320px;
-border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.4);
-z-index:9999;text-align:center;display:none
-}
-#tgPopup a{display:block;background:#0088cc;color:#fff;padding:10px;
-border-radius:8px;text-decoration:none;margin-top:10px;font-weight:bold}
 </style>
- 
-<!-- MATHJAX CONFIG -->
-<script>
-window.MathJax = {
- tex: {
-  inlineMath: [['$', '$'], ['\\(', '\\)']],
-  displayMath: [['$$', '$$']]
- },
- svg: { fontCache: 'global' }
-};
-</script>
-
-<!-- MATHJAX CDN -->
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
- 
 </head>
 
-<body onload="initExam();autoFullScreen()">
+<body>
 
-<div id="tgPopup">
- <b>📢 Join DSSSB Smart Notes</b><br><br>
- Daily CBT Tests • PDFs • Results
- <a href="https://t.me/DSSSBSmartNotes" target="_blank">Join Telegram</a><br><br>
- <button onclick="closeTg()">Continue Test</button>
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>📘 DSSSB Smart Notes</h1>
+  <p>Auto Test System</p>
 </div>
 
-<header>
- <b>English PYQ – DSSSB Smart Notes</b>
- <div style="display:flex;gap:6px">
-  <button id="fsBtn" onclick="toggleFullScreen()">⛶</button>
-  <button id="langBtn" onclick="toggleLang()">ENG</button>
- </div>
-</header>
-
-<div id="timer">00:00</div>
-
-<div class="card">
- <input id="stuName" placeholder="Enter Your Name"
- style="width:100%;padding:12px;border-radius:8px;border:2px solid #2196f3">
+<!-- ===== SEARCH ===== -->
+<div class="search-box">
+  <input type="text" placeholder="🔍 Search test...">
 </div>
 
-<div class="card">
- <b>Q <span id="qno"></span>/<span id="total"></span></b>
- <div id="qtext"></div>
- 
- <div id="opts"></div>
-<!-- ✅ QUESTION IMAGE -->
-<img id="qImg" class="q-img" style="display:none;">
-
- <button onclick="markReview()">⭐ Mark for Review</button>
-
- <div id="expBox" style="display:none;background:#eef;padding:12px;margin-top:10px;border-radius:8px"></div>
- <button id="expBtn" onclick="toggleExp()" style="display:none;margin-top:8px">
-  📘 Show / Hide Solution
- </button>
+<!-- ===== TELEGRAM + YOUTUBE ===== -->
+<div class="social-bar">
+  <a href="https://t.me/DSSSBSmartNotes" target="_blank" class="tg-btn">
+    📢 Join Telegram
+  </a>
+  <a href="https://youtube.com/@rankshotofficial?si=xHUs3TVITagePD7T" target="_blank" class="yt-btn">
+    ▶️ YouTube
+  </a>
 </div>
 
-<div class="card" id="result" style="display:none"></div>
-
-<div id="palettePanel">
- <h3>Questions</h3>
- <div id="palette"></div>
- <button onclick="togglePalette()">Close</button>
+<!-- ===== FILTERS ===== -->
+<div class="filters">
+  <button data-filter="all">All</button>
+  <button data-filter="english">English</button>
+  <button data-filter="reasoning">Reasoning</button>
+  <button data-filter="gk">GK</button>
+  <button data-filter="maths">Maths</button>
 </div>
 
-<div style="position:fixed;bottom:0;left:0;right:0;background:#fff;padding:10px;
-display:flex;gap:8px;justify-content:space-between">
- <button onclick="prev()">Prev</button>
- <button onclick="next()">Next</button>
- <button onclick="togglePalette()">Palette</button>
- <button onclick="submit()">Submit</button>
+<!-- ===== PYQ TESTS ===== -->
+<div class="section">
+  <h3>📂 PYQ Tests</h3>
+
+  <div class="card filter-item english">
+    <div>
+      <h3>English PYQ Test – 01</h3>
+      <div class="attempts">🔥 3240 Attempts</div>
+    </div>
+    <a href="https://dsssbsmartnotes.github.io/dsssb-mts-cbt/eng01-10-25p12ndsft.html" class="start-btn">Start</a>
+  </div>
+
+  <div class="card filter-item gk">
+    <div>
+      <h3>GK PYQ Test – 01</h3>
+      <div class="attempts">🔥 1980 Attempts</div>
+    </div>
+    <a href="https://dsssbsmartnotes.github.io/dsssb-mts-cbt/DSSSB%20gk%20pyq.html" class="start-btn">Start</a>
+  </div>
+
+  <div class="card filter-item maths">
+    <div>
+      <h3>Maths PYQ Test – 01</h3>
+      <div class="attempts">🔥 18 Attempts</div>
+    </div>
+    <a href="https://dsssbsmartnotes.github.io/dsssb-mts-cbt/Math.html" class="start-btn">Start</a>
+  </div>
 </div>
 
+<!-- ===== MOCK TESTS ===== -->
+<div class="section">
+  <h3>🧪 MOCK Tests</h3>
+
+  <div class="card filter-item reasoning mock-card">
+    <div>
+      <h3>Reasoning MOCK Test – 01</h3>
+      <div class="attempts">🧪 MOCK TEST</div>
+    </div>
+    <a href="mock_reasoning_01.html" class="start-btn">Start</a>
+  </div>
+
+  <div class="card filter-item maths mock-card">
+    <div>
+      <h3>Maths MOCK Test – 01</h3>
+      <div class="attempts">🧪 MOCK TEST</div>
+    </div>
+    <a href="mock_maths_01.html" class="start-btn">Start</a>
+  </div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  © DSSSB Smart Notes | Powered by RankShot
+</div>
+
+<!-- ===== FILTER SCRIPT ===== -->
 <script>
-/* FULLSCREEN */
-function toggleFullScreen(){
- if(!document.fullscreenElement){
-  document.documentElement.requestFullscreen().catch(()=>{});
- }else{
-  document.exitFullscreen();
- }
-}
-function autoFullScreen(){
- setTimeout(()=>{toggleFullScreen()},500);
-}
- 
-function openImgZoom(src){
- document.getElementById("imgZoomed").src = src;
- document.getElementById("imgZoom").style.display = "flex";
-}
-
-function closeImgZoom(){
- document.getElementById("imgZoom").style.display = "none";
-}
-
-/* TELEGRAM */
-const TELEGRAM_BOT_TOKEN="8486464606:AAFT_Bd0P2HYqKNPjCm3s7TGgfM4HWmOYvs";
-const TELEGRAM_CHAT_ID="@dsssbcbtresult";
-
-/* CBT CORE */
-let LANG="EN",i=0,submitted=false,totalTime=0;
-const NEGATIVE_MARK=0.25;
-
-const QUESTIONS = [
-
-{
- q_en: "If the <u>ratio</u> of two numbers is <u>3 : 5</u> and their <u>sum</u> is <u>64</u>, then find the <u>larger number</u>.",
- q_hi: "",
- o_en: ["36", "40", "24", "28"],
- o_hi: ["36", "40", "24", "28"],
- a: 1,
- e_en: "Let the numbers be 3x and 5x. Then 3x + 5x = 64 ⇒ 8x = 64 ⇒ x = 8. Larger number = 5 × 8 = 40.",
- e_hi: ""
-},
-
-{
- q_en: "A train travels <u>360 km</u> at a speed of <u>60 km/h</u>. How much <u>time</u> will it take?",
- q_hi: "",
- o_en: ["5 hours", "6 hours", "7 hours", "8 hours"],
- o_hi: ["5 hours", "6 hours", "7 hours", "8 hours"],
- a: 1,
- e_en: "Time = Distance ÷ Speed = 360 ÷ 60 = 6 hours.",
- e_hi: ""
-},
-
-{
- q_en: "The <u>average</u> of 5 numbers is <u>20</u>. If one number is excluded, the <u>average</u> becomes <u>18</u>. Find the <u>excluded number</u>.",
- q_hi: "",
- o_en: ["26", "28", "30", "32"],
- o_hi: ["26", "28", "30", "32"],
- a: 2,
- e_en: "Sum of 5 numbers = 5 × 20 = 100. Sum of remaining 4 numbers = 4 × 18 = 72. Excluded number = 100 − 72 = 28.",
- e_hi: ""
-},
-
-{
- q_en: "Find the <u>missing number</u> in the series: <u>2, 6, 12, 20, ?</u>",
- q_hi: "",
- o_en: ["28", "30", "32", "42"],
- o_hi: ["28", "30", "32", "42"],
- a: 0,
- e_en: "Pattern: n² + n → 1²+1=2, 2²+2=6, 3²+3=12, 4²+4=20, 5²+5=30 (next).",
- e_hi: ""
-},
-
-{
- q_en: "If <u>CAT</u> is written as <u>XZG</u>, then how will <u>DOG</u> be written?",
- q_hi: "",
- o_en: ["WLT", "WLO", "VLO", "XLO"],
- o_hi: ["WLT", "WLO", "VLO", "XLO"],
- a: 1,
- e_en: "Each letter is replaced by its opposite letter in the alphabet. D → W, O → L, G → T (option closest is WLO).",
- e_hi: ""
-},
-
-{
- q_en: "Pointing to a photograph, Ramesh said, “This is the <u>son of my grandfather’s only son</u>.” How is the person related to Ramesh?",
- q_hi: "",
- o_en: ["Brother", "Cousin", "Son", "Ramesh himself"],
- o_hi: ["Brother", "Cousin", "Son", "Ramesh himself"],
- a: 3,
- e_en: "Grandfather’s only son = Ramesh’s father. Son of that person = Ramesh himself.",
- e_hi: ""
-},
-
-{
- q_en: "The <u>largest planet</u> in the <u>solar system</u> is:",
- q_hi: "",
- o_en: ["Earth", "Saturn", "Jupiter", "Mars"],
- o_hi: ["Earth", "Saturn", "Jupiter", "Mars"],
- a: 2,
- e_en: "Jupiter is the largest planet in the solar system.",
- e_hi: ""
-},
-
-{
- q_en: "The <u>Indian Constitution</u> came into force on:",
- q_hi: "",
- o_en: ["15 August 1947", "26 January 1950", "26 November 1949", "2 October 1950"],
- o_hi: ["15 August 1947", "26 January 1950", "26 November 1949", "2 October 1950"],
- a: 1,
- e_en: "The Constitution of India came into force on 26 January 1950.",
- e_hi: ""
-},
-
-{
- q_en: "Who is known as the <u>Father of the Indian Constitution</u>?",
- q_hi: "",
- o_en: ["Jawaharlal Nehru", "Mahatma Gandhi", "B. R. Ambedkar", "Rajendra Prasad"],
- o_hi: ["Jawaharlal Nehru", "Mahatma Gandhi", "B. R. Ambedkar", "Rajendra Prasad"],
- a: 2,
- e_en: "Dr. B. R. Ambedkar is known as the Father of the Indian Constitution.",
- e_hi: ""
-}
-
-];
-
-let ans=new Array(QUESTIONS.length).fill(null);
-let review=new Array(QUESTIONS.length).fill(false);
-total.innerText=QUESTIONS.length;
-
-/* TIMER */
-setInterval(()=>{
- if(submitted) return;
- totalTime++;
- let m=Math.floor(totalTime/60),s=totalTime%60;
- timer.innerText=m.toString().padStart(2,"0")+":"+s.toString().padStart(2,"0");
-},1000);
-
-/* INIT */
-function initExam(){load();tgPopup.style.display="block"}
-function closeTg(){tgPopup.style.display="none"}
-function toggleLang(){LANG=LANG==="EN"?"HI":"EN";langBtn.innerText=LANG;load()}
-
-/* LOAD */
-function load(){
- let q=QUESTIONS[i];
- qno.innerText=i+1;
-qtext.innerHTML = LANG==="EN" ? q.q_en : q.q_hi;
-expBox.innerHTML = LANG==="EN" ? q.e_en : q.e_hi;
-
- /* ✅ IMAGE RENDER FIX */
- const qImg=document.getElementById("qImg");
- if(q.img && q.img.startsWith("data:image")){
-  qImg.src=q.img;
-  qImg.style.display="block";
- qImg.onclick = () => openImgZoom(q.img); 
- }else{
-  qImg.src="";
-  qImg.style.display="none";
- }
-
- let arr=LANG==="EN"?q.o_en:q.o_hi;
- let h="";
- arr.forEach((op,idx)=>{
-  let cls="";
-  if(submitted){
-   if(idx===q.a) cls="correct";
-   else if(ans[i]===idx) cls="wrong";
-  }else if(ans[i]===idx) cls="sel";
-  h+=`<div class="opt ${cls}" onclick="selectOpt(${idx})">${op}</div>`;
- });
- opts.innerHTML=h;
- drawPalette();
- 
-// ✅ MathJax re-render (STEP 2)
-if (window.MathJax) {
- MathJax.typesetPromise();
-}
-}
-
-
-/* ACTIONS */
-function selectOpt(x){if(submitted)return;ans[i]=x;load()}
-function next(){if(i<QUESTIONS.length-1){i++;load()}}
-function prev(){if(i>0){i--;load()}}
-function togglePalette(){palettePanel.classList.toggle("show")}
-function markReview(){review[i]=!review[i];drawPalette()}
-function toggleExp(){expBox.style.display=expBox.style.display==="none"?"block":"none"}
-
-/* PALETTE */
-function drawPalette(){
- let p="";
- for(let k=0;k<QUESTIONS.length;k++){
-  let cls="";
-  if(submitted){
-   if(ans[k]===QUESTIONS[k].a) cls="correct";
-   else if(ans[k]!=null) cls="wrong";
-  }else if(review[k]) cls="review";
-  else if(ans[k]!=null) cls="answered";
-  else if(k<i) cls="visited";
-  p+=`<button class="qbtn ${cls}" onclick="i=${k};load();palettePanel.classList.remove('show')">${k+1}</button>`;
- }
- palette.innerHTML=p;
-}
-
-/* SUBMIT */
-function submit(){
- let name=stuName.value.trim();
- if(!name){alert("Enter name");return}
- submitted=true;
-
- let c=0,w=0,s=0,score=0;
- QUESTIONS.forEach((q,idx)=>{
-  if(ans[idx]==null)s++;
-  else if(ans[idx]===q.a){c++;score++}
-  else{w++;score-=NEGATIVE_MARK}
- });
-
- let attempted=c+w;
- let accuracy=attempted?((c/attempted)*100):0;
- let rankScore=(score*100)+accuracy;
- let estRank=Math.max(1,Math.round(1000-rankScore));
-
- result.innerHTML=`
- <h3>Result</h3>
- Correct: ${c}<br>
- Wrong: ${w}<br>
- Skipped: ${s}<br>
- Accuracy: <b>${accuracy.toFixed(2)}%</b><br>
- Estimated Rank: <b>${estRank}</b><br><br>
- <b>Final Score: ${score.toFixed(2)}</b>`;
- result.style.display="block";
-
- expBox.style.display="block";
- expBtn.style.display="block";
-
- sendResultToTelegram(name,score.toFixed(2),c,w,s,timer.innerText,accuracy,estRank);
- load();
-}
-
-/* TELEGRAM */
-function sendResultToTelegram(name,score,c,w,s,time,accuracy,estRank){
- fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({
-   chat_id:TELEGRAM_CHAT_ID,
-   text:
-`📘 Eng PYQ 01 CBT Result
-
-👤 Name: ${name}
-⏱ Time: ${time}
-✅ Correct: ${c}
-❌ Wrong: ${w}
-➖ Skipped: ${s}
-🎯 Score: ${score}
-📊 Accuracy: ${accuracy.toFixed(2)}%
-🏆 Estimated Rank: ${estRank}
-
-🔥 DSSSB Smart Notes`
-  })
- });
-}
+document.querySelectorAll(".filters button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    let filter = btn.getAttribute("data-filter");
+    document.querySelectorAll(".filter-item").forEach(card=>{
+      if(filter==="all" || card.classList.contains(filter)){
+        card.style.display="flex";
+      }else{
+        card.style.display="none";
+      }
+    });
+  });
+});
 </script>
- 
- <!-- IMAGE ZOOM OVERLAY -->
-<div id="imgZoom" onclick="closeImgZoom()" style="
- display:none;
- position:fixed;
- inset:0;
- background:rgba(0,0,0,0.85);
- z-index:10000;
- align-items:center;
- justify-content:center;">
- 
- <img id="imgZoomed" style="
-  max-width:95%;
-  max-height:95%;
-  border-radius:10px;">
-</div>
 
 </body>
 </html>
