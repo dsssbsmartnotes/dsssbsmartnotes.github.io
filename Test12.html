@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DSSSB CBT Professional Portal (Pro + Rank)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+/* =========================
+   CORE THEME & VIBRANT VARIABLES
+   ========================= */
+:root {
+  --primary-hue: 250; 
+  --primary: hsl(var(--primary-hue), 80%, 60%);
+  --primary-dark: hsl(var(--primary-hue), 80%, 45%);
+  --primary-light: hsl(var(--primary-hue), 90%, 95%);
+  --gradient-main: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --gradient-header: linear-gradient(90deg, #4f46e5, #9333ea);
+  
+  --success: #10b981;
+  --success-bg: #d1fae5;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  
+  --bg-body: #f3f4f6;
+  --bg-body-gradient: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+  
+  --header-height: 64px;
+  --footer-height: 64px;
+  --radius-lg: 16px;
+}
+
+body.dark-mode {
+  --primary: #818cf8;
+  --primary-dark: #6366f1;
+  --primary-light: rgba(99, 102, 241, 0.1);
+  --gradient-main: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-header: linear-gradient(90deg, #312e81, #581c87);
+  
+  --bg-body: #0f172a;
+  --bg-body-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  --bg-card: #1e293b;
+  --glass-border: #334155;
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); overflow: hidden; user-select: none; transition: background 0.3s ease; }
+body { display: grid; grid-template-rows: var(--header-height) auto 1fr var(--footer-height); }
+
+/* --- POPUPS & TOAST --- */
+#tgPopup {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: var(--bg-card); padding: 30px; width: 85%; max-width: 340px;
+  border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+  z-index: 9999; text-align: center; display: none; color: var(--text-main);
+  border: 1px solid var(--border-color); backdrop-filter: blur(10px);
+}
+#tgPopup a { display: block; background: #0088cc; color: #fff; padding: 14px; border-radius: 12px; text-decoration: none; margin-top: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,136,204,0.3); transition: transform 0.2s; }
+#tgPopup a:active { transform: scale(0.98); }
+.tg-btn-continue { background: transparent; color: var(--text-muted); border: 2px solid var(--border-color); padding: 10px 20px; border-radius: 12px; margin-top: 15px; cursor: pointer; font-weight: 600; width: 100%; transition: 0.2s; }
+.tg-btn-continue:hover { border-color: var(--primary); color: var(--primary); }
+
+#toast-container { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; width: 90%; max-width: 400px; }
+.toast { background: rgba(15, 23, 42, 0.9); color: #fff; padding: 12px 24px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; font-size: 14px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+.toast.success { border-left: 5px solid var(--success); } .toast.error { border-left: 5px solid var(--danger); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* --- LOGIN --- */
+.full-overlay { position: fixed; inset: 0; background: var(--bg-body-gradient); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; overflow-y: auto; }
+.login-card { background: var(--bg-card); padding: 40px 30px; border-radius: 24px; box-shadow: var(--shadow-lg); width: 100%; max-width: 420px; text-align: center; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
+.login-input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid var(--border-color); border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 16px; transition: 0.3s; }
+.login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+.btn-primary { background: var(--gradient-main); color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+.btn-primary:active { transform: scale(0.98); }
+
+/* --- HEADER --- */
+header { background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 50; height: var(--header-height); color: white; }
+.brand { font-weight: 900; font-size: 20px; color: #fff; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.header-tools { display: flex; gap: 10px; align-items: center; }
+.timer-badge { background: rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-family: 'Courier New', monospace; font-size: 16px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px); }
+.timer-badge.low { background: rgba(239, 68, 68, 0.9); animation: pulse 1s infinite; }
+.nav-btn { padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.nav-btn:hover { background: rgba(255,255,255,0.3); }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+/* --- SECTION BAR --- */
+#sectionBar { background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; overflow-x: auto; scrollbar-width: none; white-space: nowrap; height: 55px; align-items: center; padding: 0 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+.sec-tab { padding: 0 18px; height: 36px; border-radius: 18px; margin: 0 4px; font-size: 13px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; transition: 0.3s; border: 1px solid transparent; }
+.sec-tab.active { background: var(--gradient-main); color: #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
+.sec-tab.done { color: var(--success); background: var(--success-bg); border-color: var(--success); }
+
+/* --- MAIN LAYOUT --- */
+#mainArea { padding: 20px; overflow-y: auto; display: none; position: relative; }
+.q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 25px; box-shadow: var(--shadow-sm); margin-bottom: 25px; transition: transform 0.2s; }
+.q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.q-text { font-size: 17px; line-height: 1.6; margin-bottom: 20px; font-weight: 500; color: var(--text-main); }
+.q-text img, .opt img { max-width: 100%; height: auto; border-radius: 8px; cursor: zoom-in; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 8px; }
+
+.opt { display: flex; align-items: center; padding: 14px; border: 2px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); background: var(--bg-card); font-size: 15px; position: relative; overflow: hidden; }
+.opt:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+.opt.sel { background: var(--primary-light); border-color: var(--primary); font-weight: 600; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); }
+.opt-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-body); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 12px; font-weight: 800; flex-shrink: 0; color: var(--text-muted); transition: 0.2s; }
+.opt.sel .opt-badge { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.opt.correct-ans { border-color: var(--success); background: var(--success-bg); }
+.opt.correct-ans .opt-badge { background: var(--success); border-color: var(--success); color: #fff; }
+.opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
+.opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+/* --- FOOTER --- */
+footer { background: var(--bg-card); padding: 0 15px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 12px; display: none; z-index: 40; align-items: center; height: var(--footer-height); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+footer .nav-btn { height: 44px; flex: 1; max-width: 140px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
+footer .btn-grid { max-width: 60px; font-size: 20px; border-color: transparent; }
+footer .nav-btn.primary { background: var(--gradient-main); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+
+/* --- PALETTE PANEL --- */
+#palettePanel { 
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 300px; background: var(--bg-card); z-index: 2000; 
+    display: flex; flex-direction: column; 
+    box-shadow: -5px 0 30px rgba(0,0,0,0.2); 
+    transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#palettePanel.show { transform: translateX(0); }
+.modal-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 18px; color: var(--primary); background: var(--primary-light); }
+.p-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; overflow-y: auto; flex: 1; align-content: start; }
+.qbtn { aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); font-weight: 700; font-size: 13px; cursor: pointer; color: var(--text-main); transition: 0.2s; }
+
+.qbtn.current { border: 2px solid var(--primary); background: #fff; color: var(--primary); transform: scale(1.1); }
+.qbtn.answered { background: var(--success); color: #fff; border: none; }
+.qbtn.review { background: var(--warning); color: #fff; border: none; }
+.qbtn.p-correct { background: var(--success); color: #fff; border-color: var(--success); }
+.qbtn.p-wrong { background: var(--danger); color: #fff; border-color: var(--danger); }
+.qbtn.p-skip { background: var(--text-muted); color: #fff; border-color: var(--text-muted); opacity: 0.5; }
+
+/* --- RESULT MODALS & DASHBOARD --- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1500; display: none; backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 15px; }
+.modal-card { background: var(--bg-card); width: 100%; max-width: 800px; max-height: 90vh; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 1px solid var(--glass-border); }
+.modal-body { padding: 25px; overflow-y: auto; }
+
+/* Testbook Style Analysis Container */
+.analysis-container { max-width: 900px; margin: auto; display: flex; flex-direction: column; gap: 14px; padding: 10px 0; font-family: 'Poppins', sans-serif; }
+.card-dashboard { background: var(--bg-card); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px; color: var(--text-muted); }
+.info-grid div b { color: var(--text-main); }
+.score-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; text-align: center; }
+.score-item { background: var(--primary-light); border-radius: 10px; padding: 14px; border: 1px solid rgba(99, 102, 241, 0.2); }
+.score-item h4 { margin: 0; font-size: 13px; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 0.5px; }
+.score-item p { margin: 6px 0 0; font-size: 20px; font-weight: 800; color: var(--text-main); }
+.attempt-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; text-align: center; }
+.attempt-box { padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; border: 1px solid transparent; }
+.attempt-box span { display: block; font-size: 20px; margin-top: 4px; font-weight: 800; }
+
+.at-correct { background: var(--success-bg); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+.at-wrong { background: var(--danger-bg); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+.at-unattempted { background: var(--warning-bg); color: #b77c00; border-color: rgba(245, 158, 11, 0.3); }
+.at-total { background: var(--primary-light); color: var(--primary-dark); border-color: rgba(99, 102, 241, 0.3); }
+
+/* Comparison Bars */
+.bar-section { margin-top: 10px; }
+.bar-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
+.bar-track { height: 10px; background: var(--border-color); border-radius: 99px; overflow: hidden; position: relative; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease-out; }
+.fill-you { background: var(--primary); }
+.fill-topper { background: var(--success); }
+
+/* Leaderboard */
+.topper-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+.topper-table th { background: var(--bg-body); color: var(--text-muted); font-weight: 700; padding: 10px; text-align: left; border-bottom: 2px solid var(--border-color); }
+.topper-table td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+.section-title { font-size: 16px; font-weight: 700; margin: 0 0 14px; color: var(--text-main); padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+
+@media(max-width: 480px) {
+    #palettePanel { width: 85%; } 
+    .brand span { font-size: 24px; } .brand { font-size: 18px; }
+    .timer-badge { font-size: 14px; padding: 4px 10px; }
+    .nav-btn { padding: 6px 10px; font-size: 12px; }
+    .sec-tab { padding: 0 12px; font-size: 12px; height: 32px; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body onload="initApp()">
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Full screen inside Telegram
+        
+        // SECURITY CHECK: Agar link kisi ne Chrome/Safari mein copy paste kiya toh Access Denied
+        if (!tg.initData) {
+            document.body.innerHTML = `
+                <div style="display:flex; height:100vh; width:100vw; background:var(--bg-body-gradient); color:var(--text-main); justify-content:center; align-items:center; flex-direction:column; text-align:center; padding:20px; font-family: 'Poppins', sans-serif;">
+                    <h1 style="color:var(--danger); font-size:60px; margin:0;">🚫</h1>
+                    <h2 style="margin:10px 0;">Access Denied!</h2>
+                    <p style="color:var(--text-muted); font-weight:500;">This premium test can only be accessed via the official Telegram App.<br>Please open it directly from our private channel.</p>
+                </div>
+            `;
+            return;
+        } else {
+            // Agar genuine user hai, toh uska naam Telegram se nikal kar form me pre-fill kar do
+            const user = tg.initDataUnsafe.user;
+            if(user && user.first_name) {
+                setTimeout(() => {
+                    const nameInput = document.getElementById('startNameInput');
+                    if(nameInput) {
+                        nameInput.value = user.first_name + (user.last_name ? " " + user.last_name : "");
+                        // Aap chahein toh user ko name change karne se rok sakte hain:
+                        // nameInput.readOnly = true;
+                    }
+                }, 500);
+            }
+        }
+    }
+  });
+</script>
+<div id="tgPopup">
+  <div style="font-size:40px; margin-bottom:10px;">📢</div>
+  <h3 style="margin:0; color:var(--primary);">Join DSSSB Rank</h3>
+  <p style="font-size:13px; color:var(--text-muted); margin:10px 0 20px;">Get Daily Mock Tests, PDFs & Live Leaderboards</p>
+  <a href="https://t.me/DSSSBRank" target="_blank">🚀 Join Telegram Channel</a>
+  <button class="tg-btn-continue" onclick="closeTg()">Continue Test</button>
+</div>
+
+<div id="zoomModal" onclick="closeZoom()" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:5000; display:none; justify-content:center; align-items:center; flex-direction:column;">
+    <span style="position:absolute; top:20px; right:20px; font-size:40px; color:#fff; cursor:pointer;">&times;</span>
+    <img id="zoomImg" src="" style="max-width:95%; max-height:80vh; border-radius:12px; box-shadow:0 0 50px rgba(255,255,255,0.1);">
+    <div style="color:#fff; margin-top:15px; font-size:14px; opacity:0.7;">Click anywhere to close</div>
+</div>
+
+<div id="paletteOverlay" onclick="togglePalette()" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1900; display:none; backdrop-filter:blur(2px);"></div>
+<div id="toast-container"></div>
+
+<div id="startScreen" class="full-overlay">
+    <div class="login-card">
+        <div style="font-size:50px; margin-bottom:15px;">🛡️</div>
+        <h2 style="margin:0 0 5px 0; color:var(--text-main); font-weight:800;">DSSSB Pro Portal</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Secure Computer Based Test System</p>
+        
+        <div style="text-align:left; margin-bottom:5px; font-size:13px; font-weight:600; margin-left:5px;">Full Name</div>
+        <input type="text" id="startNameInput" class="login-input" placeholder="e.g. Rahul Sharma">
+        
+        <div style="text-align:left; margin-bottom:5px; font-size:13px; font-weight:600; margin-left:5px; margin-top:10px;">Access Code</div>
+        <input type="password" id="examPassInput" class="login-input" placeholder="Enter Password">
+        
+        <div id="resumeBox" style="display:none; margin-top:20px; background:rgba(245, 158, 11, 0.1); padding:15px; border-radius:12px; border:1px solid var(--warning); color:var(--warning); font-size:13px; text-align:left;">
+            <b>⚠️ Session Recovered</b><br>
+            We found an incomplete test saved on this device.
+            <div style="margin-top:12px; display:flex; gap:10px;">
+                <button onclick="loadState()" style="padding:8px 15px; background:var(--warning); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Resume Test</button>
+                <button onclick="clearState()" style="padding:8px 15px; background:none; border:1px solid var(--warning); color:var(--warning); border-radius:8px; cursor:pointer; font-weight:bold;">Start New</button>
+            </div>
+        </div>
+        
+        <button class="btn-primary" onclick="validateLogin()">START EXAM ➔</button>
+    </div>
+</div>
+
+<header>
+    <div class="brand"><span>🛡️</span> DSSSB <span style="opacity:0.8; font-weight:400; font-size:16px;">CBT</span></div>
+    <div class="header-tools">
+        <div id="timer" class="timer-badge">120:00</div>
+        <button class="nav-btn" onclick="toggleTheme()" title="Dark Mode">🌙</button>
+        <button class="nav-btn" onclick="toggleLang()" id="langBtn" style="width:40px;">HI</button>
+        <button class="nav-btn" onclick="toggleFS()" title="Fullscreen">⛶</button>
+    </div>
+</header>
+
+<div id="sectionBar"></div>
+
+<div id="mainArea">
+    <div class="q-card">
+        <div class="q-header">
+            <span style="display:flex; align-items:center; gap:8px;"><span style="background:var(--primary); color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;">Q.<span id="qNumDisp">1</span></span></span>
+            <span style="font-family:monospace; font-size:14px;"><span style="color:var(--success)">+1.0</span> &nbsp;|&nbsp; <span style="color:var(--danger)">-0.25</span></span>
+        </div>
+        <div id="qContent" class="q-text"></div>
+        <div id="opts"></div>
+        <div id="solutionDisplay" class="sol-box" style="display:none; margin-top:20px;"></div>
+        
+        <div style="margin-top:25px; display:flex; gap:15px;">
+            <button class="nav-btn" style="border:1px solid var(--warning); color:var(--warning); flex:1; background:transparent;" onclick="markReview()">⭐ Mark for Review</button>
+            <button class="nav-btn" style="border:1px solid var(--text-muted); color:var(--text-muted); flex:1; background:transparent;" onclick="clearResponse()">↺ Clear Response</button>
+        </div>
+    </div>
+    <div style="height:40px;"></div>
+</div>
+
+<div id="palettePanel">
+    <div class="modal-header">
+        <span>Question Palette</span>
+        <button onclick="togglePalette()" style="border:none; background:none; font-size:24px; color:var(--primary); cursor:pointer;">&times;</button>
+    </div>
+    <div class="p-grid" id="paletteGrid"></div>
+    <div style="padding:20px; border-top:1px solid var(--border-color); background:var(--bg-body);">
+        <button id="mainSubmitBtn" onclick="submitTest()" class="btn-primary" style="background:var(--danger); box-shadow:0 4px 15px rgba(239, 68, 68, 0.4);">SUBMIT EXAM</button>
+    </div>
+</div>
+
+<div id="resultModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>🏆 Analysis & Leaderboard</span>
+            <button onclick="closeResult()" style="border:none; background:none; font-size:24px; color:var(--primary); cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" id="resultContent"></div>
+    </div>
+</div>
+
+<footer>
+    <button class="nav-btn btn-grid" onclick="togglePalette()">▦ Grid</button>
+    <button class="nav-btn" onclick="prev()">Before</button>
+    <button class="nav-btn primary" id="nextBtn" onclick="next()">Save & Next</button>
+</footer>
+<script>
+/* =========================
+   FIREBASE CONFIG & INIT
+   ========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI",
+  authDomain: "dsssbexamportal.firebaseapp.com",
+  databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dsssbexamportal",
+  storageBucket: "dsssbexamportal.firebasestorage.app",
+  messagingSenderId: "853373171134",
+  appId: "1:853373171134:web:77b967374e6f34311af5ef"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+const DB_REF_NAME = "dsssb_results_live";
+
+/* =========================
+   DATA & CONFIG
+   ========================= */
+const PASS_ENCODED = "ZHNzc2IyNDA2"; 
+const TOTAL_TIME_MINS = 120;
+const STORAGE_KEY = "dsssb_cbt_rank_v2";
+const NEGATIVE_MARK = 0.25;
+const TELEGRAM_BOT_TOKEN="8486464606:AAFT_Bd0P2HYqKNPjCm3s7TGgfM4HWmOYvs";
+const TELEGRAM_CHAT_ID="@dsssbcbtresult";
+const PASSING_MARKS = 3; 
+
+const SECTION_MAP = [
+  "General 1", "General 2",
+  "Reasoning 1", "Reasoning 2",
+  "Maths 1", "Maths 2",
+  "English 1", "English 2",
+  "Hindi 1", "Hindi 2"
+];
+
+const QUESTIONS = [
+  { section: "General 1", q_en: "Who is known as the 'Iron Man of India'?", q_hi: "भारत के 'लौह पुरुष' के रूप में किसे जाना जाता है?", ans: "2", op_en: ["M.K. Gandhi", "Sardar Patel", "J.L. Nehru", "Subhash Bose"], op_hi: ["एम.के. गांधी", "सरदार पटेल", "जे.एल. नेहरू", "सुभाष बोस"], solution: "<b>Sardar Vallabhbhai Patel</b> played a key role in the integration of Indian princely states." },
+  { section: "General 2", q_en: "Which is the largest planet in our solar system?", q_hi: "हमारे सौर मंडल का सबसे बड़ा ग्रह कौन सा है?", ans: "3", op_en: ["Earth", "Mars", "Jupiter", "Saturn"], op_hi: ["पृथ्वी", "मंगल", "बृहस्पति", "शनि"], solution: "<b>Jupiter</b> is the largest planet." },
+  { section: "Reasoning 1", q_en: "Identify the next shape in the series:<br><img src='https://placehold.co/100x50/png?text=Shape+1' style='margin-top:5px'>", q_hi: "श्रृंखला में अगली आकृति पहचानें:<br><img src='https://placehold.co/100x50/png?text=Shape+1' style='margin-top:5px'>", ans: "1", op_en: ["Square", "Circle", "Triangle", "Hexagon"], op_hi: ["वर्ग", "वृत्त", "त्रिभुज", "षट्भुज"], solution: "Pattern follows sides: 3 -> 4 -> 5. Next is <b>Hexagon</b>." },
+  { section: "Reasoning 2", q_en: "A is B's sister. C is B's mother. D is C's father. E is D's mother. Then, how is A related to D?", q_hi: "A, B की बहन है। C, B की माता है। D, C का पिता है। E, D की माता है। तो, A का D से क्या संबंध है?", ans: "4", op_en: ["Grandmother", "Grandfather", "Daughter", "Granddaughter"], op_hi: ["दादी", "दादा", "बेटी", "पोती (नतिनी)"], solution: "A is the daughter of C, and C is the daughter of D. So A is the <b>Granddaughter</b> of D." },
+  { section: "Maths 1", q_en: "If $ x^2 + 4x + 4 = 0 $, find $ x $.", q_hi: "यदि $ x^2 + 4x + 4 = 0 $, तो $ x $ ज्ञात करें।", ans: "1", op_en: ["-2", "2", "0", "4"], op_hi: ["-2", "2", "0", "4"], solution: "$$ (x+2)^2 = 0 \\Rightarrow x = -2 $$" },
+  { section: "Maths 2", q_en: "Find the average of first 5 prime numbers.", q_hi: "प्रथम 5 अभाज्य संख्याओं का औसत ज्ञात कीजिए।", ans: "3", op_en: ["5.2", "5.4", "5.6", "5.8"], op_hi: ["5.2", "5.4", "5.6", "5.8"], solution: "Primes: 2, 3, 5, 7, 11. Sum = 28. Avg = 28/5 = <b>5.6</b>" },
+  { section: "English 1", q_en: "Select the correct verb: Neither of the students ___ present.", q_hi: "सही क्रिया चुनें: Neither of the students ___ present.", ans: "1", op_en: ["was", "were", "are", "have"], op_hi: ["was", "were", "are", "have"], solution: "'Neither' takes a singular verb." },
+  { section: "English 2", q_en: "Choose the antonym of 'Artificial'.", q_hi: "'Artificial' का विलोम चुनें।", ans: "1", op_en: ["Natural", "Red", "Solid", "Truthful"], op_hi: ["Natural", "Red", "Solid", "Truthful"], solution: "Artificial means man-made. Antonym is <b>Natural</b>." },
+  { section: "Hindi 1", q_en: "Which word is the synonym of 'Agni'?", q_hi: "'अग्नि' का पर्यायवाची शब्द कौन सा है?", ans: "2", op_en: ["Vayu", "Anil", "Anal", "Jal"], op_hi: ["वायु", "अनिल", "अनल", "जल"], solution: "अग्नि का पर्यायवाची <b>अनल</b> है। अनिल का अर्थ वायु होता है।" },
+  { section: "Hindi 2", q_en: "Identify the noun in the sentence.", q_hi: "'राम अच्छा लड़का है' - वाक्य में संज्ञा पहचानें।", ans: "1", op_en: ["Ram", "Good", "Boy", "Is"], op_hi: ["राम", "अच्छा", "लड़का", "है"], solution: "<b>राम</b> व्यक्तिवाचक संज्ञा है।" }
+];
+
+let currentState = { idx: 0, answers: new Array(QUESTIONS.length).fill(null), review: new Array(QUESTIONS.length).fill(false), time: TOTAL_TIME_MINS * 60, secIdx: 0, submitted: false, name: "" };
+let timerInt;
+let secIndices = [];
+
+/* =========================
+   CORE FUNCTIONS
+   ========================= */
+function initApp() {
+    calcSectionIndices();
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved) document.getElementById('resumeBox').style.display = 'block';
+}
+
+function calcSectionIndices() { 
+    SECTION_MAP.forEach(sec => { 
+        const start = QUESTIONS.findIndex(q => q.section === sec); 
+        secIndices.push(start !== -1 ? start : 0); 
+    }); 
+}
+
+function validateLogin() {
+    const name = document.getElementById('startNameInput').value.trim();
+    const pass = document.getElementById('examPassInput').value.trim();
+    if(!name) return showToast("Please Enter Your Name", "error");
+    if(btoa(pass) !== PASS_ENCODED) return showToast("Incorrect Password!", "error");
+    currentState.name = name;
+    startGame(false);
+}
+
+function startGame(isResuming) {
+    document.getElementById('startScreen').style.display = 'none';
+    document.querySelector('header').style.display = 'flex';
+    document.getElementById('mainArea').style.display = 'block';
+    document.querySelector('footer').style.display = 'flex';
+    renderSectionTabs();
+    if(!isResuming) currentState.idx = secIndices[0];
+    loadQuestion(currentState.idx);
+    startTimer();
+    setInterval(saveState, 5000); 
+    showToast(`Welcome, ${currentState.name} 🚀`, "success");
+    toggleFS(); 
+    if(!isResuming) document.getElementById('tgPopup').style.display = "block"; 
+}
+
+function saveState() {
+    if(currentState.submitted) { localStorage.removeItem(STORAGE_KEY); return; }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState));
+}
+
+function loadState() { 
+    const saved = localStorage.getItem(STORAGE_KEY); 
+    if(saved) { currentState = JSON.parse(saved); startGame(true); } 
+}
+
+function clearState() { 
+    localStorage.removeItem(STORAGE_KEY); 
+    document.getElementById('resumeBox').style.display = 'none'; 
+    showToast("Session Cleared", "info"); 
+}
+
+function renderSectionTabs() {
+    const bar = document.getElementById('sectionBar'); let html = "";
+    SECTION_MAP.forEach((sec, i) => {
+        let cls = "sec-tab"; let icon = "🔒";
+        if (currentState.submitted) {
+            cls += " done"; icon = "🔓";
+            if (i === currentState.secIdx) { cls += " active"; icon = "👁️"; }
+        } else {
+            if(i === currentState.secIdx) { cls += " active"; icon = "🟢"; }
+            else if(i < currentState.secIdx) { cls += " done"; icon = "✅"; }
+        }
+        html += `<div class="${cls}" onclick="jumpSection(${i})">${icon} ${sec}</div>`;
+    });
+    bar.innerHTML = html;
+}
+
+function jumpSection(secIndex) {
+    if(currentState.submitted) {
+        currentState.secIdx = secIndex;
+        loadQuestion(secIndices[secIndex]);
+        renderSectionTabs();
+    }
+}
+
+function loadQuestion(idx) {
+    currentState.idx = idx; 
+    const q = QUESTIONS[idx]; 
+    const isHindi = document.getElementById('langBtn').innerText === "HI";
+    
+    const qSecIdx = SECTION_MAP.indexOf(q.section);
+    if(qSecIdx !== -1 && qSecIdx !== currentState.secIdx) {
+        currentState.secIdx = qSecIdx;
+        renderSectionTabs();
+    }
+
+    document.getElementById('qNumDisp').innerText = idx + 1;
+    
+    const contentDiv = document.getElementById('qContent');
+    contentDiv.innerHTML = isHindi ? (q.q_hi || q.q_en) : (q.q_en || q.q_hi);
+    contentDiv.querySelectorAll('img').forEach(img => { img.onclick = () => openZoom(img.src); });
+
+    let optsHtml = ""; 
+    const correctIdx = parseInt(q.ans) - 1;
+    const optsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
+    
+    optsArr.forEach((opt, i) => {
+        let cls = "opt"; 
+        const myAns = currentState.answers[idx];
+        
+        if (currentState.submitted) {
+            if (i === correctIdx) cls += " correct-ans";
+            else if (i === myAns && i !== correctIdx) cls += " wrong-ans";
+        } else {
+            if(myAns === i) cls += " sel";
+        }
+
+        optsHtml += `<div class="${cls}" onclick="selectAns(${i})"><div class="opt-badge">${String.fromCharCode(65+i)}</div><div style="width:100%">${opt}</div></div>`;
+    });
+    
+    const optsContainer = document.getElementById('opts');
+    optsContainer.innerHTML = optsHtml;
+    optsContainer.querySelectorAll('img').forEach(img => { img.onclick = (e) => { e.stopPropagation(); openZoom(img.src); }; });
+
+    const solBox = document.getElementById('solutionDisplay');
+    if(currentState.submitted) {
+        solBox.innerHTML = `<b>💡 Solution:</b><br>${q.solution}`;
+        solBox.style.display = 'block';
+    } else {
+        solBox.style.display = 'none';
+    }
+
+    updateNavButtons(); 
+    renderPalette(); 
+    if(window.MathJax) MathJax.typesetPromise();
+}
+
+function selectAns(i) { 
+    if(currentState.submitted) return; 
+    currentState.answers[currentState.idx] = i; 
+    loadQuestion(currentState.idx); 
+    saveState(); 
+}
+
+function next() {
+    if(currentState.idx < QUESTIONS.length - 1) {
+        if (currentState.submitted) {
+            loadQuestion(currentState.idx + 1);
+            return;
+        }
+
+        const nextQ = QUESTIONS[currentState.idx + 1]; 
+        const currQ = QUESTIONS[currentState.idx];
+        if(nextQ.section !== currQ.section) {
+            if(confirm(`Finish ${currQ.section} section?`)) { 
+                currentState.secIdx++; 
+                renderSectionTabs(); 
+                loadQuestion(currentState.idx + 1); 
+            }
+        } else { 
+            loadQuestion(currentState.idx + 1); 
+        }
+    } else { 
+        if(!currentState.submitted) submitTest();
+        else showToast("End of Questions", "info");
+    }
+}
+
+function prev() {
+    if (currentState.submitted) {
+        if(currentState.idx > 0) loadQuestion(currentState.idx - 1);
+        return;
+    }
+    const currQ = QUESTIONS[currentState.idx];
+    if(currentState.idx > 0) {
+        const prevQ = QUESTIONS[currentState.idx - 1];
+        if(prevQ.section === currQ.section) { loadQuestion(currentState.idx - 1); } 
+        else { showToast("You are in a locked section flow", "warning"); }
+    }
+}
+
+function updateNavButtons() {
+    const btn = document.getElementById('nextBtn');
+    if(currentState.idx === QUESTIONS.length - 1) { 
+        btn.innerText = currentState.submitted ? "End Review" : "Finish Exam"; 
+        if (!currentState.submitted) btn.style.background = "var(--danger)"; 
+    } else { 
+        btn.innerText = currentState.submitted ? "Next >" : "Save & Next"; 
+        if (!currentState.submitted) btn.style.background = "var(--gradient-main)"; 
+    }
+}
+
+function startTimer() {
+    clearInterval(timerInt);
+    timerInt = setInterval(() => {
+        if(currentState.submitted) return;
+        if(currentState.time <= 0) { submitTest(); return; }
+        currentState.time--;
+        const m = Math.floor(currentState.time / 60).toString().padStart(2,'0');
+        const s = (currentState.time % 60).toString().padStart(2,'0');
+        const el = document.getElementById('timer');
+        el.innerText = `${m}:${s}`;
+        if(currentState.time < 300) el.classList.add('low');
+    }, 1000);
+}
+
+function showToast(msg, type="info") {
+    const container = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = `toast ${type}`;
+    let icon = "ℹ️"; if(type==="success") icon = "✅"; if(type==="error") icon = "❌"; if(type==="warning") icon = "⚠️";
+    t.innerHTML = `<span>${icon}</span> <span>${msg}</span>`; container.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+
+function togglePalette() { 
+    const p = document.getElementById('palettePanel'); const o = document.getElementById('paletteOverlay');
+    if(p.classList.contains('show')) { p.classList.remove('show'); o.style.display = 'none'; } else { p.classList.add('show'); o.style.display = 'block'; }
+}
+
+function renderPalette() {
+    const grid = document.getElementById('paletteGrid'); grid.innerHTML = "";
+    QUESTIONS.forEach((q, i) => {
+        const myAns = currentState.answers[i]; 
+        let cls = "qbtn";
+        if (currentState.submitted) {
+            const correctIdx = parseInt(q.ans) - 1;
+            if (myAns === correctIdx) cls += " p-correct";
+            else if (myAns !== null && myAns !== correctIdx) cls += " p-wrong";
+            else cls += " p-skip";
+            if(currentState.review[i]) cls += " review"; 
+        } else {
+            if(i === currentState.idx) cls += " current"; 
+            if(myAns !== null) cls += " answered"; 
+            else if(currentState.review[i]) cls += " review";
+        }
+        const isAccessible = currentState.submitted || (i >= secIndices[currentState.secIdx] && (currentState.secIdx === SECTION_MAP.length -1 || i < secIndices[currentState.secIdx+1]));
+        const btn = document.createElement('button'); btn.className = cls; btn.innerText = i + 1;
+        if(isAccessible) { 
+            btn.onclick = () => { loadQuestion(i); if(window.innerWidth < 768) togglePalette(); }; 
+        } else btn.style.opacity = "0.3";
+        grid.appendChild(btn);
+    });
+}
+
+function markReview() { currentState.review[currentState.idx] = !currentState.review[currentState.idx]; loadQuestion(currentState.idx); }
+function clearResponse() { currentState.answers[currentState.idx] = null; loadQuestion(currentState.idx); }
+function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+function toggleLang() { const btn = document.getElementById('langBtn'); btn.innerText = btn.innerText === "HI" ? "EN" : "HI"; loadQuestion(currentState.idx); }
+function openZoom(src) { document.getElementById('zoomImg').src = src; document.getElementById('zoomModal').style.display = 'flex'; }
+function closeZoom() { document.getElementById('zoomModal').style.display = 'none'; }
+function toggleFS() { !document.fullscreenElement ? document.documentElement.requestFullscreen() : document.exitFullscreen(); }
+function closeTg(){ document.getElementById('tgPopup').style.display = "none"; }
+function closeResult() { document.getElementById('resultModal').style.display = 'none'; }
+
+function sendResultToTelegram(name,score,c,w,s,time,accuracy){
+ fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
+  method:"POST", headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   chat_id:TELEGRAM_CHAT_ID,
+   text:`📘 DSSSB Mock Test (Pro)\n\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Correct: ${c}\n❌ Wrong: ${w}\n➖ Skipped: ${s}\n🎯 Score: ${score}\n📊 Accuracy: ${accuracy}%\n\n🔥 DSSSB Smart Notes`
+  })
+ });
+}
+
+/* =========================
+   TESTBOOK RANK HELPERS
+   ========================= */
+function fmt(s){
+  s = Math.max(0, s);
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
+
+function renderComparisonBar(label, userVal, maxVal, topperVal, maxTopperVal, unit = "", isReverse = false) {
+  const userPct = (userVal > 0) ? Math.min(100, (userVal / maxVal) * 100) : 0;
+  const topperPct = Math.min(100, (topperVal / maxTopperVal) * 100) || 0;
+
+  return `
+  <div class="bar-section">
+    <div class="bar-label"><span>${label}</span></div>
+    <div style="display:grid; grid-template-columns: 60px 1fr 80px; gap:10px; align-items:center; margin-bottom:6px;">
+       <span style="font-size:12px; font-weight:700; color:var(--primary);">YOU</span>
+       <div class="bar-track"><div class="bar-fill fill-you" style="width:${userPct}%"></div></div>
+       <span style="font-size:12px; font-weight:700; text-align:right; color:var(--text-main);">${userVal}${unit}</span>
+    </div>
+    <div style="display:grid; grid-template-columns: 60px 1fr 80px; gap:10px; align-items:center;">
+       <span style="font-size:12px; font-weight:700; color:var(--success);">TOPPER</span>
+       <div class="bar-track"><div class="bar-fill fill-topper" style="width:${topperPct}%"></div></div>
+       <span style="font-size:12px; font-weight:700; text-align:right; color:var(--text-main);">${topperVal}${unit}</span>
+    </div>
+  </div>`;
+}
+
+// Fetch Ranks & Toppers directly from Live DB
+function getRanksAndToppers(myScore, myTime) {
+    return db.ref(DB_REF_NAME).once("value").then(snapshot => {
+        let attempts = [];
+        snapshot.forEach(child => {
+            const val = child.val();
+            if(val && val.score !== undefined) attempts.push(val);
+        });
+
+        attempts.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.timeTaken - b.timeTaken;
+        });
+
+        const total = attempts.length;
+        let rank = total + 1; 
+
+        // Find Rank
+        for (let i = 0; i < attempts.length; i++) {
+            if (attempts[i].score === myScore && attempts[i].timeTaken === myTime) {
+                rank = i + 1; break;
+            }
+        }
+
+        // Percentile
+        const below = attempts.filter(a => a.score < myScore || (a.score === myScore && a.timeTaken > myTime)).length;
+        const percentile = total ? ((below / total) * 100).toFixed(2) : "0.00";
+
+        return { 
+            rank, 
+            percentile, 
+            total,
+            toppersList: attempts.slice(0, 10) 
+        };
+    });
+}
+
+/* =========================
+   SUBMISSION & DASHBOARD
+   ========================= */
+function submitTest() {
+    if(!currentState.submitted) { if(!confirm("Are you sure you want to Submit?")) return; }
+    currentState.submitted = true; 
+    clearInterval(timerInt); 
+    saveState();
+    
+    renderPalette();
+    renderSectionTabs();
+
+    let totalScore = 0, correct = 0, wrong = 0, skipped = 0;
+    let sectionScores = {};
+
+    QUESTIONS.forEach((q, i) => {
+        const secName = q.section;
+        if(!sectionScores[secName]) sectionScores[secName] = {c:0, w:0, s:0, total:0};
+        sectionScores[secName].total++;
+        
+        const correctIdx = parseInt(q.ans) - 1;
+        const myAns = currentState.answers[i];
+        
+        if(myAns === null) {
+            skipped++; sectionScores[secName].s++;
+        } else if(myAns === correctIdx) { 
+            correct++; totalScore += 1; sectionScores[secName].c++; 
+        } else { 
+            wrong++; totalScore -= 0.25; sectionScores[secName].w++; 
+        }
+    });
+
+    const attempted = correct + wrong;
+    const accuracy = attempted > 0 ? ((correct/attempted)*100).toFixed(1) : 0;
+    const timeSpentSeconds = (TOTAL_TIME_MINS * 60) - currentState.time;
+    const timeStr = `${Math.floor(timeSpentSeconds/60)}m ${timeSpentSeconds%60}s`;
+
+    const userData = {
+        name: currentState.name,
+        score: parseFloat(totalScore.toFixed(2)),
+        timeTaken: timeSpentSeconds,
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        correct: correct,
+        wrong: wrong
+    };
+    
+    // UI Loading State
+    const resBox = document.getElementById('resultContent');
+    resBox.innerHTML = `<div class="card-dashboard" style="text-align:center; padding:50px;">
+                            <div style="font-size:30px; animation: pulse 1s infinite;">🔄</div>
+                            <h2 style="color:var(--primary);">Generating Detailed Analysis...</h2>
+                            <p style="color:var(--text-muted);">Calculating your Rank & Percentile against Toppers</p>
+                        </div>`;
+    document.getElementById('resultModal').style.display = 'flex';
+    document.getElementById('mainSubmitBtn').style.display = 'none';
+
+    // Save to Firebase & Get Data
+    db.ref(DB_REF_NAME).push(userData)
+    .then(() => {
+        sendResultToTelegram(currentState.name, totalScore.toFixed(2), correct, wrong, skipped, timeStr, accuracy);
+        return getRanksAndToppers(userData.score, userData.timeTaken);
+    })
+    .then(data => {
+        let topperStats = { score: 0, accuracy: 0, correct: 0, wrong: 0, time: 0 };
+        if (data.toppersList.length > 0) {
+            let t = data.toppersList[0];
+            let tAtt = (t.correct || 0) + (t.wrong || 0);
+            topperStats = {
+                score: t.score,
+                accuracy: tAtt > 0 ? (((t.correct || 0) / tAtt) * 100).toFixed(1) : 0,
+                correct: t.correct || 0,
+                wrong: t.wrong || 0,
+                time: t.timeTaken
+            };
+        }
+
+        // --- GENERATE TESTBOOK STYLE DASHBOARD HTML ---
+        let html = `
+        <div id="pdfContent" class="analysis-container">
+            
+            <div style="text-align:center; padding: 10px 0 20px 0;">
+                <h2 style="color:var(--primary); margin:0; font-size:24px;">DSSSB MOCK TEST REPORT</h2>
+            </div>
+
+            <div class="card-dashboard">
+                <div class="info-grid">
+                    <div><b>Name:</b> ${currentState.name}</div>
+                    <div><b>Status:</b> ${totalScore >= PASSING_MARKS ? '<span style="color:var(--success)">QUALIFIED 🏆</span>' : '<span style="color:var(--danger)">NOT QUALIFIED ❌</span>'}</div>
+                </div>
+            </div>
+
+            <div class="card-dashboard score-summary">
+                <div class="score-item">
+                    <h4>🏆 Rank</h4>
+                    <p>${data.rank} / ${data.total}</p>
+                </div>
+                <div class="score-item">
+                    <h4>📊 Percentile</h4>
+                    <p>${data.percentile}%</p>
+                </div>
+                <div class="score-item">
+                    <h4>🧮 Score</h4>
+                    <p>${totalScore.toFixed(2)}</p>
+                </div>
+                <div class="score-item">
+                    <h4>⏱ Time</h4>
+                    <p>${fmt(timeSpentSeconds)}</p>
+                </div>
+            </div>
+
+            <div class="card-dashboard attempt-summary">
+               <div class="attempt-box at-correct">✅ Correct<span>${correct}</span></div>
+               <div class="attempt-box at-wrong">❌ Wrong<span>${wrong}</span></div>
+               <div class="attempt-box at-unattempted">🟡 Skipped<span>${skipped}</span></div>
+               <div class="attempt-box at-total">✍️ Attempted<span>${attempted} / ${QUESTIONS.length}</span></div>
+            </div>
+
+            <div class="card-dashboard">
+                <h3 class="section-title">📊 You vs Topper</h3>
+                ${renderComparisonBar("Score", totalScore.toFixed(2), QUESTIONS.length, topperStats.score, QUESTIONS.length)}
+                ${renderComparisonBar("Accuracy", accuracy, 100, topperStats.accuracy, 100, "%")}
+                ${renderComparisonBar("Correct", correct, QUESTIONS.length, topperStats.correct, QUESTIONS.length)}
+                ${renderComparisonBar("Time Taken", timeSpentSeconds, TOTAL_TIME_MINS*60, topperStats.time, TOTAL_TIME_MINS*60)}
+            </div>
+
+            <div class="card-dashboard">
+                <h3 class="section-title">🏆 Top 10 Leaderboard</h3>
+                <div style="overflow-x:auto">
+                    <table class="topper-table">
+                        <tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr>
+                        ${data.toppersList.map((t, idx) => `
+                        <tr style="${t.name === currentState.name ? 'background:var(--success-bg); font-weight:bold;' : ''}">
+                            <td>${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '#' + (idx + 1)))}</td>
+                            <td>${t.name} ${t.name === currentState.name ? '(You)' : ''}</td>
+                            <td><b>${t.score}</b></td>
+                            <td>${fmt(t.timeTaken)}</td>
+                        </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-grid" style="margin-top:20px;">
+                <div class="card-dashboard" style="height:250px;"><canvas id="pieChart"></canvas></div>
+                <div class="card-dashboard" style="height:250px;"><canvas id="barChart"></canvas></div>
+            </div>
+
+            <h3 style="margin-top:40px; border-left:5px solid var(--primary); padding-left:15px; color:var(--text-main);">Detailed Question Analysis</h3>
+        `;
+
+        QUESTIONS.forEach((q, i) => {
+            const correctIdx = parseInt(q.ans) - 1;
+            const myAns = currentState.answers[i];
+            let statusBadge = "";
+            if(myAns === null) statusBadge = `<span style="background:#94a3b8; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">SKIPPED</span>`;
+            else if(myAns === correctIdx) statusBadge = `<span style="background:#10b981; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">CORRECT</span>`;
+            else statusBadge = `<span style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">WRONG</span>`;
+            
+            const isHindi = document.getElementById('langBtn').innerText === "HI";
+            const qText = isHindi ? (q.q_hi || q.q_en) : (q.q_en || q.q_hi);
+            const optionsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
+
+            html += `
+                <div class="card-dashboard" style="margin-bottom:15px; padding:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:var(--text-muted); font-size:13px;">
+                        <b>Q.${i+1}</b> ${statusBadge}
+                    </div>
+                    <div style="font-weight:500; margin-bottom:15px; color:var(--text-main); font-size:16px;">${qText}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; font-size:13px; background:var(--bg-body); padding:12px; border-radius:8px;">
+                        <div><b style="color:var(--text-muted);">Your Answer:</b> <br>${myAns !== null ? String.fromCharCode(65+myAns)+') '+optionsArr[myAns] : 'Not Attempted'}</div>
+                        <div><b style="color:var(--text-muted);">Correct Answer:</b> <br><span style="color:var(--success); font-weight:bold;">${String.fromCharCode(65+correctIdx)+') '+optionsArr[correctIdx]}</span></div>
+                    </div>
+                    <div style="margin-top:15px; background:var(--primary-light); padding:15px; border-left:4px solid var(--primary); color:var(--primary-dark); font-size:14px; border-radius:4px;"><b>💡 Solution:</b><br>${q.solution}</div>
+                </div>
+            `;
+        });
+
+        html += `</div>`; 
+        html += `<div style="text-align:center; margin-top:30px; padding-bottom:30px;">
+                    <button onclick="downloadPDF()" class="btn-primary" style="width:auto; padding:12px 30px;">Download PDF Report 📥</button>
+                    <button onclick="closeResult()" class="btn-primary" style="width:auto; padding:12px 30px; background:transparent; color:var(--primary); border:2px solid var(--primary); box-shadow:none; margin-left:10px;">Review Questions 🔍</button>
+                 </div>`;
+
+        resBox.innerHTML = html;
+
+        // Initialize Charts inside the new HTML
+        new Chart(document.getElementById('pieChart'), { type: 'doughnut', data: { labels: ['Correct', 'Wrong', 'Skipped'], datasets: [{ data: [correct, wrong, skipped], backgroundColor: ['#10b981', '#ef4444', '#cbd5e1'], borderWidth:0 }] }, options: { plugins: { legend: { position: 'bottom' } }, maintainAspectRatio: false } });
+        const labels = Object.keys(sectionScores);
+        new Chart(document.getElementById('barChart'), { type: 'bar', data: { labels: labels, datasets: [ { label: 'Correct', data: labels.map(k => sectionScores[k].c), backgroundColor: '#10b981' }, { label: 'Wrong', data: labels.map(k => sectionScores[k].w), backgroundColor: '#ef4444' } ] }, options: { scales: { x: { stacked: true, grid:{display:false} }, y: { stacked: true } }, maintainAspectRatio: false, borderRadius:4 } });
+
+        if(window.MathJax) MathJax.typesetPromise();
+    })
+    .catch((error) => {
+        console.error("Result Generation FAILED:", error);
+        resBox.innerHTML = `<h3 style="color:red; text-align:center;">Network Error. Please try again.</h3>`;
+    });
+}
+
+function downloadPDF() {
+    const element = document.getElementById('pdfContent');
+    const opt = {
+        margin: [5, 5, 5, 5],
+        filename: `${currentState.name}_DSSSB_Report.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 1.5, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
+</script>
+</body>
+</html>
