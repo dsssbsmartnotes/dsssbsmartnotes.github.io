@@ -1,0 +1,1405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DSSSB CBT Professional Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<meta name="theme-color" content="#4f46e5">
+
+<link rel="manifest" href="/manifest.json">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+/* =========================
+   CORE THEME & VIBRANT VARIABLES
+   ========================= */
+:root {
+  --primary-hue: 250; 
+  --primary: hsl(var(--primary-hue), 80%, 60%);
+  --primary-dark: hsl(var(--primary-hue), 80%, 45%);
+  --primary-light: hsl(var(--primary-hue), 90%, 95%);
+  --gradient-main: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --gradient-header: linear-gradient(90deg, #4f46e5, #9333ea);
+  --success: #10b981; --success-bg: #d1fae5;
+  --danger: #ef4444; --danger-bg: #fee2e2;
+  --warning: #f59e0b; --warning-bg: #fef3c7;
+  --bg-body: #f3f4f6; --bg-body-gradient: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+  --bg-card: rgba(255, 255, 255, 0.95); --glass-border: rgba(255, 255, 255, 0.6);
+  --text-main: #1e293b; --text-muted: #64748b; --border-color: #e2e8f0;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05); --shadow-lg: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+  --header-height: 64px; --footer-height: 64px; --radius-lg: 16px;
+}
+
+body.dark-mode {
+  --primary: #818cf8; --primary-dark: #6366f1; --primary-light: rgba(99, 102, 241, 0.1);
+  --gradient-main: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-header: linear-gradient(90deg, #312e81, #581c87);
+  --bg-body: #0f172a; --bg-body-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  --bg-card: #1e293b; --glass-border: #334155;
+  --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: #334155;
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); overflow: hidden; user-select: none; transition: background 0.3s ease; }
+body { display: grid; grid-template-rows: var(--header-height) auto 1fr var(--footer-height); }
+
+#tgPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--bg-card); padding: 30px; width: 85%; max-width: 340px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); z-index: 9999; text-align: center; display: none; color: var(--text-main); border: 1px solid var(--border-color); backdrop-filter: blur(10px); }
+#tgPopup a { display: block; background: #0088cc; color: #fff; padding: 14px; border-radius: 12px; text-decoration: none; margin-top: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,136,204,0.3); transition: transform 0.2s; }
+#tgPopup a:active { transform: scale(0.98); }
+.tg-btn-continue { background: transparent; color: var(--text-muted); border: 2px solid var(--border-color); padding: 10px 20px; border-radius: 12px; margin-top: 15px; cursor: pointer; font-weight: 600; width: 100%; transition: 0.2s; }
+.tg-btn-continue:hover { border-color: var(--primary); color: var(--primary); }
+
+#toast-container { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; width: 90%; max-width: 400px; }
+.toast { background: rgba(15, 23, 42, 0.9); color: #fff; padding: 12px 24px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; font-size: 14px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+.toast.success { border-left: 5px solid var(--success); } .toast.error { border-left: 5px solid var(--danger); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* Custom Confirm Modal */
+#customConfirm { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+.confirm-box { background: var(--bg-card); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color); animation: slideUp 0.3s ease-out; }
+.confirm-box h3 { margin: 0 0 10px 0; color: var(--text-main); font-weight: 800; }
+.confirm-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+.confirm-btns { display: flex; gap: 15px; }
+.confirm-btns button { flex: 1; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; transition: 0.2s; }
+.btn-cancel { background: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border-color); }
+.btn-proceed { background: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); }
+
+.full-overlay { position: fixed; inset: 0; background: var(--bg-body-gradient); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; overflow-y: auto; }
+.login-card { background: var(--bg-card); padding: 40px 30px; border-radius: 24px; box-shadow: var(--shadow-lg); width: 100%; max-width: 420px; text-align: center; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
+.login-input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid var(--border-color); border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 16px; transition: 0.3s; }
+.login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+.btn-primary { background: var(--gradient-main); color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+.btn-primary:active { transform: scale(0.98); }
+
+header { background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 50; height: var(--header-height); color: white; }
+.brand { font-weight: 900; font-size: 20px; color: #fff; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.header-tools { display: flex; gap: 8px; align-items: center; }
+.timer-badge { background: rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-family: 'Courier New', monospace; font-size: 16px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px); }
+.timer-badge.low { background: rgba(239, 68, 68, 0.9); animation: pulse 1s infinite; }
+.nav-btn { padding: 8px 10px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: 0.2s; white-space: nowrap; }
+.nav-btn:hover { background: rgba(255,255,255,0.3); }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+#sectionBar { background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; overflow-x: auto; scrollbar-width: none; white-space: nowrap; height: 55px; align-items: center; padding: 0 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+.sec-tab { padding: 0 18px; height: 36px; border-radius: 18px; margin: 0 4px; font-size: 13px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; transition: 0.3s; border: 1px solid transparent; cursor: pointer; }
+.sec-tab.active { background: var(--gradient-main); color: #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
+.sec-tab.done { color: var(--success); background: var(--success-bg); border-color: var(--success); }
+
+#mainArea { padding: 20px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; }
+.q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 25px; box-shadow: var(--shadow-sm); margin-bottom: 25px; transition: transform 0.2s; }
+.q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.q-text { font-size: 17px; line-height: 1.6; margin-bottom: 20px; font-weight: 500; color: var(--text-main); transition: font-size 0.2s; }
+.q-text img, .opt img { max-width: 100%; height: auto; border-radius: 8px; cursor: zoom-in; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 8px; }
+
+.opt { display: flex; align-items: center; padding: 14px; border: 2px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); background: var(--bg-card); font-size: 15px; position: relative; overflow: hidden; }
+.opt:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+.opt.sel { background: var(--primary-light); border-color: var(--primary); font-weight: 600; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); }
+.opt-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-body); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 12px; font-weight: 800; flex-shrink: 0; color: var(--text-muted); transition: 0.2s; }
+.opt.sel .opt-badge { background: var(--primary); border-color: var(--primary); color: #fff; }
+.opt.correct-ans { border-color: var(--success); background: var(--success-bg); }
+.opt.correct-ans .opt-badge { background: var(--success); border-color: var(--success); color: #fff; }
+.opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
+.opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+/* Scrollable Footer for better button fits */
+footer { background: var(--bg-card); padding: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-start; gap: 8px; display: none; z-index: 40; align-items: center; height: var(--footer-height); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; }
+footer::-webkit-scrollbar { display: none; }
+footer .nav-btn { height: 44px; flex: 0 0 auto; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
+footer .btn-grid { font-size: 20px; border-color: transparent; }
+footer .nav-btn.primary { background: var(--gradient-main); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+footer .btn-review-next { background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+
+#palettePanel { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; background: var(--bg-card); z-index: 2000; display: flex; flex-direction: column; box-shadow: -5px 0 30px rgba(0,0,0,0.2); transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+#palettePanel.show { transform: translateX(0); }
+.modal-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 18px; color: var(--primary); background: var(--primary-light); }
+
+/* Palette Stats Grid */
+.palette-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px 20px; background: var(--bg-body); border-bottom: 1px solid var(--border-color); font-size: 12px; font-weight: 600; color: var(--text-main); }
+.stat-box { display: flex; align-items: center; gap: 6px; }
+.stat-dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot-ans { background: var(--success); }
+.dot-unans { background: var(--bg-card); border: 2px solid var(--border-color); }
+.dot-rev { background: var(--warning); }
+.dot-skip { background: var(--text-muted); opacity: 0.5; }
+
+.p-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; overflow-y: auto; flex: 1; align-content: start; }
+.qbtn { aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); font-weight: 700; font-size: 13px; cursor: pointer; color: var(--text-main); transition: 0.2s; }
+.qbtn.current { border: 2px solid var(--primary); background: #fff; color: var(--primary); transform: scale(1.1); box-shadow: 0 4px 10px rgba(99,102,241,0.2); }
+.qbtn.answered { background: var(--success); color: #fff; border: none; }
+.qbtn.review { background: var(--warning); color: #fff; border: none; }
+.qbtn.p-correct { background: var(--success); color: #fff; border-color: var(--success); }
+.qbtn.p-wrong { background: var(--danger); color: #fff; border-color: var(--danger); }
+.qbtn.p-skip { background: var(--text-muted); color: #fff; border-color: var(--text-muted); opacity: 0.5; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1500; display: none; backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 15px; }
+.modal-card { background: var(--bg-card); width: 100%; max-width: 800px; max-height: 90vh; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 1px solid var(--glass-border); }
+.modal-body { padding: 25px; overflow-y: auto; }
+
+.analysis-container { max-width: 900px; margin: auto; display: flex; flex-direction: column; gap: 14px; padding: 10px 0; font-family: 'Poppins', sans-serif; }
+.card-dashboard { background: var(--bg-card); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px; color: var(--text-muted); }
+.info-grid div b { color: var(--text-main); }
+.score-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; text-align: center; }
+.score-item { background: var(--primary-light); border-radius: 10px; padding: 14px; border: 1px solid rgba(99, 102, 241, 0.2); }
+.score-item h4 { margin: 0; font-size: 13px; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 0.5px; }
+.score-item p { margin: 6px 0 0; font-size: 20px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 5px; }
+.score-item p .total-count { font-size: 14px; color: var(--text-muted); font-weight: 600; margin-top: 3px; }
+.attempt-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; text-align: center; }
+.attempt-box { padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; border: 1px solid transparent; }
+.attempt-box span { display: block; font-size: 20px; margin-top: 4px; font-weight: 800; }
+.at-correct { background: var(--success-bg); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+.at-wrong { background: var(--danger-bg); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+.at-unattempted { background: var(--warning-bg); color: #b77c00; border-color: rgba(245, 158, 11, 0.3); }
+.at-total { background: var(--primary-light); color: var(--primary-dark); border-color: rgba(99, 102, 241, 0.3); }
+
+.bar-section { margin-top: 10px; }
+.bar-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
+.bar-track { height: 10px; background: var(--border-color); border-radius: 99px; overflow: hidden; position: relative; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease-out; }
+.fill-you { background: var(--primary); }
+.fill-topper { background: var(--success); }
+
+.topper-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+.topper-table th { background: var(--bg-body); color: var(--text-muted); font-weight: 700; padding: 10px; text-align: left; border-bottom: 2px solid var(--border-color); }
+.topper-table td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+.section-title { font-size: 16px; font-weight: 700; margin: 0 0 14px; color: var(--text-main); padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+
+/* --- NEW: DOUBT DISCUSSION SYSTEM STYLES --- */
+.discussion-section { margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px; }
+.comment-box { background: var(--bg-body); border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 13px; }
+.comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.comment-author { font-weight: bold; color: var(--primary); }
+.comment-time { color: var(--text-muted); font-size: 11px; }
+.comment-input-area { display: flex; gap: 10px; margin-top: 10px; }
+.comment-input { flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; background: var(--bg-card); color: var(--text-main); outline: none; }
+.comment-input:focus { border-color: var(--primary); }
+.comment-btn { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+.comment-btn:hover { background: var(--primary-dark); }
+.toggle-discuss-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+.toggle-discuss-btn:hover { background: var(--primary-light); }
+
+@media(max-width: 480px) {
+    #palettePanel { width: 85%; } 
+    .brand span { font-size: 24px; } .brand { font-size: 18px; }
+    .timer-badge { font-size: 14px; padding: 4px 10px; }
+    .nav-btn { padding: 6px 10px; font-size: 12px; }
+    .sec-tab { padding: 0 12px; font-size: 12px; height: 32px; }
+}
+
+/* 🔥 NEW: DESKTOP / LAPTOP EXAM UI (TCS STYLE) 🔥 */
+@media(min-width: 1024px) {
+    body {
+        display: grid;
+        grid-template-columns: 1fr 340px; 
+        grid-template-rows: var(--header-height) auto 1fr var(--footer-height);
+        grid-template-areas:
+            "header header"
+            "secbar secbar"
+            "main palette"
+            "footer palette"; 
+    }
+    header { grid-area: header; }
+    #sectionBar { grid-area: secbar; }
+    #mainArea { 
+        grid-area: main; 
+        padding: 40px 60px; 
+        max-width: 1100px; 
+        margin: 0 auto; 
+        width: 100%; 
+    }
+    #palettePanel {
+        grid-area: palette;
+        position: relative; 
+        transform: none; 
+        width: 100%;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.02);
+        border-left: 1px solid var(--border-color);
+        display: flex !important;
+        z-index: 10;
+    }
+    .modal-header button { display: none; } 
+    #paletteOverlay { display: none !important; }
+    footer .btn-grid { display: none; } 
+    footer { grid-area: footer; justify-content: center; border-right: 1px solid var(--border-color); }
+    .q-card { box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); }
+    .opt { padding: 18px; } 
+}
+</style>
+</head>
+<body onload="initApp()">
+
+<div id="customConfirm">
+    <div class="confirm-box">
+        <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+        <h3 id="confirmTitle">Submit Section?</h3>
+        <p id="confirmDesc">Are you sure you want to submit this section? Once submitted, you cannot edit answers in this section.</p>
+        <div class="confirm-btns">
+            <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+            <button class="btn-proceed" id="confirmProceedBtn">Yes, Submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="tgPopup">
+  <div style="font-size:40px; margin-bottom:10px;">📢</div>
+  <h3 style="margin:0; color:var(--primary);">Join DSSSB Smart Notes</h3>
+  <p style="font-size:13px; color:var(--text-muted); margin:10px 0 20px;">Get Daily Mock Tests, PDFs & Live Leaderboards</p>
+  <a href="https://t.me/DSSSBRank" target="_blank">🚀 Join Telegram Channel</a>
+  <button class="tg-btn-continue" onclick="closeTg()">Continue Test</button>
+</div>
+
+<div id="zoomModal" onclick="closeZoom()" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:5000; display:none; justify-content:center; align-items:center; flex-direction:column;">
+    <span style="position:absolute; top:20px; right:20px; font-size:40px; color:#fff; cursor:pointer;">&times;</span>
+    <img id="zoomImg" src="" style="max-width:95%; max-height:80vh; border-radius:12px; box-shadow:0 0 50px rgba(255,255,255,0.1);">
+    <div style="color:#fff; margin-top:15px; font-size:14px; opacity:0.7;">Click anywhere to close</div>
+</div>
+
+<div id="paletteOverlay" onclick="togglePalette()" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1900; display:none; backdrop-filter:blur(2px);"></div>
+<div id="toast-container"></div>
+
+<div id="startScreen" class="full-overlay">
+    <div class="login-card">
+        <div style="font-size:50px; margin-bottom:15px;">🛡️</div>
+        <h2 style="margin:0 0 5px 0; color:var(--text-main); font-weight:800;">DSSSB Pro Portal</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Secure Computer Based Test System</p>
+        
+        <div style="text-align:left; margin-bottom:5px; font-size:13px; font-weight:600; margin-left:5px;">Candidate Name (Auto-Fetched)</div>
+        <input type="text" id="startNameInput" class="login-input" readonly style="background: rgba(255,255,255,0.1); border-color: var(--primary); cursor: not-allowed; font-weight: bold; text-align: center;">
+        
+        <div id="resumeBox" style="display:none; margin-top:20px; background:rgba(245, 158, 11, 0.1); padding:15px; border-radius:12px; border:1px solid var(--warning); color:var(--warning); font-size:13px; text-align:left;">
+            <b>⚠️ Session Recovered</b><br>
+            We found an incomplete test saved on this device.
+            <div style="margin-top:12px; display:flex; gap:10px;">
+                <button onclick="loadState()" style="padding:8px 15px; background:var(--warning); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Resume Test</button>
+                <button onclick="clearState()" style="padding:8px 15px; background:none; border:1px solid var(--warning); color:var(--warning); border-radius:8px; cursor:pointer; font-weight:bold;">Start New</button>
+            </div>
+        </div>
+        
+        <button class="btn-primary" id="startExamBtn" onclick="validateLogin()">START EXAM ➔</button>
+    </div>
+</div>
+
+<header>
+    <div class="brand"><span>🛡️</span> <span id="displayTitle" style="font-size: 16px;">DSSSB CBT</span></div>
+    <div class="header-tools">
+        <div style="display:flex; border:1px solid rgba(255,255,255,0.2); border-radius:8px; overflow:hidden;">
+            <button class="nav-btn" style="border-radius:0; background:transparent;" onclick="adjustFont(-1)" title="Decrease Font">A-</button>
+            <button class="nav-btn" style="border-radius:0; background:rgba(255,255,255,0.1);" onclick="adjustFont(1)" title="Increase Font">A+</button>
+        </div>
+        <div id="timer" class="timer-badge">120:00</div>
+        <button class="nav-btn" onclick="toggleTheme()" title="Dark Mode">🌙</button>
+        <button class="nav-btn" onclick="toggleLang()" id="langBtn" style="width:40px;">HI</button>
+    </div>
+</header>
+
+<div id="sectionBar"></div>
+
+<div id="mainArea">
+    <div class="q-card">
+        <div class="q-header">
+            <span style="display:flex; align-items:center; gap:12px;">
+                <span style="background:var(--primary); color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;">Q.<span id="qNumDisp">1</span></span>
+                <button id="bookmarkBtn" onclick="toggleBookmark()" style="background:transparent; border:none; cursor:pointer; font-size:18px; padding:0; transition:0.2s;" title="Bookmark for Revision">🔖</button>
+            </span>
+            <span style="font-family:monospace; font-size:14px;"><span style="color:var(--success)">+1.0</span> &nbsp;|&nbsp; <span style="color:var(--danger)">-0.25</span></span>
+        </div>
+        
+        <div id="qContent" class="q-text"></div>
+        <div id="opts"></div>
+        <div id="solutionDisplay" class="sol-box" style="display:none; margin-top:20px; background:var(--primary-light); padding:15px; border-left:4px solid var(--primary); color:var(--primary-dark); font-size:14px; border-radius:4px;"></div>
+        
+        <div id="discussionArea" style="display:none;">
+            <button class="toggle-discuss-btn" onclick="toggleDiscussion()">💬 Discuss this Question</button>
+            <div id="discussionContainer" class="discussion-section" style="display:none;">
+                <div id="commentsList" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                    <div style="text-align:center; color:var(--text-muted); font-size:12px;">Loading discussions...</div>
+                </div>
+                <div class="comment-input-area">
+                    <input type="text" id="newCommentInput" class="comment-input" placeholder="Ask a doubt or explain...">
+                    <button class="comment-btn" onclick="postComment()">Post</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="actionButtons" style="margin-top:25px; display:flex; gap:15px;">
+            <button class="nav-btn" style="border:1px solid var(--text-muted); color:var(--text-muted); flex:1; background:transparent;" onclick="clearResponse()">↺ Clear Response</button>
+        </div>
+    </div>
+    <div style="height:40px;"></div>
+</div>
+
+<div id="palettePanel">
+    <div class="modal-header">
+        <span>Question Palette</span>
+        <button onclick="togglePalette()" style="border:none; background:none; font-size:24px; color:var(--primary); cursor:pointer;">&times;</button>
+    </div>
+    <div class="palette-stats" id="paletteStatsBox">
+        <div class="stat-box"><div class="stat-dot dot-ans"></div> <span id="c-ans">0</span> Answered</div>
+        <div class="stat-box"><div class="stat-dot dot-unans"></div> <span id="c-unans">0</span> Not Answered</div>
+        <div class="stat-box"><div class="stat-dot dot-rev"></div> <span id="c-rev">0</span> Review</div>
+    </div>
+    <div class="p-grid" id="paletteGrid"></div>
+    <div style="padding:20px; border-top:1px solid var(--border-color); background:var(--bg-body);">
+        <button id="mainSubmitBtn" onclick="submitTestDialog()" class="btn-primary" style="background:var(--danger); box-shadow:0 4px 15px rgba(239, 68, 68, 0.4);">SUBMIT EXAM</button>
+    </div>
+</div>
+
+<div id="resultModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>🏆 Analysis & Leaderboard</span>
+            <button onclick="closeResult()" style="border:none; background:none; font-size:24px; color:var(--primary); cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" id="resultContent"></div>
+    </div>
+</div>
+
+<div id="paymentModal" class="modal">
+    <div class="modal-content" style="text-align:center;">
+        <div style="font-size: 50px; margin-bottom: 10px;">👑</div>
+        <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900;">Upgrade to DSSSB PRO</h2>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; font-weight:600;">Unlock All Premium Mock Tests, Video Classes & PDF Notes!</p>
+        
+        <div style="background:var(--primary-light); color:var(--primary-dark); padding:15px; border-radius:12px; margin-bottom:20px; font-size: 14px; font-weight: 700;">
+            Special Offer: ₹99 <span style="font-size:12px; text-decoration:line-through; color:grey;">₹499</span>
+        </div>
+        
+        <p style="font-size:12px; color:var(--text-main); margin-bottom:15px; font-weight:600;">To upgrade, please contact our Admin team directly on Telegram.</p>
+        
+        <button onclick="window.open('https://t.me/DSSSBRank', '_blank')" class="start-btn" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);"><i class="fab fa-telegram-plane"></i> Message Admin to Upgrade</button>
+        
+        <button onclick="document.getElementById('paymentModal').style.display='none'" class="start-btn" style="background:var(--bg-body); color:var(--text-main); margin-top:15px; box-shadow:none;">Cancel</button>
+    </div>
+</div>
+
+<footer>
+    <button class="nav-btn btn-grid" onclick="togglePalette()">▦</button>
+    <button class="nav-btn" onclick="prev()">◀ Prev</button>
+    <button class="nav-btn btn-review-next" id="reviewNextBtn" onclick="reviewAndNext()">⭐ Review & Next</button>
+    <button class="nav-btn primary" id="nextBtn" onclick="next()">Save & Next ▶</button>
+</footer>
+
+<script>
+/* =========================
+   FIREBASE CONFIG & INIT
+   ========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI",
+  authDomain: "dsssbexamportal.firebaseapp.com",
+  databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dsssbexamportal",
+  storageBucket: "dsssbexamportal.firebasestorage.app",
+  messagingSenderId: "853373171134",
+  appId: "1:853373171134:web:77b967374e6f34311af5ef"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+const DB_REF_NAME = "dsssb_results_live";
+const DB_DISCUSS_REF = "dsssb_discussions"; 
+
+/* =========================================
+   HARDCORE SECURITY LAYER
+   ========================================= */
+Object.keys(console).forEach(function(key) { console[key] = function() {}; });
+
+setInterval(function() {
+    const before = new Date().getTime();
+    (function() { return false; }['constructor']('debugger')());
+    const after = new Date().getTime();
+    if (after - before > 100) {
+        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:20%'>🚨 SECURE BROWSER VIOLATION 🚨<br>Developer Tools Detected.</h1>";
+        window.location.replace("about:blank"); 
+    }
+}, 1000);
+
+window.addEventListener('resize', function() {
+    const widthThreshold = window.outerWidth - window.innerWidth > 160;
+    const heightThreshold = window.outerHeight - window.innerHeight > 160;
+    if ((widthThreshold || heightThreshold) && !currentState.submitted) {
+        alert("🚨 Developer Tools Detected! Auto-submitting exam.");
+        submitTest();
+    }
+});
+
+if (window.top !== window.self) { window.top.location = window.self.location; }
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || (e.ctrlKey && ['U', 'S', 'P', 'H'].includes(e.key.toUpperCase()))) {
+        e.preventDefault(); e.stopPropagation(); alert("🚨 Unauthorized action detected!"); return false;
+    }
+});
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('copy', e => { e.preventDefault(); e.clipboardData.setData('text/plain', 'Cheating is not allowed in DSSSB Pro Portal!'); });
+
+/* =========================
+   DATA & CONFIG
+   ========================= */
+const urlParams = new URLSearchParams(window.location.search);
+const CURRENT_TEST_ID = urlParams.get('testid') || "TEST_UNKNOWN";
+const CURRENT_TEST_TITLE = urlParams.get('title') || "DSSSB Mock Test";
+const TOTAL_TIME_MINS = parseInt(urlParams.get('time')) || 120; 
+
+const TEST_MODE = urlParams.get('mode') || "exam"; 
+
+const STORAGE_KEY = "dsssb_cbt_rank_v2";
+const NEGATIVE_MARK = 0.25;
+const TELEGRAM_BOT_TOKEN="8486464606:AAFT_Bd0P2HYqKNPjCm3s7TGgfM4HWmOYvs";
+const TELEGRAM_CHAT_ID="@dsssbcbtresult";
+
+let DYNAMIC_CUTOFF = 0; 
+let QUESTIONS = [];
+let SECTION_MAP = [];
+
+let currentState = { idx: 0, answers: [], review: [], time: TOTAL_TIME_MINS * 60, secIdx: 0, submitted: false, name: "", timePerQ: [] };
+let timerInt;
+let secIndices = [];
+let fontOffset = 0;
+let currentDiscussionRef = null; 
+
+/* =========================
+   OFFLINE SYNC QUEUE 🌐
+   ========================= */
+window.addEventListener('online', syncOfflineResults);
+
+function syncOfflineResults() {
+    const unsynced = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+    if (unsynced.length > 0 && navigator.onLine) {
+        unsynced.forEach((res, index) => {
+            db.ref(DB_REF_NAME).push(res).then(() => {
+                let updated = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+                updated = updated.filter(u => u.timestamp !== res.timestamp);
+                localStorage.setItem('dsssb_unsynced_results', JSON.stringify(updated));
+                console.log("Offline result synced.");
+            });
+        });
+    }
+}
+
+/* =========================
+   MOBILE SWIPE GESTURES 📱
+   ========================= */
+let touchstartX = 0;
+let touchendX = 0;
+
+document.getElementById('mainArea').addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById('mainArea').addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    if(touchendX < touchstartX - 80) next(); 
+    if(touchendX > touchstartX + 80) prev(); 
+}
+
+/* =========================
+   CORE FUNCTIONS
+   ========================= */
+function initApp() {
+    document.getElementById('displayTitle').innerText = CURRENT_TEST_TITLE;
+    document.title = CURRENT_TEST_TITLE;
+    
+    syncOfflineResults(); 
+
+    // 🔥 NAME SYNC LOGIC 🔥
+    let tName = "Student";
+    let tId = "guest";
+
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe.user) {
+        let u = window.Telegram.WebApp.initDataUnsafe.user;
+        tName = u.first_name + (u.last_name ? " " + u.last_name : "");
+        tId = u.id.toString();
+        // Save to device memory
+        localStorage.setItem('dsssb_user_name', tName);
+        localStorage.setItem('dsssb_user_id', tId);
+    } else {
+        // Retrieve from device memory if direct open
+        let savedName = localStorage.getItem('dsssb_user_name');
+        let savedId = localStorage.getItem('dsssb_user_id');
+        if(savedName) {
+            tName = savedName;
+            tId = savedId || "guest";
+        }
+    }
+    
+    if (TEST_MODE === 'solution') {
+        document.getElementById('startNameInput').value = tName + " (Solution Mode)";
+        document.getElementById('startExamBtn').innerText = "VIEW SOLUTIONS ➔";
+        document.getElementById('timer').style.display = 'none'; 
+    } else {
+        document.getElementById('startNameInput').value = tName;
+    }
+
+    db.ref('dsssb_tests_meta/' + CURRENT_TEST_ID + '/cutoff').once('value').then(snap => {
+        if(snap.exists()) DYNAMIC_CUTOFF = parseFloat(snap.val());
+        else DYNAMIC_CUTOFF = 40; 
+    });
+
+    db.ref('dsssb_questions_db/' + CURRENT_TEST_ID).once('value').then(snap => {
+        if(snap.exists()) {
+            QUESTIONS = snap.val();
+            SECTION_MAP = [];
+            QUESTIONS.forEach(q => {
+                let secName = q.section || "General";
+                if (!SECTION_MAP.includes(secName)) SECTION_MAP.push(secName);
+            });
+            
+            const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
+            calcSectionIndices();
+            
+            if (TEST_MODE === 'solution') {
+                const finalSaved = localStorage.getItem(specificStorageKey + "_final");
+                if (finalSaved) {
+                    currentState = JSON.parse(finalSaved);
+                } else {
+                    currentState.answers = new Array(QUESTIONS.length).fill(null);
+                    currentState.review = new Array(QUESTIONS.length).fill(false);
+                    currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
+                }
+                currentState.submitted = true; 
+                document.getElementById('resumeBox').style.display = 'none';
+            } else {
+                currentState.answers = new Array(QUESTIONS.length).fill(null);
+                currentState.review = new Array(QUESTIONS.length).fill(false);
+                currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
+                
+                const saved = localStorage.getItem(specificStorageKey);
+                if(saved) {
+                    let savedState = JSON.parse(saved);
+                    if(savedState.answers && savedState.answers.length === QUESTIONS.length) {
+                        document.getElementById('resumeBox').style.display = 'block';
+                    } else {
+                        localStorage.removeItem(specificStorageKey);
+                    }
+                }
+            }
+        } else {
+            alert("⚠️ Alert: Is Test ID ke questions abhi upload nahi hue hain! Admin se sampark karein.");
+        }
+    }).catch(err => {
+        alert("Error loading test data: " + err.message);
+    });
+}
+
+function calcSectionIndices() { 
+    secIndices = [];
+    SECTION_MAP.forEach(sec => { 
+        const start = QUESTIONS.findIndex(q => (q.section || "General") === sec); 
+        secIndices.push(start !== -1 ? start : 0); 
+    }); 
+}
+
+function validateLogin() {
+    if(QUESTIONS.length === 0) return showToast("Loading test data, please wait...", "warning");
+    const name = document.getElementById('startNameInput').value.trim();
+    if(!name) return showToast("Name is missing!", "error");
+    
+    // Clean name for solutions mode
+    currentState.name = name.replace(" (Solution Mode)", "");
+    startGame(false);
+}
+
+function startGame(isResuming) {
+    document.getElementById('startScreen').style.display = 'none';
+    document.querySelector('header').style.display = 'flex';
+    document.getElementById('mainArea').style.display = 'block';
+    document.querySelector('footer').style.display = 'flex';
+    renderSectionTabs();
+    
+    if(!currentState.timePerQ) currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
+    
+    if(!isResuming && TEST_MODE !== 'solution') currentState.idx = secIndices[0];
+    loadQuestion(currentState.idx);
+    
+    if(!document.fullscreenElement && TEST_MODE !== 'solution') {
+        try { document.documentElement.requestFullscreen(); } catch(e){}
+    }
+    
+    if (TEST_MODE === 'solution') {
+        document.getElementById('mainSubmitBtn').style.display = 'none'; 
+        document.getElementById('paletteStatsBox').style.display = 'none'; 
+        document.getElementById('reviewNextBtn').style.display = 'none'; 
+        showToast(`Showing Solutions...`, "success");
+    } else {
+        startTimer();
+        setInterval(saveState, 5000); 
+        showToast(`Welcome, ${currentState.name} 🚀`, "success");
+        if(!isResuming && window.innerWidth < 1024) document.getElementById('tgPopup').style.display = "block"; 
+    }
+}
+
+function saveState() {
+    if (TEST_MODE === 'solution') return; 
+    const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
+    if(currentState.submitted) { localStorage.removeItem(specificStorageKey); return; }
+    localStorage.setItem(specificStorageKey, JSON.stringify(currentState));
+}
+
+function loadState() { 
+    const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
+    const saved = localStorage.getItem(specificStorageKey); 
+    if(saved) { 
+        currentState = JSON.parse(saved); 
+        if(!currentState.timePerQ) currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
+        startGame(true); 
+    } 
+}
+
+function clearState() { 
+    const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
+    localStorage.removeItem(specificStorageKey); 
+    document.getElementById('resumeBox').style.display = 'none'; 
+    showToast("Session Cleared", "info"); 
+}
+
+function renderSectionTabs() {
+    const bar = document.getElementById('sectionBar'); let html = "";
+    SECTION_MAP.forEach((sec, i) => {
+        let cls = "sec-tab"; let icon = "🔒";
+        if (currentState.submitted) {
+            cls += " done"; icon = "🔓";
+            if (i === currentState.secIdx) { cls += " active"; icon = "👁️"; }
+        } else {
+            if(i === currentState.secIdx) { cls += " active"; icon = "🟢"; }
+            else if(i < currentState.secIdx) { cls += " done"; icon = "✅"; }
+        }
+        html += `<div class="${cls}" onclick="jumpSection(${i})">${icon} ${sec}</div>`;
+    });
+    bar.innerHTML = html;
+}
+
+function jumpSection(secIndex) {
+    if(currentState.submitted) {
+        currentState.secIdx = secIndex;
+        loadQuestion(secIndices[secIndex]);
+        renderSectionTabs();
+    }
+}
+
+function adjustFont(step) {
+    fontOffset += step;
+    if(fontOffset > 6) fontOffset = 6;
+    if(fontOffset < -2) fontOffset = -2;
+    applyFont();
+}
+
+function applyFont() {
+    const qContent = document.getElementById('qContent');
+    if(qContent) qContent.style.fontSize = (17 + fontOffset) + 'px';
+    document.querySelectorAll('.opt').forEach(el => el.style.fontSize = (15 + fontOffset) + 'px');
+}
+
+function loadQuestion(idx) {
+    currentState.idx = idx; 
+    const q = QUESTIONS[idx]; 
+    const isHindi = document.getElementById('langBtn').innerText === "HI";
+    
+    const qSecIdx = SECTION_MAP.indexOf(q.section || "General");
+    if(qSecIdx !== -1 && qSecIdx !== currentState.secIdx) {
+        currentState.secIdx = qSecIdx;
+        renderSectionTabs();
+    }
+
+    document.getElementById('qNumDisp').innerText = idx + 1;
+    
+    const contentDiv = document.getElementById('qContent');
+    contentDiv.innerHTML = isHindi ? (q.q_hi || q.q_en) : (q.q_en || q.q_hi);
+    contentDiv.querySelectorAll('img').forEach(img => { img.onclick = () => openZoom(img.src); });
+
+    let optsHtml = ""; 
+    const correctIdx = parseInt(q.ans) - 1;
+    const optsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
+    
+    optsArr.forEach((opt, i) => {
+        let cls = "opt"; 
+        const myAns = currentState.answers[idx];
+        
+        if (currentState.submitted) {
+            if (i === correctIdx) cls += " correct-ans";
+            else if (i === myAns && i !== correctIdx) cls += " wrong-ans";
+        } else {
+            if(myAns === i) cls += " sel";
+        }
+
+        optsHtml += `<div class="${cls}" onclick="selectAns(${i})"><div class="opt-badge">${String.fromCharCode(65+i)}</div><div style="width:100%">${opt}</div></div>`;
+    });
+    
+    const optsContainer = document.getElementById('opts');
+    optsContainer.innerHTML = optsHtml;
+    optsContainer.querySelectorAll('img').forEach(img => { img.onclick = (e) => { e.stopPropagation(); openZoom(img.src); }; });
+
+    const solBox = document.getElementById('solutionDisplay');
+    const actionBtns = document.getElementById('actionButtons');
+    const discussArea = document.getElementById('discussionArea');
+
+    if(currentState.submitted) {
+        solBox.innerHTML = `<b>💡 Solution:</b><br>${q.solution || 'No detailed solution provided.'}`;
+        solBox.style.display = 'block';
+        if(actionBtns) actionBtns.style.display = 'none'; 
+        
+        discussArea.style.display = 'block';
+        document.getElementById('discussionContainer').style.display = 'none'; 
+        loadComments(idx); 
+    } else {
+        solBox.style.display = 'none';
+        discussArea.style.display = 'none';
+        if(actionBtns) actionBtns.style.display = 'flex';
+    }
+
+    let bms = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
+    let qk = CURRENT_TEST_ID + "_Q" + idx;
+    document.getElementById('bookmarkBtn').innerText = bms[qk] ? "⭐" : "🔖";
+
+    updateNavButtons(); 
+    renderPalette(); 
+    applyFont(); 
+    
+    if(window.MathJax) {
+        const fullContent = contentDiv.innerHTML + optsContainer.innerHTML + (currentState.submitted ? solBox.innerHTML : "");
+        if (fullContent.includes('$') || fullContent.includes('\\(')) {
+            MathJax.typesetPromise([contentDiv, optsContainer, solBox]).catch(err => console.log(err));
+        }
+    }
+}
+
+/* =========================
+   NEW: LIVE DISCUSSION SYSTEM 💬
+   ========================= */
+function toggleDiscussion() {
+    const container = document.getElementById('discussionContainer');
+    container.style.display = container.style.display === 'none' ? 'block' : 'none';
+}
+
+function loadComments(qIndex) {
+    const qKey = CURRENT_TEST_ID + "_Q" + qIndex;
+    const listDiv = document.getElementById('commentsList');
+    
+    if(currentDiscussionRef) { currentDiscussionRef.off(); }
+    
+    currentDiscussionRef = db.ref(`${DB_DISCUSS_REF}/${qKey}`);
+    
+    currentDiscussionRef.on('value', (snapshot) => {
+        listDiv.innerHTML = "";
+        if(!snapshot.exists()) {
+            listDiv.innerHTML = "<div style='text-align:center; color:var(--text-muted); font-size:12px; padding:10px;'>No discussions yet. Be the first to ask!</div>";
+            return;
+        }
+        
+        snapshot.forEach(child => {
+            const data = child.val();
+            const date = new Date(data.timestamp);
+            const timeStr = date.toLocaleDateString() + " " + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            listDiv.innerHTML += `
+                <div class="comment-box">
+                    <div class="comment-header">
+                        <span class="comment-author">${data.name}</span>
+                        <span class="comment-time">${timeStr}</span>
+                    </div>
+                    <div style="color:var(--text-main);">${data.text}</div>
+                </div>
+            `;
+        });
+        listDiv.scrollTop = listDiv.scrollHeight;
+    });
+}
+
+function postComment() {
+    const input = document.getElementById('newCommentInput');
+    const text = input.value.trim();
+    if(!text) return showToast("Please write something first!", "warning");
+    
+    const qKey = CURRENT_TEST_ID + "_Q" + currentState.idx;
+    
+    db.ref(`${DB_DISCUSS_REF}/${qKey}`).push({
+        name: currentState.name || "Student",
+        text: text,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        input.value = "";
+        showToast("Comment posted!", "success");
+    }).catch(err => {
+        showToast("Error posting comment. Try again.", "error");
+    });
+}
+
+function toggleBookmark() {
+    let bookmarks = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
+    let qKey = CURRENT_TEST_ID + "_Q" + currentState.idx;
+    if(bookmarks[qKey]) {
+        delete bookmarks[qKey];
+        showToast("Bookmark Removed", "info");
+        document.getElementById('bookmarkBtn').innerText = "🔖";
+    } else {
+        bookmarks[qKey] = QUESTIONS[currentState.idx];
+        showToast("Question Bookmarked ⭐", "success");
+        document.getElementById('bookmarkBtn').innerText = "⭐";
+    }
+    localStorage.setItem('dsssb_bookmarks', JSON.stringify(bookmarks));
+}
+
+function selectAns(i) { 
+    if(currentState.submitted) return; 
+    currentState.answers[currentState.idx] = i; 
+    loadQuestion(currentState.idx); 
+    saveState(); 
+}
+
+function showConfirmDialog(title, desc, onProceed) {
+    document.getElementById('confirmTitle').innerText = title;
+    document.getElementById('confirmDesc').innerText = desc;
+    document.getElementById('customConfirm').style.display = 'flex';
+    
+    const proceedBtn = document.getElementById('confirmProceedBtn');
+    const newBtn = proceedBtn.cloneNode(true);
+    proceedBtn.parentNode.replaceChild(newBtn, proceedBtn);
+    
+    newBtn.addEventListener('click', () => {
+        closeConfirm();
+        if(onProceed) onProceed();
+    });
+}
+function closeConfirm() { document.getElementById('customConfirm').style.display = 'none'; }
+
+function reviewAndNext() {
+    if(currentState.submitted) return;
+    currentState.review[currentState.idx] = true;
+    next();
+}
+
+function next() {
+    if(currentState.idx < QUESTIONS.length - 1) {
+        if (currentState.submitted) {
+            loadQuestion(currentState.idx + 1);
+            return;
+        }
+
+        const nextQ = QUESTIONS[currentState.idx + 1]; 
+        const currQ = QUESTIONS[currentState.idx];
+        if((nextQ.section || "General") !== (currQ.section || "General")) {
+            showConfirmDialog(
+                "Submit Section?", 
+                `Are you sure you want to finish the ${currQ.section || "General"} section? You cannot modify answers in this section later.`,
+                () => {
+                    currentState.secIdx++; 
+                    renderSectionTabs(); 
+                    loadQuestion(currentState.idx + 1);
+                }
+            );
+        } else { 
+            loadQuestion(currentState.idx + 1); 
+        }
+    } else { 
+        if(!currentState.submitted) {
+            submitTestDialog();
+        } else {
+            showToast("End of Questions. Redirecting to Dashboard...", "info");
+            setTimeout(() => { window.location.href = "index.html"; }, 1500);
+        }
+    }
+}
+
+function prev() {
+    if (currentState.submitted) {
+        if(currentState.idx > 0) loadQuestion(currentState.idx - 1);
+        return;
+    }
+    const currQ = QUESTIONS[currentState.idx];
+    if(currentState.idx > 0) {
+        const prevQ = QUESTIONS[currentState.idx - 1];
+        if((prevQ.section || "General") === (currQ.section || "General")) { loadQuestion(currentState.idx - 1); } 
+        else { showToast("You are in a locked section flow! Cannot go back.", "warning"); }
+    }
+}
+
+function updateNavButtons() {
+    const btn = document.getElementById('nextBtn');
+    const revBtn = document.getElementById('reviewNextBtn');
+    if(currentState.idx === QUESTIONS.length - 1) { 
+        btn.innerText = currentState.submitted ? "End Review" : "Finish Exam"; 
+        if (!currentState.submitted) {
+            btn.style.background = "var(--danger)"; 
+            revBtn.style.display = "none";
+        }
+    } else { 
+        btn.innerText = currentState.submitted ? "Next >" : "Save & Next ▶"; 
+        if (!currentState.submitted) {
+            btn.style.background = "var(--gradient-main)"; 
+            revBtn.style.display = "block";
+        }
+    }
+}
+
+function startTimer() {
+    clearInterval(timerInt);
+    timerInt = setInterval(() => {
+        if(currentState.submitted) return;
+        
+        if (TEST_MODE !== 'solution' && currentState.idx !== undefined) {
+            currentState.timePerQ[currentState.idx] = (currentState.timePerQ[currentState.idx] || 0) + 1;
+        }
+
+        if(currentState.time <= 0) { submitTest(); return; }
+        currentState.time--;
+        const m = Math.floor(currentState.time / 60).toString().padStart(2,'0');
+        const s = (currentState.time % 60).toString().padStart(2,'0');
+        const el = document.getElementById('timer');
+        el.innerText = `${m}:${s}`;
+        if(currentState.time < 300) el.classList.add('low');
+    }, 1000);
+}
+
+function showToast(msg, type="info") {
+    const container = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = `toast ${type}`;
+    let icon = "ℹ️"; if(type==="success") icon = "✅"; if(type==="error") icon = "❌"; if(type==="warning") icon = "⚠️";
+    t.innerHTML = `<span>${icon}</span> <span>${msg}</span>`; container.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+
+function togglePalette() { 
+    // Desktop me palette toggle hide kar diya gaya hai
+    if(window.innerWidth >= 1024) return;
+    
+    const p = document.getElementById('palettePanel'); const o = document.getElementById('paletteOverlay');
+    if(p.classList.contains('show')) { p.classList.remove('show'); o.style.display = 'none'; } else { p.classList.add('show'); o.style.display = 'block'; }
+}
+
+function renderPalette() {
+    const grid = document.getElementById('paletteGrid'); grid.innerHTML = "";
+    let stats = { ans: 0, unans: 0, rev: 0 }; 
+    
+    QUESTIONS.forEach((q, i) => {
+        const myAns = currentState.answers[i]; 
+        let cls = "qbtn";
+        
+        let startIdx = secIndices[currentState.secIdx];
+        let endIdx = (currentState.secIdx === SECTION_MAP.length - 1) ? QUESTIONS.length : secIndices[currentState.secIdx + 1];
+        
+        if (!currentState.submitted && i >= startIdx && i < endIdx) {
+            if(myAns !== null) stats.ans++;
+            else stats.unans++;
+            if(currentState.review[i]) stats.rev++;
+        }
+
+        if (currentState.submitted) {
+            const correctIdx = parseInt(q.ans) - 1;
+            if (myAns === correctIdx) cls += " p-correct";
+            else if (myAns !== null && myAns !== correctIdx) cls += " p-wrong";
+            else cls += " p-skip";
+            if(currentState.review[i]) cls += " review"; 
+        } else {
+            if(i === currentState.idx) cls += " current"; 
+            else if(myAns !== null) cls += " answered"; 
+            else if(currentState.review[i]) cls += " review";
+        }
+        
+        let isAccessible = currentState.submitted;
+        if (!currentState.submitted) {
+            if (i >= startIdx && i < endIdx) {
+                isAccessible = true;
+            }
+        }
+        
+        const btn = document.createElement('button'); btn.className = cls; btn.innerText = i + 1;
+        
+        if(isAccessible) { 
+            btn.onclick = () => { loadQuestion(i); if(window.innerWidth < 1024) togglePalette(); }; 
+            btn.style.cursor = "pointer";
+        } else {
+            btn.style.opacity = "0.2";
+            btn.style.cursor = "not-allowed";
+            btn.style.background = "var(--border-color)";
+            btn.style.color = "var(--text-muted)";
+        }
+        grid.appendChild(btn);
+    });
+
+    if (!currentState.submitted && TEST_MODE !== 'solution') {
+        document.getElementById('c-ans').innerText = stats.ans;
+        document.getElementById('c-unans').innerText = stats.unans;
+        document.getElementById('c-rev').innerText = stats.rev;
+    }
+}
+
+function clearResponse() { currentState.answers[currentState.idx] = null; currentState.review[currentState.idx] = false; loadQuestion(currentState.idx); }
+function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+function toggleLang() { const btn = document.getElementById('langBtn'); btn.innerText = btn.innerText === "HI" ? "EN" : "HI"; loadQuestion(currentState.idx); }
+function openZoom(src) { document.getElementById('zoomImg').src = src; document.getElementById('zoomModal').style.display = 'flex'; }
+function closeZoom() { document.getElementById('zoomModal').style.display = 'none'; }
+function closeTg(){ document.getElementById('tgPopup').style.display = "none"; }
+function closeResult() { document.getElementById('resultModal').style.display = 'none'; }
+
+function toggleFS() { 
+    if (!document.fullscreenElement) {
+        try { document.documentElement.requestFullscreen(); } catch(e){}
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+    }
+}
+
+function sendResultToTelegram(name,score,c,w,s,time,accuracy){
+ fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
+  method:"POST", headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   chat_id:TELEGRAM_CHAT_ID,
+   text:`📘 DSSSB Mock Test (Pro)\n\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Correct: ${c}\n❌ Wrong: ${w}\n➖ Skipped: ${s}\n🎯 Score: ${score}\n📊 Accuracy: ${accuracy}%\n\n🔥 DSSSB Smart Notes`
+  })
+ });
+}
+
+function fmt(s){
+  s = Math.max(0, s);
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
+
+function renderComparisonBar(label, userVal, maxVal, topperVal, maxTopperVal, unit = "") {
+  const userPct = (userVal > 0) ? Math.min(100, (userVal / maxVal) * 100) : 0;
+  const topperPct = Math.min(100, (topperVal / maxTopperVal) * 100) || 0;
+
+  return `
+  <div class="bar-section">
+    <div class="bar-label"><span>${label}</span></div>
+    <div style="display:grid; grid-template-columns: 60px 1fr 80px; gap:10px; align-items:center; margin-bottom:6px;">
+       <span style="font-size:12px; font-weight:700; color:var(--primary);">YOU</span>
+       <div class="bar-track"><div class="bar-fill fill-you" style="width:${userPct}%"></div></div>
+       <span style="font-size:12px; font-weight:700; text-align:right; color:var(--text-main);">${userVal}${unit}</span>
+    </div>
+    <div style="display:grid; grid-template-columns: 60px 1fr 80px; gap:10px; align-items:center;">
+       <span style="font-size:12px; font-weight:700; color:var(--success);">TOPPER</span>
+       <div class="bar-track"><div class="bar-fill fill-topper" style="width:${topperPct}%"></div></div>
+       <span style="font-size:12px; font-weight:700; text-align:right; color:var(--text-main);">${topperVal}${unit}</span>
+    </div>
+  </div>`;
+}
+
+function getRanksAndToppers(myScore, myTime) {
+    return db.ref(DB_REF_NAME).once("value").then(snapshot => {
+        let attempts = [];
+        snapshot.forEach(child => {
+            const val = child.val();
+            if(val && val.score !== undefined && val.testId === CURRENT_TEST_ID) {
+                attempts.push(val);
+            }
+        });
+
+        attempts.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.timeTaken - b.timeTaken;
+        });
+
+        const total = attempts.length;
+        let rank = total + 1; 
+
+        for (let i = 0; i < attempts.length; i++) {
+            if (attempts[i].score === myScore && attempts[i].timeTaken === myTime) {
+                rank = i + 1; break;
+            }
+        }
+
+        const below = attempts.filter(a => a.score < myScore || (a.score === myScore && a.timeTaken > myTime)).length;
+        const percentile = total ? ((below / total) * 100).toFixed(2) : "0.00";
+
+        return { rank, percentile, total, toppersList: attempts.slice(0, 10) };
+    });
+}
+
+function submitTestDialog() {
+    if(currentState.submitted) return;
+    showConfirmDialog(
+        "Final Submit?", 
+        "Are you absolutely sure you want to submit the entire Mock Test? You will not be able to change your answers.",
+        () => submitTest()
+    );
+}
+
+async function submitTest() {
+    if(currentState.submitted) return;
+    
+    currentState.submitted = true; 
+    clearInterval(timerInt); 
+    if(window.innerWidth < 1024) togglePalette(); 
+    
+    const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
+    localStorage.setItem(specificStorageKey + "_final", JSON.stringify(currentState));
+    localStorage.removeItem(specificStorageKey); 
+    
+    renderPalette();
+    renderSectionTabs();
+
+    let totalScore = 0, correct = 0, wrong = 0, skipped = 0;
+    let sectionScores = {};
+
+    QUESTIONS.forEach((q, i) => {
+        const secName = q.section || "General";
+        if(!sectionScores[secName]) sectionScores[secName] = {c:0, w:0, s:0, total:0};
+        sectionScores[secName].total++;
+        
+        const correctIdx = parseInt(q.ans) - 1;
+        const myAns = currentState.answers[i];
+        
+        if(myAns === null) {
+            skipped++; sectionScores[secName].s++;
+        } else if(myAns === correctIdx) { 
+            correct++; totalScore += 1; sectionScores[secName].c++; 
+        } else { 
+            wrong++; totalScore -= 0.25; sectionScores[secName].w++; 
+        }
+    });
+
+    const attempted = correct + wrong;
+    const accuracy = attempted > 0 ? ((correct/attempted)*100).toFixed(1) : 0;
+    const timeSpentSeconds = (TOTAL_TIME_MINS * 60) - currentState.time;
+    const timeStr = `${Math.floor(timeSpentSeconds/60)}m ${timeSpentSeconds%60}s`;
+
+    // Accurate User ID check
+    let tId = localStorage.getItem('dsssb_user_id') || "guest";
+    
+    const userData = {
+        name: currentState.name,
+        userId: tId,             
+        testId: CURRENT_TEST_ID, 
+        score: parseFloat(totalScore.toFixed(2)),
+        timeTaken: timeSpentSeconds,
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        correct: correct,
+        wrong: wrong
+    };
+    
+    const resBox = document.getElementById('resultContent');
+    resBox.innerHTML = `<div class="card-dashboard" style="text-align:center; padding:50px;">
+                            <div style="font-size:30px; animation: pulse 1s infinite;">🔄</div>
+                            <h2 style="color:var(--primary);">Generating Detailed Analysis...</h2>
+                            <p style="color:var(--text-muted);">Calculating your Rank & Percentile against Toppers</p>
+                        </div>`;
+    document.getElementById('resultModal').style.display = 'flex';
+    document.getElementById('mainSubmitBtn').style.display = 'none';
+
+    let unsynced = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+    unsynced.push(userData);
+    localStorage.setItem('dsssb_unsynced_results', JSON.stringify(unsynced));
+
+    db.ref(DB_REF_NAME).push(userData)
+    .then(() => {
+        let currentUnsynced = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+        currentUnsynced = currentUnsynced.filter(u => u.timestamp !== userData.timestamp);
+        localStorage.setItem('dsssb_unsynced_results', JSON.stringify(currentUnsynced));
+        
+        sendResultToTelegram(currentState.name, totalScore.toFixed(2), correct, wrong, skipped, timeStr, accuracy);
+        return getRanksAndToppers(userData.score, userData.timeTaken);
+    })
+    .catch(err => {
+        showToast("⚠️ Device Offline. Result saved locally and will sync later.", "warning");
+        return { rank: '--', percentile: '--', total: '--', toppersList: [] };
+    })
+    .then(data => {
+        let topperStats = { score: 0, accuracy: 0, correct: 0, wrong: 0, time: 0 };
+        if (data.toppersList && data.toppersList.length > 0) {
+            let t = data.toppersList[0];
+            let tAtt = (t.correct || 0) + (t.wrong || 0);
+            topperStats = {
+                score: t.score,
+                accuracy: tAtt > 0 ? (((t.correct || 0) / tAtt) * 100).toFixed(1) : 0,
+                correct: t.correct || 0,
+                wrong: t.wrong || 0,
+                time: t.timeTaken
+            };
+        }
+
+        let html = `
+        <div id="pdfContent" class="analysis-container">
+            <div style="text-align:center; padding: 10px 0 20px 0;">
+                <h2 style="color:var(--primary); margin:0; font-size:24px;">DSSSB MOCK TEST REPORT</h2>
+                <p style="color:var(--text-muted); margin:5px 0 0 0;">${CURRENT_TEST_TITLE}</p>
+            </div>
+
+            <div class="card-dashboard">
+                <div class="info-grid">
+                    <div><b>Name:</b> ${currentState.name}</div>
+                    <div><b>Status:</b> ${totalScore >= DYNAMIC_CUTOFF ? '<span style="color:var(--success)">QUALIFIED 🏆</span>' : '<span style="color:var(--danger)">NOT QUALIFIED ❌</span>'} <span style="font-size:11px; color:var(--text-muted);">(Cut-off: ${DYNAMIC_CUTOFF})</span></div>
+                </div>
+            </div>
+
+            <div class="card-dashboard score-summary">
+                <div class="score-item">
+                    <h4>🏆 Rank</h4>
+                    <p>${data.rank} <span class="total-count">/ ${data.total}</span></p>
+                </div>
+                <div class="score-item">
+                    <h4>📊 Percentile</h4>
+                    <p>${data.percentile}%</p>
+                </div>
+                <div class="score-item">
+                    <h4>🧮 Score</h4>
+                    <p>${totalScore.toFixed(2)}</p>
+                </div>
+                <div class="score-item">
+                    <h4>⏱ Time</h4>
+                    <p>${fmt(timeSpentSeconds)}</p>
+                </div>
+            </div>
+
+            <div class="card-dashboard attempt-summary">
+               <div class="attempt-box at-correct">✅ Correct<span>${correct}</span></div>
+               <div class="attempt-box at-wrong">❌ Wrong<span>${wrong}</span></div>
+               <div class="attempt-box at-unattempted">🟡 Skipped<span>${skipped}</span></div>
+               <div class="attempt-box at-total">✍️ Attempted<span>${attempted} / ${QUESTIONS.length}</span></div>
+            </div>
+
+            <div class="card-dashboard">
+                <h3 class="section-title">📊 You vs Topper</h3>
+                ${renderComparisonBar("Score", totalScore.toFixed(2), QUESTIONS.length, topperStats.score, QUESTIONS.length)}
+                ${renderComparisonBar("Accuracy", accuracy, 100, topperStats.accuracy, 100, "%")}
+                ${renderComparisonBar("Correct", correct, QUESTIONS.length, topperStats.correct, QUESTIONS.length)}
+                ${renderComparisonBar("Time Taken", timeSpentSeconds, TOTAL_TIME_MINS*60, topperStats.time, TOTAL_TIME_MINS*60)}
+            </div>
+
+            <div class="card-dashboard">
+                <h3 class="section-title">🏆 Top 10 Leaderboard</h3>
+                <div style="overflow-x:auto">
+                    <table class="topper-table">
+                        <tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr>
+                        ${data.toppersList && data.toppersList.length > 0 ? data.toppersList.map((t, idx) => `
+                        <tr style="${t.name === currentState.name ? 'background:var(--success-bg); font-weight:bold;' : ''}">
+                            <td>${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '#' + (idx + 1)))}</td>
+                            <td>${t.name} ${t.name === currentState.name ? '(You)' : ''}</td>
+                            <td><b>${t.score}</b></td>
+                            <td>${fmt(t.timeTaken)}</td>
+                        </tr>
+                        `).join('') : '<tr><td colspan="4" style="text-align:center;">Leaderboard not available offline.</td></tr>'}
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-grid" style="margin-top:20px; display: grid; gap: 20px;">
+                <div class="card-dashboard" style="height:250px;"><canvas id="pieChart"></canvas></div>
+                <div class="card-dashboard" style="height:250px;"><canvas id="barChart"></canvas></div>
+            </div>
+
+            <h3 style="margin-top:40px; border-left:5px solid var(--primary); padding-left:15px; color:var(--text-main);">Detailed Question Analysis</h3>
+        `;
+
+        QUESTIONS.forEach((q, i) => {
+            const correctIdx = parseInt(q.ans) - 1;
+            const myAns = currentState.answers[i];
+            let statusBadge = "";
+            if(myAns === null) statusBadge = `<span style="background:#94a3b8; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">SKIPPED</span>`;
+            else if(myAns === correctIdx) statusBadge = `<span style="background:#10b981; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">CORRECT</span>`;
+            else statusBadge = `<span style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">WRONG</span>`;
+            
+            const timeTakenSec = currentState.timePerQ[i] || 0;
+            const tMin = Math.floor(timeTakenSec/60);
+            const tSec = timeTakenSec % 60;
+            const timeStrDisplay = tMin > 0 ? `${tMin}m ${tSec}s` : `${tSec}s`;
+
+            const isHindi = document.getElementById('langBtn').innerText === "HI";
+            const qText = isHindi ? (q.q_hi || q.q_en) : (q.q_en || q.q_hi);
+            const optionsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
+
+            html += `
+                <div class="card-dashboard" style="margin-bottom:15px; padding:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; color:var(--text-muted); font-size:13px;">
+                        <div><b>Q.${i+1} <span style="font-weight:normal; margin-left:10px;">(${q.section || "General"})</span></b> ${statusBadge}</div>
+                        <div style="font-size:11px; font-weight:bold; background:var(--bg-body); padding:4px 8px; border-radius:6px;">⏱️ ${timeStrDisplay}</div>
+                    </div>
+                    <div style="font-weight:500; margin-bottom:15px; color:var(--text-main); font-size:16px;">${qText}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; font-size:13px; background:var(--bg-body); padding:12px; border-radius:8px;">
+                        <div><b style="color:var(--text-muted);">Your Answer:</b> <br>${myAns !== null ? String.fromCharCode(65+myAns)+') '+optionsArr[myAns] : 'Not Attempted'}</div>
+                        <div><b style="color:var(--text-muted);">Correct Answer:</b> <br><span style="color:var(--success); font-weight:bold;">${String.fromCharCode(65+correctIdx)+') '+optionsArr[correctIdx]}</span></div>
+                    </div>
+                    <div style="margin-top:15px; background:var(--primary-light); padding:15px; border-left:4px solid var(--primary); color:var(--primary-dark); font-size:14px; border-radius:4px;"><b>💡 Solution:</b><br>${q.solution || 'No solution provided.'}</div>
+                </div>
+            `;
+        });
+
+        html += `</div>`; 
+        
+        html += `<div style="text-align:center; margin-top:30px; padding-bottom:30px;">
+                    <button onclick="downloadPDF()" class="btn-primary" style="width:auto; padding:12px 30px; background:var(--bg-body); color:var(--primary); border:2px solid var(--primary); box-shadow:none;">Download PDF Report 📥</button>
+                    <button onclick="reviewSolutions()" class="btn-primary" style="width:auto; padding:12px 30px; background:var(--success); margin-left:10px;">Review Solutions 👁️</button>
+                    <button onclick="window.location.href='index.html'" class="btn-primary" style="width:auto; padding:12px 30px; background:var(--primary); margin-left:10px; margin-top:10px;">Back to Home 🏠</button>
+                 </div>`;
+
+        resBox.innerHTML = html;
+
+        new Chart(document.getElementById('pieChart'), { type: 'doughnut', data: { labels: ['Correct', 'Wrong', 'Skipped'], datasets: [{ data: [correct, wrong, skipped], backgroundColor: ['#10b981', '#ef4444', '#f59e0b'] }] }, 
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#64748b' } }, title: { display: true, text: 'Overall Accuracy', color: '#1e293b' } } } 
+        });
+
+        const secLabels = Object.keys(sectionScores);
+        const secCorrect = secLabels.map(s => sectionScores[s].c);
+        const secWrong = secLabels.map(s => sectionScores[s].w);
+        const secSkipped = secLabels.map(s => sectionScores[s].s);
+
+        new Chart(document.getElementById('barChart'), { 
+            type: 'bar', 
+            data: { labels: secLabels, datasets: [{ label: 'Correct', data: secCorrect, backgroundColor: '#10b981' }, { label: 'Wrong', data: secWrong, backgroundColor: '#ef4444' }, { label: 'Skipped', data: secSkipped, backgroundColor: '#f59e0b' }] }, 
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { color: '#64748b' } }, y: { stacked: true, ticks: { color: '#64748b' } } }, plugins: { legend: { position: 'bottom', labels: { color: '#64748b' } }, title: { display: true, text: 'Section-wise Performance', color: '#1e293b' } } } 
+        });
+
+    });
+}
+
+function downloadPDF() {
+    const element = document.getElementById('pdfContent');
+    const opt = {
+        margin:       0.3,
+        filename:     `DSSSB_Mock_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    
+    showToast("Generating PDF... Please wait", "info");
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+        showToast("PDF Downloaded Successfully! 📥", "success");
+    }).catch(err => {
+        console.error("PDF Generation Error:", err);
+        showToast("Failed to generate PDF", "error");
+    });
+}
+
+function reviewSolutions() {
+    document.getElementById('resultModal').style.display = 'none';
+    currentState.idx = 0;
+    currentState.secIdx = 0;
+    renderSectionTabs();
+    loadQuestion(currentState.idx);
+    showToast("Review Mode Activated 👁️", "success");
+}
+
+// 👇 Service Worker Registration Root Scope (For Play Store PWA) 👇
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Main Branch SW Registered! Scope:', reg.scope))
+        .catch(err => console.error('Service Worker Error:', err));
+    });
+}
+  
+</script>
+</body>
+</html>
