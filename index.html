@@ -1,256 +1,1221 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>DSSSB Smart Notes – Auto Test System</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DSSSB Smart Notes - Student Portal</title>
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#4f46e5">
+
+<link rel="manifest" href="/manifest.json">
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
 <style>
-/* ===== BASE ===== */
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#eef2f7;
+/* --- THEME VARIABLES --- */
+:root {
+    --primary: #4f46e5; --primary-light: #e0e7ff;
+    --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+    --text-main: #1f2937; --text-muted: #6b7280;
+    --bg-body: #f4f6f8; --bg-card: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    --border: #e5e7eb;
+    --nav-height: 70px;
+}
+body.dark-mode {
+    --primary: #6366f1; --primary-light: rgba(99, 102, 241, 0.15);
+    --text-main: #f9fafb; --text-muted: #9ca3af;
+    --bg-body: #0f172a; --bg-card: #1e293b;
+    --bg-glass: rgba(30, 41, 59, 0.85);
+    --border: #334155;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+/* 🔒 ANTI-COPY CSS LAYER 🔒 */
+body { 
+    background: var(--bg-body); 
+    color: var(--text-main); 
+    padding-bottom: var(--nav-height); 
+    transition: background 0.3s ease, color 0.3s ease; 
+    -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; 
 }
 
-/* ===== HEADER ===== */
-.header{
-  background:linear-gradient(135deg,#1e3c72,#2a5298);
-  color:#fff;
-  padding:18px;
+/* UI Animations */
+@keyframes tabFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-.header h1{
-  margin:0;
-  font-size:20px;
-}
-.header p{
-  margin:4px 0 0;
-  font-size:13px;
-  opacity:.9;
+.tab-content {
+    animation: tabFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ===== SEARCH ===== */
-.search-box{
-  padding:12px;
+/* --- HERO HEADER --- */
+.hero-header { 
+    background: var(--bg-glass); 
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    padding: 15px 20px; border-bottom: 1px solid var(--border); 
+    display: flex; justify-content: space-between; align-items: center; 
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
 }
-.search-box input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  font-size:15px;
-}
+.user-profile { display: flex; align-items: center; gap: 12px; }
+.user-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: grid; place-items: center; font-weight: 800; font-size: 20px; border: 2px solid var(--primary); overflow: hidden; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-info h1 { font-size: 18px; font-weight: 800; margin-bottom: 2px; letter-spacing: -0.5px;}
+.user-info .greeting { font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.tools { display: flex; gap: 10px; align-items: center; }
+.tool-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); display: grid; place-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.tool-btn:active { transform: scale(0.9); }
+.pro-badge-header { background: linear-gradient(135deg, #FFD700, #F59E0B); color: #000; padding: 4px 10px; border-radius: 20px; font-weight: 800; font-size: 10px; display: none; align-items: center; gap: 4px; box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3); border: 1px solid #fbbf24; }
+.buy-pro-btn { background: #dcfce7; color: #16a34a; font-weight: 800; padding: 5px 12px; border-radius: 20px; font-size: 11px; border: 1px solid #16a34a; cursor: pointer; animation: pulse 2s infinite; }
 
-/* ===== SOCIAL BUTTONS ===== */
-.social-bar{
-  display:flex;
-  gap:12px;
-  padding:0 12px 12px;
-}
-.social-bar a{
-  flex:1;
-  text-align:center;
-  padding:12px;
-  border-radius:14px;
-  color:#fff;
-  text-decoration:none;
-  font-weight:600;
-  font-size:15px;
-}
-.tg-btn{
-  background:linear-gradient(135deg,#0088cc,#00aaff);
-}
-.yt-btn{
-  background:linear-gradient(135deg,#ff0000,#cc0000);
-}
+/* --- WIDGETS --- */
+.countdown-box { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 12px 20px; margin: 15px 20px 0; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 15px rgba(0,0,0,0.1); border: 1px solid #334155; }
+.cd-timer { font-size: 15px; font-weight: 800; color: #fbbf24; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px; }
 
-/* ===== FILTERS ===== */
-.filters{
-  display:flex;
-  gap:10px;
-  padding:0 12px 12px;
-  overflow-x:auto;
-}
-.filters button{
-  padding:8px 16px;
-  border-radius:20px;
-  border:none;
-  background:#fff;
-  font-weight:600;
-  cursor:pointer;
-}
+/* 🌟 PWA Prominent Banner */
+.pwa-banner { background: var(--primary); color: white; margin: 15px 20px 0; padding: 12px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); animation: tabFade 0.5s ease; border: 1px solid var(--primary-light); }
+.pwa-banner button { background: white; color: var(--primary); border: none; padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-/* ===== SECTIONS ===== */
-.section{
-  padding:12px;
-}
-.section h3{
-  margin:8px 0 12px;
-}
+/* 🌟 Daily Goals */
+.daily-goal-card { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; margin: 15px 20px 0; padding: 15px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.daily-goal-card.completed { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-color: #86efac; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.1); }
+.dg-text { display: flex; flex-direction: column; gap: 4px; }
+.dg-title { font-weight: 800; font-size: 14px; color: #b45309; }
+.daily-goal-card.completed .dg-title { color: #166534; }
+.dg-status { font-size: 12px; font-weight: 700; color: #d97706; }
+.daily-goal-card.completed .dg-status { color: #15803d; }
+.dg-btn { background: #f59e0b; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); }
+.daily-goal-card.completed .dg-btn { display: none; }
+.dark-mode .daily-goal-card { background: linear-gradient(135deg, #2a1b0d, #1a0f05); border-color: #431407; }
+.dark-mode .daily-goal-card.completed { background: linear-gradient(135deg, #064e3b, #022c22); border-color: #065f46; }
 
-/* ===== TEST CARDS ===== */
-.card{
-  background:#fff;
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.card h3{
-  margin:0;
-  font-size:16px;
-}
-.attempts{
-  margin-top:6px;
-  color:#ff6b00;
-  font-size:14px;
-  font-weight:600;
-}
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 15px 20px 0; }
+.action-item { background: var(--bg-card); padding: 12px 8px; border-radius: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.2s; }
+.action-item:active { transform: translateY(2px); }
+.action-item i { font-size: 20px; color: var(--primary); }
+.action-item span { font-size: 11px; font-weight: 600; color: var(--text-muted); }
 
-/* ===== START BUTTON ===== */
-.start-btn{
-  background:#2e7d32;
-  color:#fff;
-  border:none;
-  padding:10px 18px;
-  border-radius:20px;
-  font-weight:600;
-  text-decoration:none;
-  display:inline-block;
-}
+.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 15px 20px; }
+.stat-card { background: var(--bg-card); padding: 15px 10px; border-radius: 16px; border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+.stat-val { font-size: 20px; font-weight: 900; color: var(--primary); margin: 4px 0; }
+.stat-lbl { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* ===== FOOTER ===== */
-.footer{
-  text-align:center;
-  padding:20px;
-  font-size:13px;
-  color:#666;
+/* --- TARGET EXAM FOLDERS --- */
+.target-exams-section { padding: 0 20px; margin-bottom: 20px; }
+.section-title { font-weight: 800; margin-bottom: 12px; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+.exam-folders-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.exam-folder-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 15px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+.exam-folder-card:active { transform: scale(0.95); }
+.folder-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; margin-bottom: 10px; }
+.folder-icon-blue { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+.folder-icon-purple { color: #a855f7; background: rgba(168, 85, 247, 0.1); }
+.folder-icon-green { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+.folder-title { font-size: 11px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin-bottom: 10px; }
+.folder-action { font-size: 10px; font-weight: 700; padding: 5px 10px; border-radius: 8px; }
+.folder-action-blue { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+.folder-action-purple { color: #a855f7; background: rgba(168, 85, 247, 0.1); }
+.folder-action-green { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+
+/* --- QOD --- */
+.qod-card { background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%); border: 1px solid #fed7aa; border-radius: 18px; padding: 18px; margin: 0 20px 20px; box-shadow: 0 6px 15px rgba(251, 146, 60, 0.1); }
+.dark-mode .qod-card { background: linear-gradient(135deg, #2a1b0d, #1a0f05); border-color: #431407; }
+.qod-tag { background: #f97316; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
+.qod-opt { padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; cursor: pointer; text-align: center; font-weight: 600; margin-bottom:8px; transition: 0.2s; }
+.qod-opt:active { transform: scale(0.98); }
+.qod-opt.correct { background: #dcfce7 !important; border-color: #16a34a !important; color: #16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.1); }
+.qod-opt.wrong { background: #fee2e2 !important; border-color: #dc2626 !important; color: #dc2626; }
+
+/* --- LISTS & FILTERS --- */
+.list-container { padding: 0 20px; }
+.search-box { background: var(--bg-card); padding: 12px 18px; border-radius: 14px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; margin-bottom: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+.search-box input { border: none; background: transparent; width: 100%; font-size: 14px; color: var(--text-main); outline: none; }
+.filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 5px; scrollbar-width: none; }
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-pill { padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.filter-pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); transform: translateY(-1px); }
+
+/* --- CARDS --- */
+.test-card, .note-card, .video-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 15px; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: 0.2s; }
+.test-card, .note-card { padding: 18px; } 
+.video-card { padding: 0; cursor: pointer; }
+
+.save-btn { background: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer; position: absolute; top: 15px; right: 15px; z-index: 10; transition: 0.3s; display: grid; place-items: center; }
+.save-btn.saved { color: #f59e0b; background: #fef3c7; border-color: #fde68a; filter: drop-shadow(0 2px 5px rgba(245, 158, 11, 0.3)); }
+.dark-mode .save-btn.saved { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4); }
+
+.live-badge { display: inline-block; margin-bottom: 10px; background: #ef4444; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; animation: pulseLive 1.5s infinite; letter-spacing: 0.5px; }
+.test-card.locked::after, .note-card.locked::after { content: "🔒 PRO"; position: absolute; top: 15px; right: 55px; background: var(--warning); color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; z-index: 5; }
+
+@keyframes pulseLive { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+.t-title { font-weight: 800; font-size: 16px; margin-bottom: 8px; line-height: 1.3; padding-right: 30px;}
+.t-info { display: flex; gap: 15px; font-size: 12px; color: var(--text-muted); margin-bottom: 15px; font-weight: 600; }
+.start-btn, .download-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
+.start-btn:active, .download-btn:active { transform: scale(0.98); }
+.start-btn.locked { background: #fee2e2; color: #ef4444; box-shadow: none; border: 1px solid #fca5a5; }
+.download-btn { background: var(--bg-card); color: var(--primary); border: 2px solid var(--primary); box-shadow: none; }
+
+.vid-thumb { width: 100%; height: 180px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
+.vid-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+.vid-content { padding: 15px; }
+
+/* --- SYLLABUS & STUDY --- */
+.segment-control { display: flex; background: var(--bg-card); padding: 6px; border-radius: 14px; margin: 0 20px 20px; border: 1px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+.segment-btn { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 800; border-radius: 10px; color: var(--text-muted); cursor: pointer; transition: 0.3s; }
+.segment-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
+
+.syllabus-container { padding: 20px; }
+.progress-card { background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.prog-ring { width: 100%; height: 12px; background: var(--bg-body); border-radius: 10px; overflow: hidden; margin-top: 12px; border: 1px solid var(--border); }
+.prog-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #8b5cf6); width: 0%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.subject-group { margin-bottom: 15px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.subject-head { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.01); cursor: pointer; font-weight: 800; font-size: 14px; }
+.topic-list { display: none; padding: 5px 15px 15px; }
+.topic-list.open { display: block; animation: fadeIn 0.3s; }
+.topic-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; }
+.topic-item:last-child { border-bottom: none; padding-bottom: 0; }
+.topic-chk { width: 20px; height: 20px; accent-color: var(--primary); }
+
+/* --- NAVIGATION --- */
+.nav-bar { position: fixed; bottom: 0; width: 100%; height: var(--nav-height); background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
+.nav-item { text-align: center; color: var(--text-muted); font-size: 10px; font-weight: 700; opacity: 0.7; cursor: pointer; flex: 1; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.nav-item i { font-size: 20px; margin-bottom: 4px; display: block; transition: 0.3s; }
+.nav-item.active { color: var(--primary); opacity: 1; transform: translateY(-3px); }
+.nav-item.active i { transform: scale(1.15); }
+
+.chart-box { background: var(--bg-card); padding: 18px; border-radius: 18px; border: 1px solid var(--border); margin: 0 20px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); flex: 1;}
+.rank-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; }
+
+/* SKELETON LOADER UI */
+.skeleton-loader { display: flex; flex-direction: column; gap: 20px; padding: 20px; }
+.sk-header { display: flex; gap: 15px; align-items: center; }
+.sk-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--border); animation: sk-pulse 1.5s infinite; }
+.sk-line { height: 15px; background: var(--border); border-radius: 8px; animation: sk-pulse 1.5s infinite; }
+.sk-box { height: 100px; border-radius: 14px; background: var(--border); animation: sk-pulse 1.5s infinite; }
+@keyframes sk-pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Modals & Misc */
+.news-container { background: linear-gradient(90deg, #4f46e5, #8b5cf6); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+.modal-content { background: var(--bg-card); width: 100%; max-width: 360px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+textarea, input[type="text"] { width: 100%; padding: 14px; margin: 10px 0 20px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-body); color: var(--text-main); outline:none; font-size: 14px; transition: 0.2s; }
+textarea:focus, input[type="text"]:focus { border-color: var(--primary); }
+textarea { height: 120px; resize: none; }
+
+#toast { display: none; position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; z-index: 9999; font-size: 13px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadeInOut 2.5s forwards; white-space: nowrap; }
+@keyframes fadeInOut { 0% { opacity: 0; bottom: 80px; } 15% { opacity: 1; bottom: 90px; } 85% { opacity: 1; bottom: 90px; } 100% { opacity: 0; bottom: 80px; } }
+
+/* 🔥 DESKTOP UI UPGRADE 🔥 */
+@media (min-width: 1024px) {
+    body { padding-bottom: 0; display: flex; background: var(--bg-body); }
+    
+    /* Sidebar Navigation */
+    .nav-bar { 
+        position: fixed; top: 0; left: 0; width: 260px; height: 100vh; 
+        flex-direction: column; justify-content: flex-start; padding-top: 40px; gap: 10px;
+        border-top: none; border-right: 1px solid var(--border);
+        box-shadow: 4px 0 15px rgba(0,0,0,0.02); background: var(--bg-card);
+    }
+    .nav-item { width: 100%; text-align: left; padding: 15px 30px; font-size: 15px; display: flex; align-items: center; gap: 20px; border-radius: 0 30px 30px 0; margin-right: 20px; transition: 0.3s; cursor: pointer; opacity: 0.7;}
+    .nav-item i { margin-bottom: 0; font-size: 20px; width: 24px; text-align: center; display: inline-block; }
+    .nav-item.active { background: var(--primary-light); border-left: 4px solid var(--primary); transform: translateY(0); opacity: 1; font-weight: 800;}
+    
+    /* Main Content Area */
+    #app { margin-left: 260px; padding: 30px 40px; max-width: 1300px; width: calc(100% - 260px); margin-right: auto; }
+    
+    /* Header Floating */
+    .hero-header { border-radius: 20px; top: 20px; margin-bottom: 30px; border: 1px solid var(--border); padding: 20px 30px;}
+    .user-info h1 { font-size: 22px; }
+    
+    /* Grids for Content */
+    .quick-actions { padding: 0; margin-bottom: 25px; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .stats-row { padding: 0; margin-bottom: 25px; gap: 20px; grid-template-columns: repeat(3, 1fr);}
+    .target-exams-section { padding: 0; margin-bottom: 25px; }
+    
+    /* Desktop Charts Side-by-Side */
+    .desktop-charts { display: flex; gap: 20px; margin-bottom: 20px; flex-direction: row;}
+    .desktop-charts .chart-box { margin: 0; }
+    
+    /* List Grids (Tests, Notes, Videos) */
+    .list-container { padding: 0; }
+    #testListContainer, #notesListContainer, #videoListContainer { 
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; 
+    }
+    .test-card, .note-card, .video-card { margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; height: 100%;}
+    
+    /* Banner Adjustment */
+    .pwa-banner, .segment-control, .countdown-box, .daily-goal-card, .qod-card { margin-left: 0; margin-right: 0; }
+    
+    /* Desktop PWA Install Button Style */
+    #pwaBannerBtn { padding: 10px 24px; font-size: 14px; cursor: pointer;}
 }
 </style>
 </head>
-
 <body>
 
-<!-- ===== HEADER ===== -->
-<div class="header">
-  <h1>📘 DSSSB Smart Notes</h1>
-  <p>Auto Test System</p>
+<div id="maintenanceScreen" class="modal" style="background: var(--bg-body); flex-direction: column; text-align: center; z-index:9999;">
+    <i class="fas fa-tools fa-4x" style="color:var(--primary); margin-bottom:20px;"></i>
+    <h1 style="font-weight:900; margin-bottom:10px;">App is under Maintenance!</h1>
+    <p style="color:var(--text-muted); font-size:15px; font-weight:600;">We are updating the portal. Please check back shortly.</p>
 </div>
 
-<!-- ===== SEARCH ===== -->
-<div class="search-box">
-  <input type="text" placeholder="🔍 Search test...">
+<div id="toast"></div>
+
+<div class="news-container" id="newsSection" style="display:none;">
+    <span>📢</span> <marquee id="newsText" scrollamount="5">Welcome to DSSSB Smart Notes Portal!</marquee>
 </div>
 
-<!-- ===== TELEGRAM + YOUTUBE ===== -->
-<div class="social-bar">
-  <a href="https://t.me/DSSSBSmartNotes" target="_blank" class="tg-btn">
-    📢 Join Telegram
-  </a>
-  <a href="https://youtube.com/@rankshotofficial?si=xHUs3TVITagePD7T" target="_blank" class="yt-btn">
-    ▶️ YouTube
-  </a>
+<div id="loader">
+    <div class="skeleton-loader">
+        <div class="sk-header"><div class="sk-avatar"></div><div style="flex:1"><div class="sk-line" style="width:60%; margin-bottom:8px;"></div><div class="sk-line" style="width:40%;"></div></div></div>
+        <div class="sk-box"></div><div class="sk-box" style="height: 150px;"></div><div class="sk-box"></div>
+    </div>
 </div>
 
-<!-- ===== FILTERS ===== -->
-<div class="filters">
-  <button data-filter="all">All</button>
-  <button data-filter="english">English</button>
-  <button data-filter="reasoning">Reasoning</button>
-  <button data-filter="gk">GK</button>
-  <button data-filter="maths">Maths</button>
-  <button data-filter="hindi">Hindi</button>
+<div id="app" style="display: none;">
+
+    <div class="hero-header">
+        <div class="user-profile">
+            <div class="user-avatar" id="uAvatar">A</div>
+            <div class="user-info">
+                <div class="greeting" id="greetingText">Good Morning</div>
+                <h1 id="uName">Student</h1>
+                <div id="badgePro" class="pro-badge-header" style="display:none; margin-top:4px;">
+                    <i class="fas fa-crown"></i> PRO
+                </div>
+                <button id="buyProBtn" class="buy-pro-btn" style="display:none; margin-top:4px;" onclick="document.getElementById('paymentModal').style.display='flex'">💎 Buy Pro</button>
+            </div>
+        </div>
+        <div class="tools">
+            <button class="tool-btn" id="installBtn" style="display:none;" onclick="installApp()"><i class="fas fa-download"></i></button>
+            <button class="tool-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+        </div>
+    </div>
+
+    <div id="tab-home" class="tab-content">
+        <div id="pwaBanner" class="pwa-banner" style="display:none;" onclick="installApp()">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-arrow-alt-circle-down" style="font-size:24px;"></i>
+                <div style="text-align:left;">
+                    <div style="font-weight:800; font-size:14px;" id="pwaBannerTitle">Install DSSSB App</div>
+                    <div style="font-size:11px; opacity:0.9;" id="pwaBannerDesc">Fast access & better experience</div>
+                </div>
+            </div>
+            <button id="pwaBannerBtn">Install Now</button>
+        </div>
+
+        <div class="countdown-box">
+            <span class="cd-text" style="font-weight: 700;">🎯 Target Exam</span><span class="cd-timer" id="examTimer">00 Days Left</span>
+        </div>
+
+        <div id="dailyGoalCard" class="daily-goal-card">
+            <div class="dg-text">
+                <span class="dg-title">🎯 Daily Mock Goal</span>
+                <span class="dg-status" id="dgStatus">Pending ⏳</span>
+            </div>
+            <button class="dg-btn" onclick="switchTab('tests', document.querySelectorAll('.nav-item')[1])">Give Mock</button>
+        </div>
+
+        <div class="quick-actions">
+            <div class="action-item" onclick="window.open('https://t.me/DSSSBRank')"><i class="fab fa-telegram-plane"></i><span>Channel</span></div>
+            <div class="action-item" onclick="shareApp()"><i class="fas fa-share-alt"></i><span>Share</span></div>
+            <div class="action-item" onclick="document.getElementById('reportModal').style.display='flex'"><i class="fas fa-headset"></i><span>Support</span></div>
+            <div class="action-item" onclick="switchTab('study', document.getElementById('nav-study'))"><i class="fas fa-book-open"></i><span>Library</span></div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-val" id="valRank">--</div><div class="stat-lbl">Rank</div></div>
+            <div class="stat-card"><div class="stat-val" id="valTests">0</div><div class="stat-lbl">Mocks</div></div>
+            <div class="stat-card"><div class="stat-val"><i class="fas fa-fire" style="color:#f97316;"></i> <span id="valStreak">1</span></div><div class="stat-lbl">Streak</div></div>
+        </div>
+
+        <div class="target-exams-section">
+            <div class="section-title">📁 Target Exams</div>
+            <div class="exam-folders-grid" id="examFoldersGrid">
+                <div class="exam-folder-card" onclick="openExamFolder('asst_sup')">
+                    <div class="folder-icon folder-icon-blue">👮‍♂️</div>
+                    <div class="folder-title">Asst.<br>Supt.</div>
+                    <div class="folder-action folder-action-blue">Explore 👉</div>
+                </div>
+                <div class="exam-folder-card" onclick="openExamFolder('dass_grade_2')">
+                    <div class="folder-icon folder-icon-purple">🎓</div>
+                    <div class="folder-title">DASS<br>Grade II</div>
+                    <div class="folder-action folder-action-purple">Explore 👉</div>
+                </div>
+                <div class="exam-folder-card" onclick="openExamFolder('my_attempts')">
+                    <div class="folder-icon folder-icon-green">📝</div>
+                    <div class="folder-title">My<br>Attempts</div>
+                    <div class="folder-action folder-action-green">View 👉</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="qod-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
+                <span class="qod-tag"><i class="fas fa-bolt"></i> Daily Question</span><span style="font-size:12px; color:#ea580c; font-weight:800;">+2 Pts</span>
+            </div>
+            <div class="qod-text" id="qodQuestion" style="font-weight: 700; margin-bottom:15px; font-size:14px; color:#431407;">Loading today's challenge...</div>
+            <div class="qod-options" id="qodOptions"></div>
+        </div>
+
+        <div class="desktop-charts">
+            <div class="chart-box">
+                <div class="section-title" style="margin-bottom:15px;">📊 Performance Overview</div>
+                <div style="height: 200px;"><canvas id="barChart"></canvas></div>
+            </div>
+
+            <div class="chart-box">
+                <div class="section-title" style="margin-bottom:15px;">🕸️ Mastery Heatmap</div>
+                <div style="height: 240px; position:relative;"><canvas id="radarChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-tests" class="tab-content" style="display:none;">
+        <div class="list-container" style="padding-top:15px;">
+            <div class="search-box">
+                <i class="fas fa-search" style="color:var(--text-muted);"></i>
+                <input type="text" id="testSearch" placeholder="Search for Mocks or Subjects..." onkeyup="debouncedTestSearch(this.value)">
+            </div>
+            <div class="filter-scroll">
+                <div class="filter-pill active" onclick="filterTests('all', this)">All Tests</div>
+                <div class="filter-pill" style="color:#ef4444;" onclick="filterTests('Live', this)">Live 🔴</div>
+                <div class="filter-pill" style="color:#f59e0b;" onclick="filterTests('Saved', this)">Saved ⭐</div>
+                <div class="filter-pill" style="color:#10b981;" onclick="filterTests('Attempted', this)">Attempted ✅</div>
+                <div class="filter-pill" onclick="filterTests('Full Mock', this)">Full Mock</div>
+                <div class="filter-pill" onclick="filterTests('Reasoning', this)">Reasoning</div>
+                <div class="filter-pill" onclick="filterTests('Maths', this)">Maths</div>
+                <div class="filter-pill" onclick="filterTests('English', this)">English</div>
+                <div class="filter-pill" onclick="filterTests('Hindi', this)">Hindi</div>
+                <div class="filter-pill" onclick="filterTests('Computer', this)">Computer</div>
+                <div class="filter-pill" onclick="filterTests('GK', this)">GK</div>
+            </div>
+            <div id="testListContainer"></div>
+        </div>
+    </div>
+
+    <div id="tab-study" class="tab-content" style="display:none;">
+        <div style="padding-top:15px;">
+            <div class="segment-control">
+                <div class="segment-btn active" onclick="switchStudy('notes', this)">📄 Notes & PDFs</div>
+                <div class="segment-btn" onclick="switchStudy('videos', this)">🎥 Video Classes</div>
+            </div>
+            <div id="notesSection" class="list-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="noteSearch" placeholder="Search Notes..." onkeyup="debouncedNoteSearch(this.value)">
+                </div>
+                <div id="notesListContainer"></div>
+            </div>
+            <div id="videosSection" class="list-container" style="display:none;">
+                <div id="videoListContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-syllabus" class="tab-content" style="display:none;">
+        <div class="syllabus-container">
+            <h2 style="font-size:22px; font-weight:900; margin-bottom:20px;">Progress Tracker</h2>
+            <div class="progress-card">
+                <div style="display:flex; justify-content:space-between; font-weight:800; font-size:15px;"><span>Overall Syllabus</span><span id="progText" style="color:var(--primary);">0%</span></div>
+                <div class="prog-ring"><div class="prog-fill" id="progFill"></div></div>
+            </div>
+            <div id="syllabusList"></div>
+        </div>
+    </div>
+
+    <div id="tab-rank" class="tab-content" style="display:none; padding: 20px;">
+        <h2 style="font-size:22px; font-weight:900; margin-bottom:20px;">🏆 Global Leaderboard</h2>
+        <div id="leaderboardList"></div>
+    </div>
+
+    <div id="tab-bookmarks" class="tab-content" style="display:none; padding: 20px;">
+        <h2 style="font-size:22px; font-weight:900; margin-bottom:20px;">⭐ Saved Questions</h2>
+        <div id="bookmarksListContainer"></div>
+    </div>
+
 </div>
 
-<!-- ===== PYQ TESTS ===== -->
-<div class="section">
-  <h3>📂 PYQ Tests</h3>
-
-  <div class="card filter-item english">
-    <div>
-      <h3>English PYQ Test – 01</h3>
-      <div class="attempts">🔥 3240 Attempts</div>
+<div id="alertModal" class="modal">
+    <div class="modal-content" style="text-align:center;">
+        <i class="fas fa-bell fa-3x" style="color:var(--primary); margin-bottom:15px; animation: pulse 2s infinite;"></i>
+        <h2 style="margin-bottom:10px; font-weight:900;">Announcement</h2>
+        <p id="alertMsgText" style="font-size:14px; margin-bottom:25px; font-weight:600; color:var(--text-muted);"></p>
+        <button onclick="document.getElementById('alertModal').style.display='none'" class="start-btn">Got it, Thanks!</button>
     </div>
-    <a href="https://dsssbsmartnotes.github.io/dsssb-mts-cbt/eng01-10-25p12ndsft.html" class="start-btn">Start</a>
-  </div>
-
-  <div class="card filter-item gk">
-    <div>
-      <h3>GK PYQ Test – 01</h3>
-      <div class="attempts">🔥 1980 Attempts</div>
-    </div>
-    <a href="https://dsssbsmartnotes.github.io/dsssb-mts-cbt/DSSSB%20gk%20pyq.html" class="start-btn">Start</a>
-  </div>
-
-  <div class="card filter-item maths">
-    <div>
-      <h3>Maths PYQ Test – 01</h3>
-      <div class="attempts">🔥 18 Attempts</div>
-    </div>
-    <a href="https://dsssbsmartnotes.github.io/dsssb-mts-cbt/Math.html" class="start-btn">Start</a>
-  </div>
-  
-<div class="card filter-item hindi">
-    <div>
-      <h3>Hindi PYQ Test – 01</h3>
-      <div class="attempts">🔥 18 Attempts</div>
-    </div>
-    <a href="https://dsssbsmartnotes.github.io/dsssb-mts-cbt/Hindi.html" class="start-btn">Start</a>
-  </div>
-  </div>
-
-<!-- ===== MOCK TESTS ===== -->
-<div class="section">
-  <h3>🧪 MOCK Tests</h3>
-
-  <div class="card filter-item reasoning mock-card">
-    <div>
-      <h3>Reasoning MOCK Test – 01</h3>
-      <div class="attempts">🧪 MOCK TEST</div>
-    </div>
-    <a href="mock_reasoning_01.html" class="start-btn">Start</a>
-  </div>
-
-  <div class="card filter-item reasoning mock-card">
-    <div>
-      <h3>Reasoning MOCK Test – 02</h3>
-      <div class="attempts">🧪 MOCK TEST</div>
-    </div>
-    <a href="mock_reasoning_01.html" class="start-btn">Start</a>
-  </div> 
-  
-  <div class="card filter-item maths mock-card">
-    <div>
-      <h3>Maths MOCK Test – 01</h3>
-      <div class="attempts">🧪 MOCK TEST</div>
-    </div>
-    <a href="mock_maths_01.html" class="start-btn">Start</a>
-  </div>
-
 </div>
 
-<!-- ===== FOOTER ===== -->
-<div class="footer">
-  © DSSSB Smart Notes | Powered by RankShot
+<div id="paymentModal" class="modal">
+    <div class="modal-content" style="text-align:center;">
+        <div style="font-size: 50px; margin-bottom: 10px;">👑</div>
+        <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900;">Upgrade to DSSSB PRO</h2>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; font-weight:600;">Unlock All Premium Mock Tests, Video Classes & PDF Notes!</p>
+        
+        <div style="background:var(--primary-light); color:var(--primary-dark); padding:15px; border-radius:12px; margin-bottom:20px; font-size: 14px; font-weight: 700;">
+            Special Offer: ₹99 <span style="font-size:12px; text-decoration:line-through; color:grey;">₹499</span>
+        </div>
+        
+        <p style="font-size:12px; color:var(--text-main); margin-bottom:15px; font-weight:600;">To upgrade, please contact our Admin team directly on Telegram.</p>
+        
+        <button onclick="window.open('https://t.me/DSSSBRank', '_blank')" class="start-btn" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);"><i class="fab fa-telegram-plane"></i> Message Admin to Upgrade</button>
+        
+        <button onclick="document.getElementById('paymentModal').style.display='none'" class="start-btn" style="background:var(--bg-body); color:var(--text-main); margin-top:15px; box-shadow:none;">Cancel</button>
+    </div>
 </div>
 
-<!-- ===== FILTER SCRIPT ===== -->
+<div id="reportModal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom:5px; font-weight:900;">🚩 Report Issue</h2>
+        <p style="font-size:12px; color:var(--text-muted); font-weight:600;">Found a mistake in a question? Let us know!</p>
+        <textarea id="reportText" placeholder="E.g. Mock Test 2, Q5 answer should be option C..."></textarea>
+        <div style="display:flex; gap:12px;">
+            <button class="start-btn" style="background:var(--bg-body); color:var(--text-main); box-shadow:none;" onclick="document.getElementById('reportModal').style.display='none'">Cancel</button>
+            <button class="start-btn" onclick="submitReport()">Submit Report</button>
+        </div>
+    </div>
+</div>
+
+<div class="nav-bar">
+    <div class="nav-item active" onclick="switchTab('home', this)"><i class="fas fa-home"></i> <span>Home</span></div>
+    <div class="nav-item" onclick="switchTab('tests', this)"><i class="fas fa-file-signature"></i> <span>Mocks</span></div>
+    <div class="nav-item" id="nav-study" onclick="switchTab('study', this)"><i class="fas fa-book-open"></i> <span>Study</span></div>
+    <div class="nav-item" onclick="switchTab('syllabus', this)"><i class="fas fa-chart-pie"></i> <span>Tracker</span></div>
+    <div class="nav-item" onclick="switchTab('rank', this)"><i class="fas fa-trophy"></i> <span>Ranks</span></div>
+    <div class="nav-item" onclick="switchTab('bookmarks', this)"><i class="fas fa-bookmark"></i> <span>Saved</span></div>
+</div>
+
 <script>
-document.querySelectorAll(".filters button").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    let filter = btn.getAttribute("data-filter");
-    document.querySelectorAll(".filter-item").forEach(card=>{
-      if(filter==="all" || card.classList.contains(filter)){
-        card.style.display="flex";
-      }else{
-        card.style.display="none";
-      }
-    });
-  });
-});
-</script>
+/* 1. CONFIGURATION */
+const firebaseConfig = { apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI", authDomain: "dsssbexamportal.firebaseapp.com", databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "dsssbexamportal", storageBucket: "dsssbexamportal.firebasestorage.app", messagingSenderId: "853373171134", appId: "1:853373171134:web:77b967374e6f34311af5ef" };
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
+let currentUser = "Student", currentUserId = "guest", isPro = false;
+let myScores = [], allTests = [], allNotes = [];
+let lastAlertTime = 0;
+let attemptedTestIds = new Set(); 
+
+/* 2. STATIC DATA */
+const syllabusDB = {
+    "Reasoning": ["Analogy", "Classification", "Series", "Coding-Decoding", "Blood Relation", "Direction", "Venn Diagram", "Mirror Image", "Dice & Cube", "Ranking"],
+    "Maths": ["Number System", "HCF & LCM", "Percentage", "Profit & Loss", "SI & CI", "Time & Work", "Time Speed Distance", "Average", "Ratio", "Mensuration"],
+    "English": ["Reading Comprehension", "Synonyms & Antonyms", "Idioms & Phrases", "One Word Substitution", "Spelling Errors", "Spotting Errors", "Sentence Improvement", "Fill in Blanks"],
+    "Hindi": ["Sandhi", "Samas", "Upsarg-Pratyay", "Vilom Shabd", "Paryayvachi", "Muhavare", "Vakya Shuddhi", "Anekarthi Shabd"],
+    "GK": ["History", "Geography", "Polity", "Economics", "Science", "Current Affairs", "Static GK"]
+};
+let fallbackQOD = { q: "Fetching today's challenge...", opt: ["-", "-", "-", "-"], ans: 0 };
+
+/* UTILS: Debounce Function for Performance */
+function debounce(func, delay = 300) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => { func.apply(this, args); }, delay);
+    };
+}
+
+/* 3. INITIALIZATION & DYNAMIC GREETING */
+window.onload = function() {
+    const hour = new Date().getHours();
+    let greeting = "Good Morning ☀️";
+    if(hour >= 12 && hour < 17) greeting = "Good Afternoon 🌤️";
+    else if(hour >= 17) greeting = "Good Evening 🌙";
+    document.getElementById('greetingText').innerText = greeting;
+
+    setTimeout(() => {
+        if(document.getElementById('loader').style.display !== 'none') {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+        }
+    }, 3500); 
+
+    const theme = localStorage.getItem('theme');
+    if(theme === 'dark') document.body.classList.add('dark-mode');
+    
+    checkStreak(); startCountdown(); renderSyllabus();
+
+    db.ref('dsssb_config/maintenance').on('value', snap => {
+        if(snap.val() === true) {
+            document.getElementById('maintenanceScreen').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+        } else {
+            document.getElementById('maintenanceScreen').style.display = 'none';
+        }
+    });
+
+    db.ref('dsssb_config/alert').on('value', snap => {
+        if(snap.exists()) {
+            const data = snap.val(); 
+            if(data.time && data.time > lastAlertTime && data.msg) {
+                document.getElementById('alertMsgText').innerText = data.msg;
+                document.getElementById('alertModal').style.display = 'flex';
+                lastAlertTime = data.time;
+            }
+        }
+    });
+
+    db.ref('dsssb_config/news').on('value', snap => {
+        if(snap.exists() && snap.val() !== "") {
+            document.getElementById('newsSection').style.display = 'flex';
+            document.getElementById('newsText').innerText = snap.val();
+        } else { document.getElementById('newsSection').style.display = 'none'; }
+    });
+
+    db.ref('dsssb_config/qod').on('value', snap => {
+        if(snap.exists()) {
+            const d = snap.val();
+            document.getElementById('qodQuestion').innerText = d.q;
+            let html = "";
+            d.opt.forEach((o, i) => html += `<div class="qod-opt" onclick="checkQOD(this, ${i}, ${d.ans})">${o}</div>`);
+            document.getElementById('qodOptions').innerHTML = html;
+        } else {
+            document.getElementById('qodQuestion').innerText = fallbackQOD.q;
+        }
+    });
+
+    // --- UPGRADED NAME & TELEGRAM LOGIC ---
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp; tg.expand();
+        if(tg.colorScheme === 'dark' && !theme) document.body.classList.add('dark-mode');
+        
+        if (tg.platform && tg.platform !== 'unknown') {
+            const banner = document.getElementById('pwaBanner');
+            banner.style.display = 'flex';
+            banner.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
+            document.getElementById('pwaBannerTitle').innerHTML = 'Get DSSSB App 🚀';
+            document.getElementById('pwaBannerDesc').innerHTML = 'Open in Chrome/Safari to Install';
+            document.getElementById('pwaBannerBtn').innerHTML = 'Open';
+            document.getElementById('pwaBannerBtn').style.color = '#0369a1';
+            
+            banner.onclick = () => { tg.openLink(window.location.href); };
+        }
+
+        if(tg.initDataUnsafe.user) {
+            const u = tg.initDataUnsafe.user;
+            currentUser = u.first_name + (u.last_name ? " " + u.last_name : "");
+            currentUserId = u.id.toString();
+            
+            localStorage.setItem('dsssb_user_name', currentUser);
+            localStorage.setItem('dsssb_user_id', currentUserId);
+            if(u.photo_url) localStorage.setItem('dsssb_user_photo', u.photo_url);
+
+            document.getElementById('uName').innerText = u.first_name;
+            if(u.photo_url) document.getElementById('uAvatar').innerHTML = `<img src="${u.photo_url}">`;
+            else document.getElementById('uAvatar').innerText = u.first_name.charAt(0);
+            
+            fetchData(u);
+        } else {
+            checkLocalUser();
+        }
+    } else {
+        checkLocalUser();
+    }
+};
+
+function checkLocalUser() {
+    const savedName = localStorage.getItem('dsssb_user_name');
+    const savedId = localStorage.getItem('dsssb_user_id');
+    const savedPhoto = localStorage.getItem('dsssb_user_photo');
+
+    if (savedName) {
+        currentUser = savedName;
+        currentUserId = savedId || "guest";
+        document.getElementById('uName').innerText = savedName.split(" ")[0];
+        if(savedPhoto) document.getElementById('uAvatar').innerHTML = `<img src="${savedPhoto}">`;
+        else document.getElementById('uAvatar').innerText = savedName.charAt(0);
+        fetchData({username: "guest", id: currentUserId});
+    } else {
+        document.getElementById('uName').innerText = "Student";
+        document.getElementById('uAvatar').innerText = "S";
+        fetchData({username: "guest", id: "guest"});
+    }
+}
+
+/* 4. UTILS & UI */
+function toggleTheme() { 
+    document.body.classList.toggle('dark-mode'); 
+    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
+}
+
+function switchTab(tab, el) { 
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none'); 
+    document.getElementById('tab-'+tab).style.display = 'block'; 
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
+    if(el) el.classList.add('active'); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    if(tab === 'bookmarks') renderBookmarks();
+}
+
+function switchStudy(type, el) { 
+    document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active')); 
+    el.classList.add('active'); 
+    document.getElementById('notesSection').style.display = (type === 'notes') ? 'block' : 'none'; 
+    document.getElementById('videosSection').style.display = (type === 'videos') ? 'block' : 'none'; 
+}
+
+function showToast(msg) { 
+    const toast = document.getElementById('toast'); 
+    toast.innerText = msg; 
+    toast.style.display = 'block'; 
+    setTimeout(() => { toast.style.display = 'none'; }, 2500); 
+}
+
+/* 5. GAMIFICATION & ACTIONS */
+function openExamFolder(folderId) {
+    const testTabIcon = document.querySelectorAll('.nav-item')[1];
+    switchTab('tests', testTabIcon);
+    const searchInput = document.getElementById('testSearch');
+    if (folderId === 'my_attempts') {
+        searchInput.value = '';
+        let attemptedPill = Array.from(document.querySelectorAll('.filter-pill')).find(p => p.innerText.includes('Attempted'));
+        filterTests('Attempted', attemptedPill);
+        showToast("Showing your attempted tests 📝");
+    } else {
+        let searchText = folderId === 'asst_sup' ? 'Assistant Superintendent' : 'DASS Grade II';
+        searchInput.value = searchText;
+        filterTests('all', document.querySelector('.filter-pill'), searchText);
+        showToast("Searching tests for: " + searchText);
+    }
+}
+
+function checkStreak() {
+    const last = localStorage.getItem('lastVisit');
+    const today = new Date().toDateString();
+    let s = parseInt(localStorage.getItem('streak') || 0);
+    if(last !== today) { 
+        const y = new Date(); y.setDate(y.getDate()-1); 
+        if(last === y.toDateString()) s++; else s = 1; 
+        localStorage.setItem('lastVisit', today); 
+        localStorage.setItem('streak', s); 
+    }
+    document.getElementById('valStreak').innerText = s;
+}
+
+function startCountdown() {
+    const target = new Date(2026, 4, 15); 
+    const days = Math.ceil((target - new Date()) / (1000 * 60 * 60 * 24));
+    document.getElementById('examTimer').innerText = (days > 0 ? days : 0) + " Days Left";
+}
+
+function shareApp() {
+    if (navigator.share) navigator.share({ title: 'DSSSB Pro Portal', text: 'Best Exam Prep App!', url: window.location.href });
+    else { navigator.clipboard.writeText(window.location.href); showToast("Link copied to clipboard!"); }
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => { 
+    e.preventDefault(); 
+    deferredPrompt = e; 
+    document.getElementById('installBtn').style.display = 'grid'; 
+    
+    const banner = document.getElementById('pwaBanner');
+    banner.style.display = 'flex';
+    banner.style.background = 'var(--primary)';
+    document.getElementById('pwaBannerTitle').innerHTML = 'Install DSSSB App';
+    document.getElementById('pwaBannerDesc').innerHTML = 'Fast access & better experience';
+    document.getElementById('pwaBannerBtn').innerHTML = 'Install Now';
+    document.getElementById('pwaBannerBtn').style.color = 'var(--primary)';
+    
+    banner.onclick = () => { installApp(); };
+});
+
+async function installApp() { 
+    if(deferredPrompt) { 
+        deferredPrompt.prompt(); 
+        deferredPrompt = null; 
+        document.getElementById('installBtn').style.display='none'; 
+        document.getElementById('pwaBanner').style.display='none'; 
+    } 
+    else if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe.user) {
+        window.Telegram.WebApp.openLink(window.location.href);
+    } 
+    else {
+        alert("App install karne ke liye browser ki settings (⋮) me jaakar 'Add to Home Screen' ya 'Install App' par click karein.");
+    }
+}
+
+/* 6. SYLLABUS TRACKER */
+function renderSyllabus() {
+    const container = document.getElementById('syllabusList');
+    let saved = JSON.parse(localStorage.getItem('syllabusProgress') || '{}');
+    let html = "";
+    Object.keys(syllabusDB).forEach((sub, i) => {
+        html += `<div class="subject-group"><div class="subject-head" onclick="toggleTopic('sub${i}')"><span>📚 ${sub}</span> <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i></div><div class="topic-list" id="sub${i}">`;
+        syllabusDB[sub].forEach(topic => {
+            const key = `${sub}-${topic}`;
+            const checked = saved[key] ? 'checked' : '';
+            html += `<div class="topic-item"><input type="checkbox" class="topic-chk" onchange="updateSyllabus('${key}', this)" ${checked}><span>${topic}</span></div>`;
+        });
+        html += `</div></div>`;
+    });
+    container.innerHTML = html;
+    calcProgress();
+}
+
+function toggleTopic(id) { document.getElementById(id).classList.toggle('open'); }
+function updateSyllabus(key, el) { 
+    let saved = JSON.parse(localStorage.getItem('syllabusProgress') || '{}'); 
+    if(el.checked) saved[key] = true; else delete saved[key]; 
+    localStorage.setItem('syllabusProgress', JSON.stringify(saved)); 
+    calcProgress(); 
+}
+
+function calcProgress() {
+    let saved = JSON.parse(localStorage.getItem('syllabusProgress') || '{}');
+    let total = 0; Object.values(syllabusDB).forEach(list => total += list.length);
+    let done = Object.keys(saved).length;
+    let pct = Math.round((done/total)*100);
+    document.getElementById('progFill').style.width = pct + "%"; 
+    document.getElementById('progText').innerText = pct + "%";
+    if(pct === 100 && window.confetti) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+}
+
+/* 7. QOD CHECK */
+function checkQOD(el, idx, correct) {
+    document.querySelectorAll('.qod-opt').forEach(o => o.style.pointerEvents = "none");
+    if(idx === correct) { 
+        el.classList.add('correct'); 
+        if(window.confetti) confetti({particleCount: 50, spread: 50}); 
+        showToast("Correct! +2 Points 🔥"); 
+    } else { 
+        el.classList.add('wrong'); 
+        document.querySelectorAll('.qod-opt')[correct].classList.add('correct'); 
+        showToast("Oops! Better luck tomorrow.");
+    }
+}
+
+/* 8. FORMS & UTILS */
+function submitReport() {
+    const txt = document.getElementById('reportText').value;
+    if(!txt) return showToast("Please write an issue first!");
+    db.ref('dsssb_reports').push({ user: currentUser, id: currentUserId, issue: txt, time: firebase.database.ServerValue.TIMESTAMP });
+    showToast("Report Sent Successfully! 🛡️"); 
+    document.getElementById('reportModal').style.display='none'; 
+    document.getElementById('reportText').value='';
+}
+
+function toggleSaveTest(testId, el, event) {
+    event.stopPropagation(); 
+    let savedTests = JSON.parse(localStorage.getItem('savedTests') || '[]');
+    if (savedTests.includes(testId)) {
+        savedTests = savedTests.filter(id => id !== testId);
+        el.classList.remove('saved'); 
+        el.innerHTML = '<i class="far fa-star"></i>'; 
+        showToast("Removed from Saved"); 
+    } else {
+        savedTests.push(testId);
+        el.classList.add('saved'); 
+        el.innerHTML = '<i class="fas fa-star"></i>'; 
+        showToast("Test Saved ⭐"); 
+    }
+    localStorage.setItem('savedTests', JSON.stringify(savedTests));
+}
+
+function renderBookmarks() {
+    const container = document.getElementById('bookmarksListContainer');
+    let bms = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
+    let keys = Object.keys(bms);
+    
+    if(keys.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--text-muted);"><i class="far fa-star fa-3x" style="margin-bottom:15px; opacity:0.3;"></i><h3>No Saved Questions</h3><p style="font-size:13px; margin-top:8px;">Click 🔖 during a mock test to save difficult questions here.</p></div>`;
+        return;
+    }
+    
+    let html = "";
+    keys.reverse().forEach(k => {
+        let q = bms[k]; 
+        let correctIdx = parseInt(q.ans) - 1; 
+        let qText = q.q_hi || q.q_en; 
+        let optArr = q.op_hi || q.op_en; 
+        let correctAnsText = optArr && optArr[correctIdx] ? optArr[correctIdx] : "Not Specified";
+        
+        html += `<div class="test-card" style="margin-bottom:15px; border-left:4px solid var(--warning);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <span style="font-size:11px; background:var(--warning); color:#fff; padding:3px 8px; border-radius:6px; font-weight:800;">${q.section || 'General'}</span>
+                        <button onclick="removeBookmark('${k}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:700;"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div style="font-weight:700; font-size:14px; margin-bottom:15px;">${qText}</div>
+                    <div style="background:var(--bg-body); padding:12px; border-radius:10px; border:1px solid var(--border);">
+                        <div style="font-size:13px; font-weight:800; color:var(--success); margin-bottom:8px;">✅ Answer: ${String.fromCharCode(65+correctIdx)}) ${correctAnsText}</div>
+                        <hr style="border:none; border-top:1px dashed var(--border); margin:10px 0;">
+                        <div style="font-size:12px; color:var(--text-muted); line-height:1.5;"><b>💡 Solution:</b><br>${q.solution || 'No detailed solution.'}</div>
+                    </div>
+                </div>`;
+    });
+    
+    container.innerHTML = html;
+    if(window.MathJax) { MathJax.typesetPromise([container]); }
+}
+
+function removeBookmark(key) {
+    if(confirm("Remove this question?")) {
+        let bms = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {}; 
+        delete bms[key]; 
+        localStorage.setItem('dsssb_bookmarks', JSON.stringify(bms)); 
+        renderBookmarks(); 
+        showToast("Bookmark Removed 🗑️");
+    }
+}
+
+function reattemptTest(testId, title, time) {
+    if(confirm("Re-attempting will clear your previous answers on this device. Continue?")) {
+        localStorage.removeItem("dsssb_cbt_rank_v2_" + testId); 
+        localStorage.removeItem("dsssb_cbt_rank_v2_" + testId + "_final"); 
+        window.location.href = `cbt.html?testid=${testId}&title=${encodeURIComponent(title)}&time=${time}&mode=exam`;
+    }
+}
+
+/* 9. MAIN DATA FETCHING */
+async function fetchData(user) {
+    try {
+        if(currentUserId !== "guest") {
+            const userRef = db.ref('dsssb_presence/' + currentUserId);
+            userRef.set({ name: currentUser, id: currentUserId, state: 'online', lastActive: firebase.database.ServerValue.TIMESTAMP });
+            userRef.onDisconnect().update({ state: 'offline', lastActive: firebase.database.ServerValue.TIMESTAMP });
+        }
+        
+        const [testsSnap, resultsSnap, proSnap, notesSnap] = await Promise.all([ 
+            db.ref("dsssb_tests_db").once("value"), 
+            db.ref("dsssb_results_live").once("value"), 
+            db.ref("dsssb_pro_users").once("value"), 
+            db.ref("dsssb_notes_db").once("value") 
+        ]);
+
+        isPro = false;
+        if(proSnap.exists()) {
+            let myUsername = (user.username && user.username !== "guest") ? String(user.username).toLowerCase().trim().replace("@", "") : null;
+            let myId = (user.id && user.id !== "guest") ? String(user.id).trim() : null;
+            
+            if (myUsername || myId) { 
+                proSnap.forEach(child => {
+                    let dbVal = child.val(), dbKey = String(child.key).toLowerCase().trim().replace("@", "");
+                    if (!dbVal) return; 
+                    
+                    let v = typeof dbVal === 'object' ? (dbVal.username || dbVal.id || "") : dbVal;
+                    v = String(v).toLowerCase().trim().replace("@", "");
+                    
+                    if (v !== "") { 
+                        if ((myUsername && (v === myUsername || dbKey === myUsername)) || (myId && (v === myId || dbKey === myId))) isPro = true; 
+                    } else if (dbKey !== "") { 
+                        if ((myUsername && dbKey === myUsername) || (myId && dbKey === myId)) isPro = true; 
+                    }
+                });
+            }
+        }
+
+        if(isPro) { 
+            document.getElementById('badgePro').style.display = 'flex'; 
+            document.getElementById('buyProBtn').style.display = 'none'; 
+        } else { 
+            document.getElementById('badgePro').style.display = 'none'; 
+            document.getElementById('buyProBtn').style.display = 'inline-block'; 
+        }
+
+        allNotes = Object.values(notesSnap.val() || {}).reverse(); 
+        searchNotes(''); 
+        renderVideos();
+
+        const res = resultsSnap.val() || {}, testData = testsSnap.val() || {}; 
+        let userMap = {}, myTestCount = 0, subScores = { 'Maths': [], 'English': [], 'Hindi': [], 'GK': [], 'Reasoning': [] };
+
+        Object.values(res).forEach(r => {
+            let rName = r.name || "Student", safeScore = parseFloat(r.score) || 0;
+            if(!userMap[rName]) userMap[rName] = {s:0, c:0, isMe: false};
+            userMap[rName].s += safeScore; 
+            userMap[rName].c++;
+            
+            if (String(r.userId || "").trim() === String(currentUserId).trim() || rName === currentUser) {
+                userMap[rName].isMe = true; 
+                myTestCount++; 
+                if(r.testId) attemptedTestIds.add(r.testId); 
+                
+                let cat = r.category || (testData[r.testId] ? testData[r.testId].category : "GK");
+                let max = r.testId && testData[r.testId] ? (parseInt(testData[r.testId].qs) || parseInt(testData[r.testId].marks) || 20) : 20;
+                let percent = (safeScore / max) * 100;
+                let matchedCat = Object.keys(subScores).find(k => cat.toLowerCase().includes(k.toLowerCase()));
+                
+                if(matchedCat) subScores[matchedCat].push(percent); else subScores['GK'].push(percent); 
+            }
+        });
+
+        document.getElementById('valTests').innerText = myTestCount;
+        let lb = Object.keys(userMap).map(k=>({name: k, avg: userMap[k].s / userMap[k].c, isMe: userMap[k].isMe})).sort((a,b) => b.avg - a.avg);
+        let myRank = lb.findIndex(u => u.isMe) + 1; 
+        document.getElementById('valRank').innerText = myRank > 0 ? `#${myRank}` : '--';
+        renderLeaderboard(lb);
+
+        let chartAverages = []; 
+        ['Maths', 'English', 'Hindi', 'GK', 'Reasoning'].forEach(cat => { 
+            let arr = subScores[cat]; 
+            chartAverages.push(Math.round(arr.length > 0 ? (arr.reduce((a,b)=>a+b, 0) / arr.length) : 0)); 
+        });
+        
+        renderCharts(chartAverages);
+        allTests = Object.keys(testData).map(key => ({ dbKey: key, ...testData[key] }));
+        filterTests('all', document.querySelector('.filter-pill'));
+
+        if (myTestCount > 0) {
+            let goalCard = document.getElementById('dailyGoalCard');
+            if(goalCard) {
+                goalCard.classList.add('completed');
+                document.getElementById('dgStatus').innerText = 'Completed ✅';
+            }
+        }
+
+        if (currentUser && currentUser.includes("Amit")) { 
+            let grid = document.getElementById('examFoldersGrid');
+            if(grid && !document.getElementById('adminAddFolder')) {
+                grid.innerHTML += `
+                    <div id="adminAddFolder" class="exam-folder-card" style="border: 2px dashed var(--primary); background: transparent;" onclick="window.location.href='admin.html'">
+                        <div class="folder-icon" style="background: var(--primary-light); color: var(--primary);">➕</div>
+                        <div class="folder-title">Admin<br>Panel</div>
+                        <div class="folder-action" style="color: var(--primary); background:var(--primary-light);">Open ⚙️</div>
+                    </div>
+                `;
+            }
+        }
+
+    } catch(e) { 
+        console.error("Data Load Error:", e); 
+    } finally { 
+        document.getElementById('loader').style.display = 'none'; 
+        document.getElementById('app').style.display = 'block'; 
+    }
+}
+
+
+/* 10. RENDERERS & SMART SEARCH */
+const debouncedTestSearch = debounce((val) => searchTests(val), 300);
+const debouncedNoteSearch = debounce((val) => searchNotes(val), 300);
+
+function searchTests(query) { 
+    let activeFilterEl = document.querySelector('.filter-pill.active'); 
+    let cat = activeFilterEl ? activeFilterEl.innerText.replace(/[^a-zA-Z ]/g, '').trim() : 'all'; 
+    filterTests(cat, activeFilterEl, query); 
+}
+
+function filterTests(cat, el, searchQuery = "") {
+    if(el) { 
+        document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active')); 
+        el.classList.add('active'); 
+    }
+    
+    let list = [...allTests].reverse();
+    let savedTests = JSON.parse(localStorage.getItem('savedTests') || '[]');
+    
+    if (searchQuery) { 
+        let q = searchQuery.toLowerCase().trim();
+        if(q === 'reas') q = 'reasoning';
+        else if(q === 'math' || q === 'quant') q = 'math';
+        else if(q === 'eng') q = 'english';
+        else if(q === 'comp') q = 'computer';
+        else if(q === 'hin') q = 'hindi';
+        
+        list = list.filter(t => (t.title||"").toLowerCase().includes(q) || (t.category||"").toLowerCase().includes(q) || (t.title||"").toLowerCase().includes(searchQuery.toLowerCase())); 
+    } else if(cat && cat.toLowerCase() !== 'all tests' && cat.toLowerCase() !== 'all') {
+        const key = cat.toLowerCase();
+        if(key.includes('saved')) list = list.filter(t => savedTests.includes(t.dbKey));
+        else if (key.includes('live')) list = list.filter(t => (t.isLive && t.isLive.toString() === 'true') || (t.scheduledTime && Date.now() >= t.scheduledTime));
+        else if (key.includes('attempted')) list = list.filter(t => attemptedTestIds.has(t.dbKey) || attemptedTestIds.has(t.id));
+        else list = list.filter(t => { 
+            const title = (t.title||"").toLowerCase(), c = (t.category||"").toLowerCase(); 
+            if(key.includes('reasoning')) return title.includes('reas') || title.includes('logic') || c.includes('reas');
+            if(key.includes('maths')) return title.includes('math') || title.includes('quant') || c.includes('math');
+            if(key.includes('english')) return title.includes('eng') || c.includes('eng');
+            if(key.includes('hindi')) return title.includes('hin') || c.includes('hin');
+            if(key.includes('computer')) return title.includes('comp') || c.includes('comp');
+            if(key.includes('gk')) return title.includes('gk') || title.includes('general') || c.includes('gk');
+            return title.includes(key) || c.includes(key); 
+        });
+    }
+    
+    let html = "";
+    list.forEach(t => {
+        let locked = t.type === 'pro' && !isPro;
+        let isAttempted = attemptedTestIds.has(t.dbKey) || attemptedTestIds.has(t.id);
+        let isSaved = savedTests.includes(t.dbKey);
+        let liveHTML = ((t.isLive && t.isLive.toString() === 'true') || (t.scheduledTime && Date.now() >= t.scheduledTime)) ? '<div class="live-badge">🔴 LIVE NOW</div>' : '';
+        
+        let buttonHTML = locked ? 
+            `<button class="start-btn locked" onclick="document.getElementById('paymentModal').style.display='flex'">Unlock Premium</button>` : 
+            isAttempted ? 
+            `<div style="display:flex; gap:10px; margin-top:5px;">
+                <button class="start-btn" style="flex:1; background:var(--bg-card); color:var(--primary); border:2px solid var(--primary); padding: 10px;" onclick="reattemptTest('${t.dbKey}', '${(t.title||"").replace(/'/g, "\\'")}', ${t.time||120})">🔄 Retake</button>
+                <button class="start-btn" style="flex:1; padding: 10px; background:#10b981;" onclick="window.location.href='cbt.html?testid=${t.dbKey}&title=${encodeURIComponent(t.title)}&mode=solution'">Solutions ➔</button>
+            </div>` : 
+            `<button class="start-btn" onclick="window.location.href='cbt.html?testid=${t.dbKey}&title=${encodeURIComponent(t.title)}&time=${t.time||120}&mode=exam'">Start Mock Test ➔</button>`;
+        
+        html += `<div class="test-card ${locked?'locked':''}">
+                    ${liveHTML}
+                    <button class="save-btn ${isSaved?'saved':''}" onclick="toggleSaveTest('${t.dbKey}', this, event)">
+                        ${isSaved?'<i class="fas fa-star"></i>':'<i class="far fa-star"></i>'}
+                    </button>
+                    <div class="t-title">${t.title || 'DSSSB Mock Test'}</div>
+                    <div class="t-info">
+                        <span><i class="fas fa-list-ol"></i> ${t.qs || '20'} Qs</span>
+                        <span><i class="far fa-clock"></i> ${t.time || '15'} Mins</span>
+                        <span><i class="fas fa-check-circle"></i> ${t.marks || t.qs || '20'} Marks</span>
+                    </div>
+                    ${buttonHTML}
+                </div>`;
+    });
+    document.getElementById('testListContainer').innerHTML = html || "<div style='text-align:center; color:var(--text-muted); padding:40px;'><i class='fas fa-box-open fa-3x' style='opacity:0.3; margin-bottom:10px;'></i><br>No tests found</div>";
+}
+
+function searchNotes(query) {
+    let list = [...allNotes]; 
+    if(query) list = list.filter(n => (n.title||"").toLowerCase().includes(query.toLowerCase()) || (n.subject||"").toLowerCase().includes(query.toLowerCase()));
+    
+    let html = ""; 
+    list.forEach(n => { 
+        let locked = n.type === 'pro' && !isPro; 
+        html += `<div class="note-card ${locked?'locked':''}">
+                    <div class="t-title">${n.title || 'Study Material'}</div>
+                    <div class="t-info" style="margin-bottom:12px;">
+                        <span><i class="fas fa-book"></i> ${n.subject || 'General'}</span>
+                        <span style="color:#ef4444;"><i class="fas fa-file-pdf"></i> PDF File</span>
+                    </div>
+                    <button class="download-btn" onclick="${locked ? "document.getElementById('paymentModal').style.display='flex'" : `window.open('${n.url}', '_blank')`}">
+                        <i class="fas fa-cloud-download-alt"></i> Download PDF
+                    </button>
+                </div>`; 
+    });
+    document.getElementById('notesListContainer').innerHTML = html || "<div style='text-align:center; color:grey; padding:20px;'>No notes available</div>";
+}
+
+function renderVideos() {
+    const list = [ 
+        { title: "Percentage Shortcuts", subject: "Maths", thumb: "https://img.youtube.com/vi/aL2X1M78p3U/mqdefault.jpg", url: "https://youtu.be/aL2X1M78p3U", pro: false }, 
+        { title: "Analogy Tricks", subject: "Reasoning", thumb: "https://img.youtube.com/vi/W59A76-P6sI/mqdefault.jpg", url: "https://youtu.be/W59A76-P6sI", pro: true }, 
+        { title: "English Vocab Class 1", subject: "English", thumb: "https://img.youtube.com/vi/1_M0B4-2PME/mqdefault.jpg", url: "https://youtu.be/1_M0B4-2PME", pro: false } 
+    ];
+    let html = ""; 
+    list.forEach(v => { 
+        let locked = v.pro && !isPro; 
+        html += `<div class="video-card ${locked?'locked':''}" onclick="${locked ? "document.getElementById('paymentModal').style.display='flex'" : `window.open('${v.url}', '_blank')`}">
+                    <div class="vid-thumb">
+                        <img src="${v.thumb}">
+                        <i class="fab fa-youtube fa-3x" style="position:absolute; color:red; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>
+                        ${locked ? '<div style="position:absolute; top:10px; right:10px; background:var(--warning); color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:800; z-index:5;">🔒 PRO</div>' : ''}
+                    </div>
+                    <div class="vid-content">
+                        <div class="t-title" style="margin-bottom:4px;">${v.title}</div>
+                        <div style="font-size:12px; color:var(--text-muted); font-weight:600;"><i class="fas fa-play-circle"></i> ${v.subject}</div>
+                    </div>
+                </div>`; 
+    });
+    document.getElementById('videoListContainer').innerHTML = html;
+}
+
+function renderCharts(dataArr) {
+    const ctx = document.getElementById('barChart').getContext('2d');
+    new Chart(ctx, { 
+        type: 'bar', 
+        data: { 
+            labels: ['Maths', 'English', 'Hindi', 'GK', 'Reasoning'], 
+            datasets: [{ label: 'Avg Score %', data: dataArr, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderRadius: 8 }] 
+        }, 
+        options: { 
+            responsive: true, maintainAspectRatio: false, 
+            scales: { 
+                y: { beginAtZero: true, max: 100, grid: {color:'rgba(0,0,0,0.05)'}, ticks: {font:{size:10, weight:'bold'}} }, 
+                x: { grid: {display:false}, ticks: {font:{size:10, weight:'bold'}} } 
+            }, 
+            plugins: { legend: { display: false } } 
+        } 
+    });
+
+    const ctxRadar = document.getElementById('radarChart').getContext('2d');
+    const darkLine = document.body.classList.contains('dark-mode') ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)';
+    new Chart(ctxRadar, { 
+        type: 'radar', 
+        data: { 
+            labels: ['Maths', 'English', 'Hindi', 'GK', 'Reasoning'], 
+            datasets: [{ 
+                label: 'Mastery Level', 
+                data: dataArr, 
+                backgroundColor: 'rgba(79, 70, 229, 0.25)', 
+                borderColor: '#4f46e5', 
+                pointBackgroundColor: '#4f46e5',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#4f46e5',
+                borderWidth: 2
+            }] 
+        }, 
+        options: { 
+            responsive: true, maintainAspectRatio: false, 
+            scales: { 
+                r: { 
+                    angleLines: { color: darkLine }, 
+                    grid: { color: darkLine }, 
+                    pointLabels: { font: { size: 11, weight: 'bold', family: "'Segoe UI', sans-serif" } }, 
+                    ticks: { display: false, min: 0, max: 100 } 
+                } 
+            }, 
+            plugins: { legend: { display: false } } 
+        } 
+    });
+}
+
+function renderLeaderboard(data) {
+    let html = ""; 
+    data.slice(0, 10).forEach((u, i) => { 
+        let badge = i===0?'🥇':i===1?'🥈':i===2?'🥉':`<div style="width:24px;height:24px;background:var(--border);border-radius:50%;display:grid;place-items:center;font-size:10px;">${i+1}</div>`; 
+        
+        let rankNameHTML = `<span style="font-weight:700;">${u.name}</span>`;
+        if (i === 0) rankNameHTML += ' <span style="font-size:10px; background:#fef08a; color:#854d0e; padding:2px 6px; border-radius:4px; font-weight:800; margin-top:2px; display:inline-block;">👑 Pro King</span>';
+        else if (i === 1) rankNameHTML += ' <span style="font-size:10px; background:#fed7aa; color:#9a3412; padding:2px 6px; border-radius:4px; font-weight:800; margin-top:2px; display:inline-block;">🎯 Sniper</span>';
+        else if (i === 2) rankNameHTML += ' <span style="font-size:10px; background:#fecaca; color:#991b1b; padding:2px 6px; border-radius:4px; font-weight:800; margin-top:2px; display:inline-block;">🔥 Veteran</span>';
+        
+        html += `<div class="rank-row" style="${u.isMe ? 'background:var(--primary-light); padding:15px; border-radius:12px; margin:5px 0;' : ''}">
+                    <span style="width:40px; font-weight:800; display:flex; align-items:center;">${badge}</span>
+                    <span style="flex:1; display:flex; flex-direction:column; justify-content:center;">${rankNameHTML}</span>
+                    <span style="color:var(--primary); font-weight:900; background:var(--bg-body); padding:4px 10px; border-radius:8px; align-self:center;">${Math.round(u.avg)} Pts</span>
+                </div>`; 
+    });
+    document.getElementById('leaderboardList').innerHTML = html || "<div style='text-align:center; color:grey; padding:20px;'>No ranks yet. Give a test!</div>";
+}
+
+  /* =========================================
+   🔒 ANTI-PIRACY & SECURITY LOCKDOWN 🔒
+   ========================================= */
+
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) { e.preventDefault(); return false; }
+    if (e.ctrlKey && ['U', 'u', 'C', 'c'].includes(e.key)) { e.preventDefault(); return false; }
+});
+
+// 👇 Service Worker Registration Root Scope (For Play Store PWA) 👇
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Main Branch SW Registered! Scope:', reg.scope))
+        .catch(err => console.error('Service Worker Error:', err));
+    });
+}
+  
+</script>
 </body>
 </html>
