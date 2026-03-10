@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dsssb-pro-main-v1';
+const CACHE_NAME = 'dsssb-pyq-main-v2';
 
 const urlsToCache = [
   '/',
@@ -21,7 +21,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened Play Store cache main-v1');
+        console.log('Opened Play Store cache main-v2');
         return Promise.allSettled(urlsToCache.map(url => cache.add(url).catch(e => console.log('Cache fail:', url)))); 
       })
   );
