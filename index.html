@@ -116,10 +116,17 @@ body {
 .action-item i { font-size: 20px; color: var(--primary); }
 .action-item span { font-size: 11px; font-weight: 600; color: var(--text-muted); }
 
+/* 🔥 Upgraded Clickable Stats Row 🔥 */
 .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 15px 20px; }
-.stat-card { background: var(--bg-card); padding: 15px 10px; border-radius: 16px; border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-.stat-val { font-size: 20px; font-weight: 900; color: var(--primary); margin: 4px 0; }
-.stat-lbl { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card { background: var(--bg-card); padding: 15px 10px; border-radius: 16px; border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.stat-card:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.stat-val { font-size: 20px; font-weight: 900; color: var(--primary); margin: 4px 0; pointer-events: none; }
+.stat-lbl { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; pointer-events: none; }
+
+/* 📓 My Notebook Banner */
+.notebook-banner { background: linear-gradient(135deg, #4f46e5, #8b5cf6); color: white; padding: 16px 20px; margin: 0 20px 25px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); cursor: pointer; transition: transform 0.2s; }
+.notebook-banner:active { transform: scale(0.98); }
+.nb-icon-box { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; }
 
 /* --- TARGET EXAM FOLDERS --- */
 .target-exams-section { padding: 0 20px; margin-bottom: 20px; }
@@ -248,6 +255,7 @@ textarea { height: 120px; resize: none; }
     
     .quick-actions { padding: 0; margin-bottom: 25px; grid-template-columns: repeat(4, 1fr); gap: 20px; }
     .stats-row { padding: 0; margin-bottom: 25px; gap: 20px; grid-template-columns: repeat(3, 1fr);}
+    .notebook-banner { margin-left: 0; margin-right: 0; }
     .target-exams-section { padding: 0; margin-bottom: 25px; }
     
     .desktop-charts { display: flex; gap: 20px; margin-bottom: 20px; flex-direction: row;}
@@ -353,9 +361,20 @@ textarea { height: 120px; resize: none; }
         </div>
 
         <div class="stats-row">
-            <div class="stat-card"><div class="stat-val" id="valRank">--</div><div class="stat-lbl">Rank</div></div>
-            <div class="stat-card"><div class="stat-val" id="valTests">0</div><div class="stat-lbl">Mocks</div></div>
-            <div class="stat-card"><div class="stat-val"><i class="fas fa-fire" style="color:#f97316;"></i> <span id="valStreak">1</span></div><div class="stat-lbl">Streak</div></div>
+            <div class="stat-card" onclick="switchTab('rank', document.querySelectorAll('.nav-item')[4])"><div class="stat-val" id="valRank">--</div><div class="stat-lbl">Rank</div></div>
+            <div class="stat-card" onclick="switchTab('tests', document.querySelectorAll('.nav-item')[1])"><div class="stat-val" id="valTests">0</div><div class="stat-lbl">Mocks</div></div>
+            <div class="stat-card" onclick="showStreakAlert()"><div class="stat-val"><i class="fas fa-fire" style="color:#f97316;"></i> <span id="valStreak">1</span></div><div class="stat-lbl">Streak</div></div>
+        </div>
+
+        <div class="notebook-banner" onclick="switchTab('bookmarks', document.querySelectorAll('.nav-item')[5])">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="font-size: 32px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">📓</div>
+                <div>
+                    <div style="font-weight: 800; font-size: 16px; letter-spacing: 0.5px;">My Notebook</div>
+                    <div style="font-size: 12px; opacity: 0.9; font-weight: 600;">Revise Mistakes & Saved Qs</div>
+                </div>
+            </div>
+            <div class="nb-icon-box"><i class="fas fa-chevron-right"></i></div>
         </div>
 
         <div class="target-exams-section">
@@ -458,9 +477,15 @@ textarea { height: 120px; resize: none; }
         <div id="leaderboardList"></div>
     </div>
 
-    <div id="tab-bookmarks" class="tab-content" style="display:none; padding: 20px;">
-        <h2 style="font-size:22px; font-weight:900; margin-bottom:20px;">⭐ Saved Questions</h2>
-        <div id="bookmarksListContainer"></div>
+    <div id="tab-bookmarks" class="tab-content" style="display:none; padding: 20px 0;">
+        <div style="padding: 0 20px;">
+            <h2 style="font-size:22px; font-weight:900; margin-bottom:15px;">📓 My Notebook</h2>
+            <div class="segment-control" style="margin: 0 0 20px 0;">
+                <div class="segment-btn active" id="nbTab-bookmarks" onclick="switchNotebook('bookmarks')">🔖 Saved Qs</div>
+                <div class="segment-btn" id="nbTab-mistakes" onclick="switchNotebook('mistakes')">❌ Mistake Book</div>
+            </div>
+        </div>
+        <div id="bookmarksListContainer" style="padding: 0 20px;"></div>
     </div>
 
 </div>
@@ -468,8 +493,8 @@ textarea { height: 120px; resize: none; }
 <div id="alertModal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <i class="fas fa-bell fa-3x" style="color:var(--primary); margin-bottom:15px; animation: pulse 2s infinite;"></i>
-        <h2 style="margin-bottom:10px; font-weight:900;">Announcement</h2>
-        <p id="alertMsgText" style="font-size:14px; margin-bottom:25px; font-weight:600; color:var(--text-muted);"></p>
+        <h2 style="margin-bottom:10px; font-weight:900;">Alert</h2>
+        <p id="alertMsgText" style="font-size:14px; margin-bottom:25px; font-weight:600; color:var(--text-muted); line-height: 1.5;"></p>
         <button onclick="document.getElementById('alertModal').style.display='none'" class="start-btn">Got it, Thanks!</button>
     </div>
 </div>
@@ -515,7 +540,7 @@ textarea { height: 120px; resize: none; }
     <div class="nav-item" id="nav-study" onclick="switchTab('study', this)"><i class="fas fa-book-open"></i> <span>Study</span></div>
     <div class="nav-item" onclick="switchTab('syllabus', this)"><i class="fas fa-chart-pie"></i> <span>Tracker</span></div>
     <div class="nav-item" onclick="switchTab('rank', this)"><i class="fas fa-trophy"></i> <span>Ranks</span></div>
-    <div class="nav-item" onclick="switchTab('bookmarks', this)"><i class="fas fa-bookmark"></i> <span>Saved</span></div>
+    <div class="nav-item" onclick="switchTab('bookmarks', this)"><i class="fas fa-bookmark"></i> <span>Notebook</span></div>
 </div>
 
 <script>
@@ -582,7 +607,7 @@ window.onload = function() {
         if(snap.exists()) {
             const data = snap.val(); 
             if(data.time && data.time > lastAlertTime && data.msg) {
-                document.getElementById('alertMsgText').innerText = data.msg;
+                document.getElementById('alertMsgText').innerHTML = data.msg;
                 document.getElementById('alertModal').style.display = 'flex';
                 lastAlertTime = data.time;
             }
@@ -608,7 +633,6 @@ window.onload = function() {
         }
     });
 
-    // --- UPGRADED NAME & TELEGRAM LOGIC ---
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
         const tg = window.Telegram.WebApp; tg.expand();
         if(tg.colorScheme === 'dark' && !theme) document.body.classList.add('dark-mode');
@@ -629,7 +653,6 @@ window.onload = function() {
 
         fetchData(u);
     } else {
-        // PLAY STORE OR DIRECT WEB BROWSER
         checkLocalUser();
     }
 };
@@ -641,7 +664,6 @@ function checkLocalUser() {
     const savedPhoto = localStorage.getItem('dsssb_user_photo');
 
     if (savedName && savedId && savedId !== "guest") {
-        // Old user returning
         currentUser = savedName;
         currentUserId = savedId;
         document.getElementById('uName').innerText = savedName.split(" ")[0];
@@ -652,7 +674,6 @@ function checkLocalUser() {
 
         fetchData({username: "guest", id: currentUserId});
     } else {
-        // First Time User (Play Store Download)
         document.getElementById('appLoginModal').style.display = 'flex';
     }
 }
@@ -664,13 +685,10 @@ function registerPlayStoreUser() {
     if(n.length < 3) return showToast("Please enter your full name");
     if(p.length < 8) return showToast("Please enter a valid mobile number");
 
-    // Save to device memory
     localStorage.setItem('dsssb_user_name', n);
     localStorage.setItem('dsssb_user_id', p);
     
     document.getElementById('appLoginModal').style.display = 'none';
-    
-    // Refresh to load app with new name
     window.location.reload();
 }
 
@@ -686,7 +704,7 @@ function switchTab(tab, el) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
     if(el) el.classList.add('active'); 
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    if(tab === 'bookmarks') renderBookmarks();
+    if(tab === 'bookmarks') switchNotebook('bookmarks');
 }
 
 function switchStudy(type, el) { 
@@ -732,6 +750,12 @@ function checkStreak() {
         localStorage.setItem('streak', s); 
     }
     document.getElementById('valStreak').innerText = s;
+}
+
+function showStreakAlert() {
+    const s = document.getElementById('valStreak').innerText;
+    document.getElementById('alertMsgText').innerHTML = `You are on a <b>${s} Day Streak!</b> 🔥<br><br>Give at least one mock test daily to keep your streak alive and boost your confidence.`;
+    document.getElementById('alertModal').style.display = 'flex';
 }
 
 function startCountdown() {
@@ -854,40 +878,77 @@ function toggleSaveTest(testId, el, event) {
     localStorage.setItem('savedTests', JSON.stringify(savedTests));
 }
 
-function renderBookmarks() {
+/* 🔥 UPGRADED NOTEBOOK SYSTEM (BOOKMARKS + MISTAKES) 🔥 */
+function switchNotebook(type) {
+    document.getElementById('nbTab-bookmarks').classList.remove('active');
+    document.getElementById('nbTab-mistakes').classList.remove('active');
+    document.getElementById('nbTab-' + type).classList.add('active');
+    renderNotebook(type);
+}
+
+function renderNotebook(type = 'bookmarks') {
     const container = document.getElementById('bookmarksListContainer');
-    let bms = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
-    let keys = Object.keys(bms);
-    
-    if(keys.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--text-muted);"><i class="far fa-star fa-3x" style="margin-bottom:15px; opacity:0.3;"></i><h3>No Saved Questions</h3><p style="font-size:13px; margin-top:8px;">Click 🔖 during a mock test to save difficult questions here.</p></div>`;
+    let dataObj = {};
+    if(type === 'bookmarks') dataObj = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
+    else dataObj = JSON.parse(localStorage.getItem('dsssb_mistakes')) || {};
+
+    let grouped = {};
+    Object.keys(dataObj).forEach(k => {
+        let q = dataObj[k];
+        q._key = k; // save key for deletion
+        let sec = q.section || "General";
+        if(!grouped[sec]) grouped[sec] = [];
+        grouped[sec].push(q);
+    });
+
+    if(Object.keys(grouped).length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--text-muted);">
+            <div style="font-size:40px; margin-bottom:10px;">${type === 'bookmarks' ? '🔖' : '❌'}</div>
+            <h3 style="color:var(--text-main);">No questions found</h3>
+            <p style="font-size:13px; margin-top:8px;">${type === 'bookmarks' ? 'Click the bookmark icon during a test to save questions.' : 'Your incorrect attempts will be auto-saved here.'}</p>
+        </div>`;
         return;
     }
-    
+
     let html = "";
-    keys.reverse().forEach(k => {
-        let q = bms[k]; 
-        let correctIdx = parseInt(q.ans) - 1; 
-        let qText = q.q_hi || q.q_en; 
-        let optArr = q.op_hi || q.op_en; 
-        let correctAnsText = optArr && optArr[correctIdx] ? optArr[correctIdx] : "Not Specified";
+    for(let sec in grouped) {
+        html += `<h3 style="color:var(--primary); border-bottom:2px solid var(--primary); padding-bottom:5px; margin-top:15px; font-size:16px;">${sec} <span style="font-size:12px; color:var(--text-muted); float:right; background:var(--primary-light); padding:2px 8px; border-radius:10px;">${grouped[sec].length} Qs</span></h3>`;
         
-        html += `<div class="test-card" style="margin-bottom:15px; border-left:4px solid var(--warning);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                        <span style="font-size:11px; background:var(--warning); color:#fff; padding:3px 8px; border-radius:6px; font-weight:800;">${q.section || 'General'}</span>
-                        <button onclick="removeBookmark('${k}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:700;"><i class="fas fa-trash"></i></button>
-                    </div>
-                    <div style="font-weight:700; font-size:14px; margin-bottom:15px;">${qText}</div>
-                    <div style="background:var(--bg-body); padding:12px; border-radius:10px; border:1px solid var(--border);">
-                        <div style="font-size:13px; font-weight:800; color:var(--success); margin-bottom:8px;">✅ Answer: ${String.fromCharCode(65+correctIdx)}) ${correctAnsText}</div>
-                        <hr style="border:none; border-top:1px dashed var(--border); margin:10px 0;">
-                        <div style="font-size:12px; color:var(--text-muted); line-height:1.5;"><b>💡 Solution:</b><br>${q.solution || 'No detailed solution.'}</div>
-                    </div>
-                </div>`;
-    });
+        grouped[sec].reverse().forEach(q => {
+            let correctIdx = parseInt(q.ans) - 1;
+            let qText = q.q_hi || q.q_en;
+            let optArr = q.op_hi || q.op_en;
+            let correctAnsText = optArr && optArr[correctIdx] ? optArr[correctIdx] : "Not Specified";
+
+            html += `
+            <div class="test-card" style="margin-bottom:15px; border-left:4px solid ${type==='bookmarks'?'var(--warning)':'var(--danger)'};">
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <span style="font-size:11px; background:${type==='bookmarks'?'var(--warning)':'var(--danger)'}; color:#fff; padding:3px 8px; border-radius:6px; font-weight:800;">${type==='bookmarks'?'Saved':'Mistake'}</span>
+                    <button onclick="removeNotebookItem('${q._key}', '${type}')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:700;"><i class="fas fa-trash"></i></button>
+                </div>
+                <div style="font-weight:700; font-size:14px; margin-bottom:15px;">${qText}</div>
+                <div style="background:var(--bg-body); padding:12px; border-radius:10px; border:1px solid var(--border);">
+                    <div style="font-size:13px; font-weight:800; color:var(--success); margin-bottom:8px;">✅ Answer: ${String.fromCharCode(65+correctIdx)}) ${correctAnsText}</div>
+                    <hr style="border:none; border-top:1px dashed var(--border); margin:10px 0;">
+                    <div style="font-size:12px; color:var(--text-muted); line-height:1.5;"><b>💡 Solution:</b><br>${q.solution || 'No detailed solution.'}</div>
+                </div>
+            </div>`;
+        });
+    }
     
     container.innerHTML = html;
     if(window.MathJax) { MathJax.typesetPromise([container]); }
+}
+
+function removeNotebookItem(key, type) {
+    let storageKey = type === 'bookmarks' ? 'dsssb_bookmarks' : 'dsssb_mistakes';
+    let data = JSON.parse(localStorage.getItem(storageKey)) || {};
+    if(data[key]) {
+        delete data[key];
+        localStorage.setItem(storageKey, JSON.stringify(data));
+        showToast("Removed from Notebook");
+        renderNotebook(type);
+    }
 }
 
 function reattemptTest(testId, title, time) {
