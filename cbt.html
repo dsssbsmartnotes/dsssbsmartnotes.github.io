@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>DSSSB CBT Professional Portal</title>
+<title>DSSSB PYQ - CBT Exam</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <meta name="theme-color" content="#4f46e5">
@@ -257,9 +257,9 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 
 <div id="tgPopup">
   <div style="font-size:40px; margin-bottom:10px;">📢</div>
-  <h3 style="margin:0; color:var(--primary);">Join DSSSB Smart Notes</h3>
+  <h3 style="margin:0; color:var(--primary);">Join DSSSB PYQ Community</h3>
   <p style="font-size:13px; color:var(--text-muted); margin:10px 0 20px;">Get Daily Mock Tests, PDFs & Live Leaderboards</p>
-  <a href="https://t.me/DSSSBSmartNotes" target="_blank">🚀 Join Telegram Channel</a>
+  <a href="https://t.me/DSSSBRank" target="_blank">🚀 Join Telegram Channel</a>
   <button class="tg-btn-continue" onclick="closeTg()">Continue Test</button>
 </div>
 
@@ -275,7 +275,7 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 <div id="startScreen" class="full-overlay">
     <div class="login-card">
         <div style="font-size:50px; margin-bottom:15px;">🛡️</div>
-        <h2 style="margin:0 0 5px 0; color:var(--text-main); font-weight:800;">DSSSB Pro Portal</h2>
+        <h2 style="margin:0 0 5px 0; color:var(--text-main); font-weight:800;">DSSSB PYQ Portal</h2>
         <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Secure Computer Based Test System</p>
         
         <div style="text-align:left; margin-bottom:5px; font-size:13px; font-weight:600; margin-left:5px;">Candidate Name (Auto-Fetched)</div>
@@ -370,20 +370,29 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 </div>
 
 <div id="paymentModal" class="modal">
-    <div class="modal-content" style="text-align:center;">
+    <div class="modal-content" style="text-align:center; max-height: 90vh; overflow-y: auto; padding: 20px;">
         <div style="font-size: 50px; margin-bottom: 10px;">👑</div>
-        <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900;">Upgrade to DSSSB PRO</h2>
-        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; font-weight:600;">Unlock All Premium Mock Tests, Video Classes & PDF Notes!</p>
+        <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900; font-size: 20px;">Upgrade to DSSSB PRO</h2>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px; font-weight:600; line-height:1.4;">
+            Unlock All Premium Mock Tests, Video Classes & PDF Notes!
+        </p>
         
-        <div style="background:var(--primary-light); color:var(--primary-dark); padding:15px; border-radius:12px; margin-bottom:20px; font-size: 14px; font-weight: 700;">
+        <div style="background:var(--primary-light); color:var(--primary-dark); padding:12px; border-radius:12px; margin-bottom:15px; font-size: 14px; font-weight: 700;">
             Special Offer: ₹99 <span style="font-size:12px; text-decoration:line-through; color:grey;">₹499</span>
         </div>
         
-        <p style="font-size:12px; color:var(--text-main); margin-bottom:15px; font-weight:600;">To upgrade, please contact our Admin team directly on Telegram.</p>
+        <p style="font-size:12px; color:var(--text-main); margin-bottom:10px; font-weight:600;">To upgrade, please contact Admin.</p>
         
-        <button onclick="window.open('https://t.me/DSSSBSmartNotes', '_blank')" class="start-btn" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);"><i class="fab fa-telegram-plane"></i> Message Admin to Upgrade</button>
+        <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:15px; font-size:12px;">
+            Your App ID: <b id="displayUserId" style="color:var(--primary); font-size: 14px;">--</b><br>
+            <span style="font-size:10px; color:grey;">Send this ID to Admin on Telegram to activate PRO</span>
+        </div>
         
-        <button onclick="document.getElementById('paymentModal').style.display='none'" class="start-btn" style="background:var(--bg-body); color:var(--text-main); margin-top:15px; box-shadow:none;">Cancel</button>
+        <button onclick="window.open('https://t.me/DSSSBRank', '_blank')" class="start-btn" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4); width: 100%; border: none; padding: 12px; border-radius: 10px; color: white; font-weight: 700; cursor: pointer;">
+            <i class="fab fa-telegram-plane"></i> Message Admin on Telegram
+        </button>
+        
+        <button onclick="document.getElementById('paymentModal').style.display='none'" class="start-btn" style="background:none; color:var(--text-main); margin-top:10px; box-shadow:none; border: none; font-weight: 600; cursor: pointer;">Cancel</button>
     </div>
 </div>
 
@@ -448,7 +457,7 @@ document.addEventListener('keydown', function(e) {
 });
 document.addEventListener('selectstart', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
-document.addEventListener('copy', e => { e.preventDefault(); e.clipboardData.setData('text/plain', 'Cheating is not allowed in DSSSB Pro Portal!'); });
+document.addEventListener('copy', e => { e.preventDefault(); e.clipboardData.setData('text/plain', 'Cheating is not allowed in DSSSB PYQ Portal!'); });
 
 /* =========================
    DATA & CONFIG
@@ -531,11 +540,9 @@ function initApp() {
         let u = window.Telegram.WebApp.initDataUnsafe.user;
         tName = u.first_name + (u.last_name ? " " + u.last_name : "");
         tId = u.id.toString();
-        // Save to device memory
         localStorage.setItem('dsssb_user_name', tName);
         localStorage.setItem('dsssb_user_id', tId);
     } else {
-        // Retrieve from device memory if direct open
         let savedName = localStorage.getItem('dsssb_user_name');
         let savedId = localStorage.getItem('dsssb_user_id');
         if(savedName) {
@@ -978,7 +985,6 @@ function showToast(msg, type="info") {
 }
 
 function togglePalette() { 
-    // Desktop me palette toggle hide kar diya gaya hai
     if(window.innerWidth >= 1024) return;
     
     const p = document.getElementById('palettePanel'); const o = document.getElementById('paletteOverlay');
@@ -1063,7 +1069,7 @@ function sendResultToTelegram(name,score,c,w,s,time,accuracy){
   method:"POST", headers:{"Content-Type":"application/json"},
   body:JSON.stringify({
    chat_id:TELEGRAM_CHAT_ID,
-   text:`📘 DSSSB Mock Test (Pro)\n\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Correct: ${c}\n❌ Wrong: ${w}\n➖ Skipped: ${s}\n🎯 Score: ${score}\n📊 Accuracy: ${accuracy}%\n\n🔥 DSSSB Smart Notes`
+   text:`📘 DSSSB Mock Test (Pro)\n\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Correct: ${c}\n❌ Wrong: ${w}\n➖ Skipped: ${s}\n🎯 Score: ${score}\n📊 Accuracy: ${accuracy}%\n\n🔥 DSSSB PYQ Portal`
   })
  });
 }
@@ -1174,7 +1180,6 @@ async function submitTest() {
     const timeSpentSeconds = (TOTAL_TIME_MINS * 60) - currentState.time;
     const timeStr = `${Math.floor(timeSpentSeconds/60)}m ${timeSpentSeconds%60}s`;
 
-    // Accurate User ID check
     let tId = localStorage.getItem('dsssb_user_id') || "guest";
     
     const userData = {
@@ -1231,7 +1236,7 @@ async function submitTest() {
         let html = `
         <div id="pdfContent" class="analysis-container">
             <div style="text-align:center; padding: 10px 0 20px 0;">
-                <h2 style="color:var(--primary); margin:0; font-size:24px;">DSSSB MOCK TEST REPORT</h2>
+                <h2 style="color:var(--primary); margin:0; font-size:24px;">DSSSB PYQ EXAM REPORT</h2>
                 <p style="color:var(--text-muted); margin:5px 0 0 0;">${CURRENT_TEST_TITLE}</p>
             </div>
 
@@ -1366,7 +1371,7 @@ function downloadPDF() {
     const element = document.getElementById('pdfContent');
     const opt = {
         margin:       0.3,
-        filename:     `DSSSB_Mock_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`,
+        filename:     `DSSSB_PYQ_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
