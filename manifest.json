@@ -1,11 +1,11 @@
 {
-  "name": "DSSSB Pro Portal",
-  "short_name": "DSSSB Smart",
+  "name": "DSSSB PYQ - Mock Tests",
+  "short_name": "DSSSB PYQ",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
-  "description": "Premium CBT Portal for DSSSB Exams.",
+  "description": "Premium CBT Portal for DSSSB Previous Year Questions & Mock Tests.",
   "orientation": "portrait",
   "icons": [
     {
