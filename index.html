@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DSSSB Smart Notes - Student Portal</title>
+<title>DSSSB PYQ - Mock Tests</title>
 
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -65,6 +65,14 @@ body {
     animation: tabFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* --- PLAY STORE LOGIN OVERLAY --- */
+.full-overlay { position: fixed; inset: 0; background: var(--bg-body); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+.login-card { background: var(--bg-card); padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); animation: tabFade 0.5s ease; }
+.login-input { width: 100%; padding: 14px; margin: 10px 0 20px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-body); color: var(--text-main); font-size: 15px; transition: 0.3s; outline:none; }
+.login-input:focus { border-color: var(--primary); }
+.btn-primary { background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%); color: #fff; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); }
+.btn-primary:active { transform: scale(0.98); }
+
 /* --- HERO HEADER --- */
 .hero-header { 
     background: var(--bg-glass); 
@@ -88,10 +96,6 @@ body {
 /* --- WIDGETS --- */
 .countdown-box { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 12px 20px; margin: 15px 20px 0; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 15px rgba(0,0,0,0.1); border: 1px solid #334155; }
 .cd-timer { font-size: 15px; font-weight: 800; color: #fbbf24; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px; }
-
-/* 🌟 PWA Prominent Banner */
-.pwa-banner { background: var(--primary); color: white; margin: 15px 20px 0; padding: 12px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); animation: tabFade 0.5s ease; border: 1px solid var(--primary-light); }
-.pwa-banner button { background: white; color: var(--primary); border: none; padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
 /* 🌟 Daily Goals */
 .daily-goal-card { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; margin: 15px 20px 0; padding: 15px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
@@ -227,7 +231,6 @@ textarea { height: 120px; resize: none; }
 @media (min-width: 1024px) {
     body { padding-bottom: 0; display: flex; background: var(--bg-body); }
     
-    /* Sidebar Navigation */
     .nav-bar { 
         position: fixed; top: 0; left: 0; width: 260px; height: 100vh; 
         flex-direction: column; justify-content: flex-start; padding-top: 40px; gap: 10px;
@@ -238,38 +241,46 @@ textarea { height: 120px; resize: none; }
     .nav-item i { margin-bottom: 0; font-size: 20px; width: 24px; text-align: center; display: inline-block; }
     .nav-item.active { background: var(--primary-light); border-left: 4px solid var(--primary); transform: translateY(0); opacity: 1; font-weight: 800;}
     
-    /* Main Content Area */
     #app { margin-left: 260px; padding: 30px 40px; max-width: 1300px; width: calc(100% - 260px); margin-right: auto; }
     
-    /* Header Floating */
     .hero-header { border-radius: 20px; top: 20px; margin-bottom: 30px; border: 1px solid var(--border); padding: 20px 30px;}
     .user-info h1 { font-size: 22px; }
     
-    /* Grids for Content */
     .quick-actions { padding: 0; margin-bottom: 25px; grid-template-columns: repeat(4, 1fr); gap: 20px; }
     .stats-row { padding: 0; margin-bottom: 25px; gap: 20px; grid-template-columns: repeat(3, 1fr);}
     .target-exams-section { padding: 0; margin-bottom: 25px; }
     
-    /* Desktop Charts Side-by-Side */
     .desktop-charts { display: flex; gap: 20px; margin-bottom: 20px; flex-direction: row;}
     .desktop-charts .chart-box { margin: 0; }
     
-    /* List Grids (Tests, Notes, Videos) */
     .list-container { padding: 0; }
     #testListContainer, #notesListContainer, #videoListContainer { 
         display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; 
     }
     .test-card, .note-card, .video-card { margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; height: 100%;}
     
-    /* Banner Adjustment */
     .pwa-banner, .segment-control, .countdown-box, .daily-goal-card, .qod-card { margin-left: 0; margin-right: 0; }
-    
-    /* Desktop PWA Install Button Style */
     #pwaBannerBtn { padding: 10px 24px; font-size: 14px; cursor: pointer;}
 }
 </style>
 </head>
 <body>
+
+<div id="appLoginModal" class="full-overlay" style="display:none;">
+    <div class="login-card">
+        <div style="font-size:50px; margin-bottom:15px;">🎓</div>
+        <h2 style="margin:0 0 5px 0; color:var(--text-main); font-weight:800;">Welcome to DSSSB PYQ</h2>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:25px;">Create your quick profile to start giving mock tests & track your rank.</p>
+        
+        <div style="text-align:left; margin-bottom:5px; font-size:12px; font-weight:700; margin-left:5px; color:var(--text-muted);">Full Name</div>
+        <input type="text" id="regName" class="login-input" placeholder="e.g. Amit Kumar">
+        
+        <div style="text-align:left; margin-bottom:5px; font-size:12px; font-weight:700; margin-left:5px; color:var(--text-muted);">Mobile Number (Used as your unique ID)</div>
+        <input type="number" id="regPhone" class="login-input" placeholder="e.g. 9876543210">
+        
+        <button class="btn-primary" onclick="registerPlayStoreUser()">START PREPARATION ➔</button>
+    </div>
+</div>
 
 <div id="maintenanceScreen" class="modal" style="background: var(--bg-body); flex-direction: column; text-align: center; z-index:9999;">
     <i class="fas fa-tools fa-4x" style="color:var(--primary); margin-bottom:20px;"></i>
@@ -280,7 +291,7 @@ textarea { height: 120px; resize: none; }
 <div id="toast"></div>
 
 <div class="news-container" id="newsSection" style="display:none;">
-    <span>📢</span> <marquee id="newsText" scrollamount="5">Welcome to DSSSB Smart Notes Portal!</marquee>
+    <span>📢</span> <marquee id="newsText" scrollamount="5">Welcome to DSSSB PYQ Portal!</marquee>
 </div>
 
 <div id="loader">
@@ -294,7 +305,7 @@ textarea { height: 120px; resize: none; }
 
     <div class="hero-header">
         <div class="user-profile">
-            <div class="user-avatar" id="uAvatar">A</div>
+            <div class="user-avatar" id="uAvatar">S</div>
             <div class="user-info">
                 <div class="greeting" id="greetingText">Good Morning</div>
                 <h1 id="uName">Student</h1>
@@ -315,7 +326,7 @@ textarea { height: 120px; resize: none; }
             <div style="display:flex; align-items:center; gap:10px;">
                 <i class="fas fa-arrow-alt-circle-down" style="font-size:24px;"></i>
                 <div style="text-align:left;">
-                    <div style="font-weight:800; font-size:14px;" id="pwaBannerTitle">Install DSSSB App</div>
+                    <div style="font-weight:800; font-size:14px;" id="pwaBannerTitle">Install DSSSB PYQ</div>
                     <div style="font-size:11px; opacity:0.9;" id="pwaBannerDesc">Fast access & better experience</div>
                 </div>
             </div>
@@ -335,7 +346,7 @@ textarea { height: 120px; resize: none; }
         </div>
 
         <div class="quick-actions">
-            <div class="action-item" onclick="window.open('https://t.me/DSSSBSmartNotes')"><i class="fab fa-telegram-plane"></i><span>Channel</span></div>
+            <div class="action-item" onclick="window.open('https://t.me/DSSSBRank')"><i class="fab fa-telegram-plane"></i><span>Channel</span></div>
             <div class="action-item" onclick="shareApp()"><i class="fas fa-share-alt"></i><span>Share</span></div>
             <div class="action-item" onclick="document.getElementById('reportModal').style.display='flex'"><i class="fas fa-headset"></i><span>Support</span></div>
             <div class="action-item" onclick="switchTab('study', document.getElementById('nav-study'))"><i class="fas fa-book-open"></i><span>Library</span></div>
@@ -467,15 +478,20 @@ textarea { height: 120px; resize: none; }
     <div class="modal-content" style="text-align:center;">
         <div style="font-size: 50px; margin-bottom: 10px;">👑</div>
         <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900;">Upgrade to DSSSB PRO</h2>
-        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; font-weight:600;">Unlock All Premium Mock Tests, Video Classes & PDF Notes!</p>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px; font-weight:600;">Unlock All Premium Mock Tests, Video Classes & PDF Notes!</p>
         
-        <div style="background:var(--primary-light); color:var(--primary-dark); padding:15px; border-radius:12px; margin-bottom:20px; font-size: 14px; font-weight: 700;">
+        <div style="background:var(--primary-light); color:var(--primary-dark); padding:15px; border-radius:12px; margin-bottom:15px; font-size: 14px; font-weight: 700;">
             Special Offer: ₹99 <span style="font-size:12px; text-decoration:line-through; color:grey;">₹499</span>
         </div>
         
-        <p style="font-size:12px; color:var(--text-main); margin-bottom:15px; font-weight:600;">To upgrade, please contact our Admin team directly on Telegram.</p>
+        <p style="font-size:12px; color:var(--text-main); margin-bottom:10px; font-weight:600;">To upgrade, please contact Admin.</p>
         
-        <button onclick="window.open('https://t.me/DSSSBSmartNotes', '_blank')" class="start-btn" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);"><i class="fab fa-telegram-plane"></i> Message Admin to Upgrade</button>
+        <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:15px; font-size:12px;">
+            Your App ID: <b id="displayUserId" style="color:var(--primary); font-size: 14px;">--</b><br>
+            <span style="font-size:10px; color:grey;">Send this ID to Admin on Telegram to activate PRO</span>
+        </div>
+        
+        <button onclick="window.open('https://t.me/DSSSBRank', '_blank')" class="start-btn" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);"><i class="fab fa-telegram-plane"></i> Message Admin on Telegram</button>
         
         <button onclick="document.getElementById('paymentModal').style.display='none'" class="start-btn" style="background:var(--bg-body); color:var(--text-main); margin-top:15px; box-shadow:none;">Cancel</button>
     </div>
@@ -593,61 +609,69 @@ window.onload = function() {
     });
 
     // --- UPGRADED NAME & TELEGRAM LOGIC ---
-    if (window.Telegram && window.Telegram.WebApp) {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
         const tg = window.Telegram.WebApp; tg.expand();
         if(tg.colorScheme === 'dark' && !theme) document.body.classList.add('dark-mode');
         
-        if (tg.platform && tg.platform !== 'unknown') {
-            const banner = document.getElementById('pwaBanner');
-            banner.style.display = 'flex';
-            banner.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
-            document.getElementById('pwaBannerTitle').innerHTML = 'Get DSSSB App 🚀';
-            document.getElementById('pwaBannerDesc').innerHTML = 'Open in Chrome/Safari to Install';
-            document.getElementById('pwaBannerBtn').innerHTML = 'Open';
-            document.getElementById('pwaBannerBtn').style.color = '#0369a1';
-            
-            banner.onclick = () => { tg.openLink(window.location.href); };
-        }
+        const u = tg.initDataUnsafe.user;
+        currentUser = u.first_name + (u.last_name ? " " + u.last_name : "");
+        currentUserId = u.id.toString();
+        
+        localStorage.setItem('dsssb_user_name', currentUser);
+        localStorage.setItem('dsssb_user_id', currentUserId);
+        if(u.photo_url) localStorage.setItem('dsssb_user_photo', u.photo_url);
 
-        if(tg.initDataUnsafe.user) {
-            const u = tg.initDataUnsafe.user;
-            currentUser = u.first_name + (u.last_name ? " " + u.last_name : "");
-            currentUserId = u.id.toString();
-            
-            localStorage.setItem('dsssb_user_name', currentUser);
-            localStorage.setItem('dsssb_user_id', currentUserId);
-            if(u.photo_url) localStorage.setItem('dsssb_user_photo', u.photo_url);
+        document.getElementById('uName').innerText = u.first_name;
+        if(u.photo_url) document.getElementById('uAvatar').innerHTML = `<img src="${u.photo_url}">`;
+        else document.getElementById('uAvatar').innerText = u.first_name.charAt(0);
+        
+        if(document.getElementById('displayUserId')) document.getElementById('displayUserId').innerText = currentUserId;
 
-            document.getElementById('uName').innerText = u.first_name;
-            if(u.photo_url) document.getElementById('uAvatar').innerHTML = `<img src="${u.photo_url}">`;
-            else document.getElementById('uAvatar').innerText = u.first_name.charAt(0);
-            
-            fetchData(u);
-        } else {
-            checkLocalUser();
-        }
+        fetchData(u);
     } else {
+        // PLAY STORE OR DIRECT WEB BROWSER
         checkLocalUser();
     }
 };
 
+/* 🔥 PLAY STORE FIRST TIME LOGIN SYSTEM 🔥 */
 function checkLocalUser() {
     const savedName = localStorage.getItem('dsssb_user_name');
     const savedId = localStorage.getItem('dsssb_user_id');
     const savedPhoto = localStorage.getItem('dsssb_user_photo');
 
-    if (savedName) {
+    if (savedName && savedId && savedId !== "guest") {
+        // Old user returning
         currentUser = savedName;
-        currentUserId = savedId || "guest";
+        currentUserId = savedId;
         document.getElementById('uName').innerText = savedName.split(" ")[0];
         if(savedPhoto) document.getElementById('uAvatar').innerHTML = `<img src="${savedPhoto}">`;
         else document.getElementById('uAvatar').innerText = savedName.charAt(0);
+        
+        if(document.getElementById('displayUserId')) document.getElementById('displayUserId').innerText = currentUserId;
+
         fetchData({username: "guest", id: currentUserId});
     } else {
-        document.getElementById('uName').innerText = "Student";
-        document.getElementById('uAvatar').innerText = "S";
-        fetchData({username: "guest", id: "guest"});
+        // First Time User (Play Store Download)
+        document.getElementById('appLoginModal').style.display = 'flex';
     }
+}
+
+function registerPlayStoreUser() {
+    const n = document.getElementById('regName').value.trim();
+    const p = document.getElementById('regPhone').value.trim();
+    
+    if(n.length < 3) return showToast("Please enter your full name");
+    if(p.length < 8) return showToast("Please enter a valid mobile number");
+
+    // Save to device memory
+    localStorage.setItem('dsssb_user_name', n);
+    localStorage.setItem('dsssb_user_id', p);
+    
+    document.getElementById('appLoginModal').style.display = 'none';
+    
+    // Refresh to load app with new name
+    window.location.reload();
 }
 
 /* 4. UTILS & UI */
@@ -717,7 +741,7 @@ function startCountdown() {
 }
 
 function shareApp() {
-    if (navigator.share) navigator.share({ title: 'DSSSB Pro Portal', text: 'Best Exam Prep App!', url: window.location.href });
+    if (navigator.share) navigator.share({ title: 'DSSSB PYQ Portal', text: 'Best Exam Prep App!', url: window.location.href });
     else { navigator.clipboard.writeText(window.location.href); showToast("Link copied to clipboard!"); }
 }
 
@@ -730,7 +754,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     const banner = document.getElementById('pwaBanner');
     banner.style.display = 'flex';
     banner.style.background = 'var(--primary)';
-    document.getElementById('pwaBannerTitle').innerHTML = 'Install DSSSB App';
+    document.getElementById('pwaBannerTitle').innerHTML = 'Install DSSSB PYQ';
     document.getElementById('pwaBannerDesc').innerHTML = 'Fast access & better experience';
     document.getElementById('pwaBannerBtn').innerHTML = 'Install Now';
     document.getElementById('pwaBannerBtn').style.color = 'var(--primary)';
@@ -866,16 +890,6 @@ function renderBookmarks() {
     if(window.MathJax) { MathJax.typesetPromise([container]); }
 }
 
-function removeBookmark(key) {
-    if(confirm("Remove this question?")) {
-        let bms = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {}; 
-        delete bms[key]; 
-        localStorage.setItem('dsssb_bookmarks', JSON.stringify(bms)); 
-        renderBookmarks(); 
-        showToast("Bookmark Removed 🗑️");
-    }
-}
-
 function reattemptTest(testId, title, time) {
     if(confirm("Re-attempting will clear your previous answers on this device. Continue?")) {
         localStorage.removeItem("dsssb_cbt_rank_v2_" + testId); 
@@ -978,19 +992,6 @@ async function fetchData(user) {
             if(goalCard) {
                 goalCard.classList.add('completed');
                 document.getElementById('dgStatus').innerText = 'Completed ✅';
-            }
-        }
-
-        if (currentUser && currentUser.includes("Amit")) { 
-            let grid = document.getElementById('examFoldersGrid');
-            if(grid && !document.getElementById('adminAddFolder')) {
-                grid.innerHTML += `
-                    <div id="adminAddFolder" class="exam-folder-card" style="border: 2px dashed var(--primary); background: transparent;" onclick="window.location.href='admin.html'">
-                        <div class="folder-icon" style="background: var(--primary-light); color: var(--primary);">➕</div>
-                        <div class="folder-title">Admin<br>Panel</div>
-                        <div class="folder-action" style="color: var(--primary); background:var(--primary-light);">Open ⚙️</div>
-                    </div>
-                `;
             }
         }
 
