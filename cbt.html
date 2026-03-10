@@ -369,8 +369,8 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
     </div>
 </div>
 
-<div id="paymentModal" class="modal">
-    <div class="modal-content" style="text-align:center; max-height: 90vh; overflow-y: auto; padding: 20px;">
+<div id="paymentModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px);">
+    <div style="background: var(--bg-card); width: 100%; max-width: 360px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align:center; max-height: 90vh; overflow-y: auto;">
         <div style="font-size: 50px; margin-bottom: 10px;">👑</div>
         <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900; font-size: 20px;">Upgrade to DSSSB PRO</h2>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px; font-weight:600; line-height:1.4;">
@@ -388,11 +388,11 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
             <span style="font-size:10px; color:grey;">Send this ID to Admin on Telegram to activate PRO</span>
         </div>
         
-        <button onclick="window.open('https://t.me/DSSSBRank', '_blank')" class="start-btn" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4); width: 100%; border: none; padding: 12px; border-radius: 10px; color: white; font-weight: 700; cursor: pointer;">
+        <button onclick="window.open('https://t.me/DSSSBRank', '_blank')" style="background:#0088cc; box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4); width: 100%; border: none; padding: 12px; border-radius: 10px; color: white; font-weight: 700; cursor: pointer;">
             <i class="fab fa-telegram-plane"></i> Message Admin on Telegram
         </button>
         
-        <button onclick="document.getElementById('paymentModal').style.display='none'" class="start-btn" style="background:none; color:var(--text-main); margin-top:10px; box-shadow:none; border: none; font-weight: 600; cursor: pointer;">Cancel</button>
+        <button onclick="document.getElementById('paymentModal').style.display='none'" style="background:none; color:var(--text-main); margin-top:10px; box-shadow:none; border: none; font-weight: 600; cursor: pointer; width: 100%; padding: 10px;">Cancel</button>
     </div>
 </div>
 
@@ -1064,12 +1064,13 @@ function toggleFS() {
     }
 }
 
+// 🔥 TELEGRAM RESULT MESSAGE UPDATED WITH EXACT TEST NAME 🔥
 function sendResultToTelegram(name,score,c,w,s,time,accuracy){
  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
   method:"POST", headers:{"Content-Type":"application/json"},
   body:JSON.stringify({
    chat_id:TELEGRAM_CHAT_ID,
-   text:`📘 DSSSB Mock Test (Pro)\n\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Correct: ${c}\n❌ Wrong: ${w}\n➖ Skipped: ${s}\n🎯 Score: ${score}\n📊 Accuracy: ${accuracy}%\n\n🔥 DSSSB PYQ Portal`
+   text:`📘 ${CURRENT_TEST_TITLE}\n\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Correct: ${c}\n❌ Wrong: ${w}\n➖ Skipped: ${s}\n🎯 Score: ${score}\n📊 Accuracy: ${accuracy}%\n\n🔥 DSSSB PYQ Portal`
   })
  });
 }
