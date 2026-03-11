@@ -1453,69 +1453,72 @@ async function submitTest() {
     });
 }
 
-/* 🔥 GHOST WRAPPER & BODY UNLOCK FOR 100% PERFECT PDF 🔥 */
+/* 🔥 ULTIMATE PDF BLANK FIX: FULL BODY UNLOCK 🔥 */
 function downloadPDF() {
     const element = document.getElementById('pdfContent');
+    const resultModal = document.getElementById('resultModal');
     
-    // 1. Temporary Body Unlock (Jisse blank PDF na aaye)
-    document.body.style.position = 'static';
-    document.body.style.overflow = 'visible';
+    // 1. Purane styles save kar lo
+    const originalHtmlStyle = document.documentElement.style.cssText;
+    const originalBodyStyle = document.body.style.cssText;
     
-    // 2. Ghost Wrapper Setup
+    // 2. Scroll ko Top par laao (Iske bina PDF aadhi blank aati hai)
+    window.scrollTo(0, 0);
+    
+    // 3. HTML aur Body ke saare locks tod do
+    document.documentElement.style.cssText = 'height: auto !important; overflow: visible !important; scroll-behavior: auto !important;';
+    document.body.style.cssText = 'position: relative !important; height: auto !important; overflow: visible !important; display: block !important;';
+    
+    // 4. Ghost Wrapper (Ek invisible dabba jismein PDF lamba hoke set hoga)
     const printWrapper = document.createElement('div');
-    printWrapper.style.position = 'absolute';
-    printWrapper.style.top = '0';
-    printWrapper.style.left = '0';
-    printWrapper.style.width = '1000px'; 
-    printWrapper.style.background = '#f8fafc';
-    printWrapper.style.zIndex = '-1'; 
+    printWrapper.id = 'print-wrapper';
+    printWrapper.style.cssText = 'position: absolute; top: 0; left: 0; width: 1000px; background: #f8fafc; z-index: 99999; padding: 20px;';
     
     document.body.appendChild(printWrapper);
-    printWrapper.appendChild(element); // Element ko modal se bahar nikala
+    printWrapper.appendChild(element); // Content ko modal se nikal kar khuli hawa mein rakha
+    
+    resultModal.style.display = 'none'; // Background UI chupaya
 
     const opt = { 
         margin: 0.3, 
         filename: `DSSSB_PYQ_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`, 
         image: { type: 'jpeg', quality: 1.0 }, 
-        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 1000, scrollY: 0 }, 
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            logging: false, 
+            windowWidth: 1000,
+            scrollY: 0,
+            scrollX: 0
+        }, 
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
-    showToast("Generating High Quality PDF... Please wait", "info");
+    showToast("Preparing High Quality PDF...", "info");
     
-    // 3. 500ms ka delay diya taaki browser design render kar le
+    // 5. 1 Second ka wait diya taaki browser design ko lamba stretch kar le
     setTimeout(() => {
         html2pdf().set(opt).from(element).save().then(() => { 
             showToast("PDF Downloaded Successfully! 📥", "success"); 
-            
-            // 4. Wapas Modal ke andar daala aur Body Lock wapas lagaya
-            document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild); 
-            document.body.removeChild(printWrapper);
-            
-            // Mobile Lockdown Wapas
-            document.body.style.position = 'fixed'; 
-            document.body.style.top = '0';
-            document.body.style.left = '0';
-            document.body.style.right = '0';
-            document.body.style.bottom = '0';
-            document.body.style.overflow = 'hidden';
-            
+            restoreUI();
         }).catch(err => {
-            console.error(err);
+            console.error("PDF Gen Error:", err);
             showToast("Error generating PDF", "error");
-            
-            // Error aane par bhi sab wapas normal karna zaroori hai
-            document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild);
-            document.body.removeChild(printWrapper);
-            document.body.style.position = 'fixed';
-            document.body.style.top = '0';
-            document.body.style.left = '0';
-            document.body.style.right = '0';
-            document.body.style.bottom = '0';
-            document.body.style.overflow = 'hidden';
+            restoreUI();
         });
-    }, 500); 
+    }, 1000);
+
+    // 6. PDF nikalte hi sab wapas jaisa tha waisa kar do
+    function restoreUI() {
+        document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild);
+        if(document.getElementById('print-wrapper')) {
+            document.body.removeChild(document.getElementById('print-wrapper'));
+        }
+        document.documentElement.style.cssText = originalHtmlStyle;
+        document.body.style.cssText = originalBodyStyle;
+        resultModal.style.display = 'flex';
+    }
 }
 function reviewSolutions() {
     document.getElementById('resultModal').style.display = 'none';
