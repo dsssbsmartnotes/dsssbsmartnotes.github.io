@@ -56,8 +56,9 @@ body.dark-mode {
 
 * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); overflow: hidden; user-select: none; transition: background 0.3s ease; }
-body { display: flex; flex-direction: column; }
+/* 🔥 FIX: Mobile Body Overflow Lockdown 🔥 */
+html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); user-select: none; transition: background 0.3s ease; }
+body { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
 
 header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 50; height: var(--header-height); color: white; gap: 8px; }
 .brand { font-weight: 900; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
@@ -75,6 +76,7 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .sec-tab.active { background: var(--gradient-main); color: #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
 .sec-tab.done { color: var(--success); background: var(--success-bg); border-color: var(--success); }
 
+/* Main Area Padding */
 #mainArea { flex: 1; padding: 15px 15px 120px 15px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; -webkit-overflow-scrolling: touch; }
 .q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-sm); margin-top: 10px; margin-bottom: 25px; transition: transform 0.2s; }
 .q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
@@ -91,10 +93,10 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
 .opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-/* FIX: Footer buttons visibility */
-footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 10px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; width: 100%; }
+/* 🔥 Guaranteed Footer Visibility Fix 🔥 */
+footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 10px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; width: 100%; position: relative; }
 footer::-webkit-scrollbar { display: none; }
-footer .nav-btn { flex: 1; height: 46px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); font-weight: 700; font-size: 14px; border-radius: 10px; }
+footer .nav-btn { flex: 1; height: 46px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); font-weight: 700; font-size: 14px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 footer .btn-grid { flex: 0 0 50px !important; font-size: 20px; border-color: transparent; }
 footer .nav-btn.primary { background: var(--gradient-main); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 footer .btn-review-next { background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
@@ -616,14 +618,23 @@ function startGame(isResuming) {
     document.querySelector('header').style.display = 'flex';
     document.getElementById('mainArea').style.display = 'block';
     
-    // Ensure footer is visible
+    // 🔥 Make sure footer shows and forces fresh start on dashboard launch
     document.querySelector('footer').style.display = 'flex';
+    
+    if(!isResuming) {
+        currentState.idx = secIndices[0] || 0;
+        currentState.secIdx = 0;
+    }
+    // Force index 0 if opening Quiz or Solution from dashboard
+    if(TEST_MODE === 'solution' || TEST_MODE === 'quiz') {
+        currentState.idx = 0;
+        currentState.secIdx = 0;
+    }
     
     renderSectionTabs();
     
     if(!currentState.timePerQ) currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
     
-    if(!isResuming && TEST_MODE !== 'solution') currentState.idx = secIndices[0];
     loadQuestion(currentState.idx);
     
     if(!document.fullscreenElement && TEST_MODE === 'exam') {
@@ -707,7 +718,7 @@ function applyFont() {
     document.querySelectorAll('.opt').forEach(el => el.style.fontSize = (15 + fontOffset) + 'px');
 }
 
-// 🔥 Hide/Show Solution Toggle Function 🔥
+// 🔥 Smart Hide/Show Solution Function 🔥
 window.toggleAppSolution = function(btn) {
     const content = btn.nextElementSibling;
     const icon = btn.querySelector('.toggle-icon');
@@ -770,7 +781,6 @@ function loadQuestion(idx) {
     const discussArea = document.getElementById('discussionArea');
 
     if(currentState.submitted || isQuizAnswered) {
-        // 🔥 Replaced Direct text with Toggle Button 🔥
         solBox.innerHTML = `
             <button onclick="toggleAppSolution(this)" style="width:100%; padding:12px 15px; background:var(--primary-light); color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:10px; font-size:14px; display:flex; justify-content:space-between; align-items:center; transition:0.3s;">
                 <span>👁️ View Detailed Solution</span>
@@ -883,7 +893,7 @@ function toggleBookmark() {
 
 function selectAns(i) { 
     if(currentState.submitted) return; 
-    if(TEST_MODE === 'quiz' && currentState.answers[currentState.idx] !== null) return; // Prevent changing in quiz mode
+    if(TEST_MODE === 'quiz' && currentState.answers[currentState.idx] !== null) return; 
     
     currentState.answers[currentState.idx] = i; 
     saveState(); 
@@ -960,10 +970,15 @@ function prev() {
     }
 }
 
-/* 🔥 FIX: Footer Buttons now perfectly balance & remain visible 🔥 */
+/* 🔥 FORCE Display on Prev and Next buttons 🔥 */
 function updateNavButtons() {
     const btn = document.getElementById('nextBtn');
     const revBtn = document.getElementById('reviewNextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    
+    // Explicitly guarantee they are shown
+    btn.style.display = "flex";
+    prevBtn.style.display = "flex";
     
     if (currentState.submitted || TEST_MODE === 'quiz') {
         revBtn.style.display = "none";
@@ -982,7 +997,7 @@ function updateNavButtons() {
         } else { 
             btn.innerText = "Save & Next ▶"; 
             btn.style.background = "var(--gradient-main)"; 
-            revBtn.style.display = "block";
+            revBtn.style.display = "flex";
         }
     }
 }
@@ -1358,6 +1373,7 @@ async function submitTest() {
             <h3 style="margin-top:40px; border-left:5px solid var(--primary); padding-left:15px; color:var(--text-main);">Detailed Question Analysis</h3>
         `;
 
+        // 🔥 PDF QUESTIONS RENDER LOGIC (Avoiding Cuts) 🔥
         QUESTIONS.forEach((q, i) => {
             const correctIdx = parseInt(q.ans) - 1;
             const myAns = currentState.answers[i];
@@ -1391,7 +1407,7 @@ async function submitTest() {
             optionsHTML += '</div>';
 
             html += `
-                <div class="card-dashboard pdf-q-card" style="margin-bottom:25px; padding:25px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; page-break-inside: avoid; break-inside: avoid;">
+                <div class="card-dashboard pdf-q-card" style="margin-bottom:25px; padding:25px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; page-break-inside: avoid !important; break-inside: avoid !important; display: block; overflow: hidden;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; color:var(--text-muted); font-size:14px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
                         <div><b style="color:var(--primary); font-size:16px;">Q.${i+1}</b> <span style="margin-left:8px; font-weight:600;">(${q.section || "General"})</span> &nbsp;&nbsp; ${statusBadge}</div>
                         <div style="font-size:13px; font-weight:bold; background:#f1f5f9; padding:6px 12px; border-radius:8px; color:#475569;">⏱️ Time: ${timeStrDisplay}</div>
@@ -1430,28 +1446,28 @@ async function submitTest() {
     });
 }
 
-/* 🔥 FIX: PDF Blank Download Issue 🔥 */
+/* 🔥 GHOST WRAPPER FOR PDF FIX 🔥 */
 function downloadPDF() {
     const element = document.getElementById('pdfContent');
     
-    // Ghost wrapper banaya taaki PDF full render ho
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'absolute';
-    wrapper.style.top = '0';
-    wrapper.style.left = '0';
-    wrapper.style.width = '1000px'; 
-    wrapper.style.background = '#f3f4f6';
-    wrapper.style.padding = '20px';
-    wrapper.style.zIndex = '-9999';
+    // Create an invisible block wrapper so html2pdf can calculate page breaks
+    const printWrapper = document.createElement('div');
+    printWrapper.style.position = 'absolute';
+    printWrapper.style.top = '0';
+    printWrapper.style.left = '0';
+    printWrapper.style.width = '1000px'; 
+    printWrapper.style.background = '#f8fafc';
+    printWrapper.style.zIndex = '-1000';
+    printWrapper.style.display = 'block'; 
     
-    document.body.appendChild(wrapper);
-    wrapper.appendChild(element); // Element ko modal se bahar nikala
+    document.body.appendChild(printWrapper);
+    printWrapper.appendChild(element); // Take out of modal
 
     const opt = { 
-        margin: 0.4, 
+        margin: 0.3, 
         filename: `DSSSB_PYQ_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`, 
         image: { type: 'jpeg', quality: 1.0 }, 
-        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 1000 }, 
+        html2canvas: { scale: 2, useCORS: true, logging: false }, 
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
@@ -1460,13 +1476,14 @@ function downloadPDF() {
     
     html2pdf().set(opt).from(element).save().then(() => { 
         showToast("PDF Downloaded Successfully! 📥", "success"); 
-        document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild); // Wapas daala
-        document.body.removeChild(wrapper);
+        // Put back in modal
+        document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild); 
+        document.body.removeChild(printWrapper);
     }).catch(err => {
         console.error(err);
         showToast("Error generating PDF", "error");
         document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild);
-        document.body.removeChild(wrapper);
+        document.body.removeChild(printWrapper);
     });
 }
 
@@ -1474,7 +1491,7 @@ function reviewSolutions() {
     document.getElementById('resultModal').style.display = 'none';
     currentState.idx = 0; currentState.secIdx = 0;
     renderSectionTabs(); loadQuestion(currentState.idx);
-    document.querySelector('footer').style.display = 'flex'; // Ensure footer visible
+    document.querySelector('footer').style.display = 'flex';
     showToast("Review Mode Activated 👁️", "success");
 }
 
