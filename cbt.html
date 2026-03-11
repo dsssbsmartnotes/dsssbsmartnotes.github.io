@@ -60,10 +60,13 @@ body.dark-mode {
 html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); overflow: hidden; user-select: none; transition: background 0.3s ease; }
 body { display: flex; flex-direction: column; }
 
-header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 50; height: var(--header-height); color: white; }
-.brand { font-weight: 900; font-size: 20px; color: #fff; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.header-tools { display: flex; gap: 8px; align-items: center; }
-.timer-badge { background: rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-family: 'Courier New', monospace; font-size: 16px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px); }
+/* 🔥 Header Overlap FIX 🔥 */
+header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 50; height: var(--header-height); color: white; gap: 8px; }
+.brand { font-weight: 900; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+#displayTitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.header-tools { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+.timer-badge { background: rgba(255,255,255,0.2); color: #fff; padding: 6px 10px; border-radius: 8px; font-weight: 700; font-family: 'Courier New', monospace; font-size: 15px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px); }
 .timer-badge.low { background: rgba(239, 68, 68, 0.9); animation: pulse 1s infinite; }
 .nav-btn { padding: 8px 10px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: 0.2s; white-space: nowrap; }
 .nav-btn:hover { background: rgba(255,255,255,0.3); }
@@ -74,7 +77,7 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .sec-tab.active { background: var(--gradient-main); color: #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
 .sec-tab.done { color: var(--success); background: var(--success-bg); border-color: var(--success); }
 
-/* 🔥 Main Area Padding & Flex Fix 🔥 */
+/* Main Area Padding */
 #mainArea { flex: 1; padding: 15px 15px 120px 15px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; -webkit-overflow-scrolling: touch; }
 .q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-sm); margin-top: 10px; margin-bottom: 25px; transition: transform 0.2s; }
 .q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
@@ -91,11 +94,11 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
 .opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-/* 🔥 Safe Area Footer Fix 🔥 */
-footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: flex-start; gap: 8px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; }
+/* 🔥 Solution Mode Footer Fix 🔥 */
+footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 8px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; width: 100%; }
 footer::-webkit-scrollbar { display: none; }
-footer .nav-btn { height: 44px; flex: 0 0 auto; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
-footer .btn-grid { font-size: 20px; border-color: transparent; }
+footer .nav-btn { flex: 1; height: 44px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
+footer .btn-grid { flex: 0 0 50px !important; font-size: 20px; border-color: transparent; }
 footer .nav-btn.primary { background: var(--gradient-main); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 footer .btn-review-next { background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
 
@@ -201,11 +204,13 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 .toggle-discuss-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
 .toggle-discuss-btn:hover { background: var(--primary-light); }
 
+/* Mobile Adjustments for Header so buttons don't break */
 @media(max-width: 480px) {
     #palettePanel { width: 85%; } 
-    .brand span { font-size: 24px; } .brand { font-size: 18px; }
-    .timer-badge { font-size: 14px; padding: 4px 10px; }
-    .nav-btn { padding: 6px 10px; font-size: 12px; }
+    .brand span:nth-child(2) { font-size: 15px; }
+    .header-tools { gap: 4px; }
+    .nav-btn { padding: 6px 8px; font-size: 12px; }
+    .timer-badge { font-size: 12px; padding: 4px 6px; }
     .sec-tab { padding: 0 12px; font-size: 12px; height: 32px; }
 }
 
@@ -302,16 +307,19 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 </div>
 
 <header>
-    <div class="brand"><span>🛡️</span> <span id="displayTitle" style="font-size: 16px;">DSSSB CBT</span></div>
+    <div class="brand">
+        <span>🛡️</span> 
+        <span id="displayTitle">DSSSB CBT</span>
+    </div>
     <div class="header-tools">
         <button class="nav-btn" onclick="openNotebook()" title="My Notebook" style="background:rgba(255,255,255,0.2);">📓</button>
-        <div style="display:flex; border:1px solid rgba(255,255,255,0.2); border-radius:8px; overflow:hidden; margin-left:5px;">
-            <button class="nav-btn" style="border-radius:0; background:transparent;" onclick="adjustFont(-1)" title="Decrease Font">A-</button>
-            <button class="nav-btn" style="border-radius:0; background:rgba(255,255,255,0.1);" onclick="adjustFont(1)" title="Increase Font">A+</button>
+        <div style="display:flex; border:1px solid rgba(255,255,255,0.2); border-radius:8px; overflow:hidden;">
+            <button class="nav-btn" style="border-radius:0; background:transparent; width: 30px;" onclick="adjustFont(-1)" title="Decrease Font">A-</button>
+            <button class="nav-btn" style="border-radius:0; background:rgba(255,255,255,0.1); width: 30px;" onclick="adjustFont(1)" title="Increase Font">A+</button>
         </div>
         <div id="timer" class="timer-badge">120:00</div>
         <button class="nav-btn" onclick="toggleTheme()" title="Dark Mode">🌙</button>
-        <button class="nav-btn" onclick="toggleLang()" id="langBtn" style="width:40px;">HI</button>
+        <button class="nav-btn" onclick="toggleLang()" id="langBtn" style="min-width: 32px;">HI</button>
     </div>
 </header>
 
@@ -620,7 +628,6 @@ function startGame(isResuming) {
     if (TEST_MODE === 'solution') {
         document.getElementById('mainSubmitBtn').style.display = 'none'; 
         document.getElementById('paletteStatsBox').style.display = 'none'; 
-        document.getElementById('reviewNextBtn').style.display = 'none'; 
         showToast(`Showing Solutions...`, "success");
     } else {
         startTimer();
@@ -911,18 +918,29 @@ function prev() {
     }
 }
 
+/* 🔥 FOOTER NAVIGATION FIX 🔥 */
 function updateNavButtons() {
     const btn = document.getElementById('nextBtn');
     const revBtn = document.getElementById('reviewNextBtn');
-    if(currentState.idx === QUESTIONS.length - 1) { 
-        btn.innerText = currentState.submitted ? "End Review" : "Finish Exam"; 
-        if (!currentState.submitted) {
+    
+    if (currentState.submitted) {
+        // Solution Mode
+        revBtn.style.display = "none";
+        if(currentState.idx === QUESTIONS.length - 1) {
+            btn.innerText = "End Review";
+            btn.style.background = "var(--danger)";
+        } else {
+            btn.innerText = "Next ▶";
+            btn.style.background = "var(--primary)";
+        }
+    } else {
+        // Exam Mode
+        if(currentState.idx === QUESTIONS.length - 1) { 
+            btn.innerText = "Finish Exam"; 
             btn.style.background = "var(--danger)"; 
             revBtn.style.display = "none";
-        }
-    } else { 
-        btn.innerText = currentState.submitted ? "Next >" : "Save & Next ▶"; 
-        if (!currentState.submitted) {
+        } else { 
+            btn.innerText = "Save & Next ▶"; 
             btn.style.background = "var(--gradient-main)"; 
             revBtn.style.display = "block";
         }
