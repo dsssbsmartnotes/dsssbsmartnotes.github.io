@@ -56,9 +56,9 @@ body.dark-mode {
 
 * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-/* 🔥 FIX: Mobile Body Overflow Lockdown 🔥 */
-html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); user-select: none; transition: background 0.3s ease; }
-body { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+/* 🔥 BULLETPROOF PWA LAYOUT 🔥 */
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); overflow: hidden; user-select: none; }
+body { display: flex; flex-direction: column; }
 
 header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 50; height: var(--header-height); color: white; gap: 8px; }
 .brand { font-weight: 900; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
@@ -76,8 +76,8 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .sec-tab.active { background: var(--gradient-main); color: #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
 .sec-tab.done { color: var(--success); background: var(--success-bg); border-color: var(--success); }
 
-/* Main Area Padding */
-#mainArea { flex: 1; padding: 15px 15px 120px 15px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; -webkit-overflow-scrolling: touch; }
+/* 🔥 Main Area Internal Scrolling 🔥 */
+#mainArea { flex: 1; padding: 15px 15px 100px 15px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; -webkit-overflow-scrolling: touch; }
 .q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-sm); margin-top: 10px; margin-bottom: 25px; transition: transform 0.2s; }
 .q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
 .q-text { font-size: 17px; line-height: 1.6; margin-bottom: 20px; font-weight: 500; color: var(--text-main); transition: font-size 0.2s; }
@@ -93,13 +93,12 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
 .opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-/* 🔥 Guaranteed Footer Visibility Fix 🔥 */
-footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 10px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; width: 100%; position: relative; }
-footer::-webkit-scrollbar { display: none; }
-footer .nav-btn { flex: 1; height: 46px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); font-weight: 700; font-size: 14px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-footer .btn-grid { flex: 0 0 50px !important; font-size: 20px; border-color: transparent; }
-footer .nav-btn.primary { background: var(--gradient-main); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
-footer .btn-review-next { background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+/* 🔥 GUARANTEED FIXED FOOTER 🔥 */
+#examFooter { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: none; justify-content: space-between; gap: 10px; z-index: 1000; align-items: center; min-height: 70px; box-shadow: 0 -10px 20px rgba(0,0,0,0.05); }
+#examFooter .nav-btn { flex: 1; height: 46px; background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 700; font-size: 14px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition:0.2s;}
+#examFooter .btn-grid { flex: 0 0 50px !important; font-size: 20px; border:none; background:transparent;}
+#examFooter .nav-btn.primary { background: var(--gradient-main); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+#examFooter .btn-review-next { background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
 
 /* Modals & Overlays */
 #tgPopup, #customConfirm { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--bg-card); padding: 30px; width: 85%; max-width: 340px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); z-index: 9999; text-align: center; display: none; color: var(--text-main); border: 1px solid var(--border-color); backdrop-filter: blur(10px); }
@@ -158,6 +157,7 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 .notebook-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 .notebook-tab.inactive { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-color); }
 
+/* Analysis UI */
 .analysis-container { max-width: 900px; margin: auto; display: flex; flex-direction: column; gap: 14px; padding: 10px 0; font-family: 'Poppins', sans-serif; }
 .card-dashboard { background: var(--bg-card); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
 .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px; color: var(--text-muted); }
@@ -225,8 +225,8 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
     }
     .modal-header button { display: none; } 
     #paletteOverlay { display: none !important; }
-    footer .btn-grid { display: none; } 
-    footer { grid-area: footer; justify-content: center; border-right: 1px solid var(--border-color); }
+    #examFooter .btn-grid { display: none; } 
+    #examFooter { grid-area: footer; justify-content: center; border-right: 1px solid var(--border-color); position:relative; }
     .q-card { box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); }
     .opt { padding: 18px; } 
 }
@@ -405,11 +405,11 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
     </div>
 </div>
 
-<footer>
+<footer id="examFooter">
     <button class="nav-btn btn-grid" onclick="togglePalette()">▦</button>
     <button class="nav-btn" id="prevBtn" onclick="prev()">◀ Prev</button>
-    <button class="nav-btn btn-review-next" id="reviewNextBtn" onclick="reviewAndNext()">⭐ Review & Next</button>
-    <button class="nav-btn primary" id="nextBtn" onclick="next()">Save & Next ▶</button>
+    <button class="nav-btn btn-review-next" id="reviewNextBtn" onclick="reviewAndNext()">⭐ Review</button>
+    <button class="nav-btn primary" id="nextBtn" onclick="next()">Next ▶</button>
 </footer>
 
 <script>
@@ -618,14 +618,14 @@ function startGame(isResuming) {
     document.querySelector('header').style.display = 'flex';
     document.getElementById('mainArea').style.display = 'block';
     
-    // 🔥 Make sure footer shows and forces fresh start on dashboard launch
-    document.querySelector('footer').style.display = 'flex';
+    // 🔥 ALWAYS ENSURE FOOTER IS FLEX WHEN STARTING ANY MODE 🔥
+    document.getElementById('examFooter').style.display = 'flex';
     
     if(!isResuming) {
         currentState.idx = secIndices[0] || 0;
         currentState.secIdx = 0;
     }
-    // Force index 0 if opening Quiz or Solution from dashboard
+    
     if(TEST_MODE === 'solution' || TEST_MODE === 'quiz') {
         currentState.idx = 0;
         currentState.secIdx = 0;
@@ -970,7 +970,7 @@ function prev() {
     }
 }
 
-/* 🔥 FORCE Display on Prev and Next buttons 🔥 */
+/* 🔥 FORCED VISIBILITY OF PREV/NEXT BUTTONS 🔥 */
 function updateNavButtons() {
     const btn = document.getElementById('nextBtn');
     const revBtn = document.getElementById('reviewNextBtn');
@@ -983,19 +983,19 @@ function updateNavButtons() {
     if (currentState.submitted || TEST_MODE === 'quiz') {
         revBtn.style.display = "none";
         if(currentState.idx === QUESTIONS.length - 1) {
-            btn.innerText = TEST_MODE === 'quiz' ? "Finish Quiz 🏁" : "End Review";
+            btn.innerHTML = TEST_MODE === 'quiz' ? "Finish Quiz 🏁" : "End Review 🏁";
             btn.style.background = "var(--danger)";
         } else {
-            btn.innerText = "Next ▶";
+            btn.innerHTML = "Next ▶";
             btn.style.background = "var(--primary)";
         }
     } else {
         if(currentState.idx === QUESTIONS.length - 1) { 
-            btn.innerText = "Finish Exam"; 
+            btn.innerHTML = "Finish Exam"; 
             btn.style.background = "var(--danger)"; 
             revBtn.style.display = "none";
         } else { 
-            btn.innerText = "Save & Next ▶"; 
+            btn.innerHTML = "Save & Next ▶"; 
             btn.style.background = "var(--gradient-main)"; 
             revBtn.style.display = "flex";
         }
@@ -1491,7 +1491,10 @@ function reviewSolutions() {
     document.getElementById('resultModal').style.display = 'none';
     currentState.idx = 0; currentState.secIdx = 0;
     renderSectionTabs(); loadQuestion(currentState.idx);
-    document.querySelector('footer').style.display = 'flex';
+    
+    // Make sure footer stays visible when returning to review!
+    document.getElementById('examFooter').style.display = 'flex';
+    
     showToast("Review Mode Activated 👁️", "success");
 }
 
