@@ -56,8 +56,9 @@ body.dark-mode {
 
 * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); overflow: hidden; user-select: none; transition: background 0.3s ease; }
-body { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
+/* 🔥 FIX: Mobile Body Overflow Lockdown 🔥 */
+html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); user-select: none; transition: background 0.3s ease; }
+body { display: flex; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
 
 header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 50; height: var(--header-height); color: white; gap: 8px; }
 .brand { font-weight: 900; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
@@ -75,6 +76,7 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .sec-tab.active { background: var(--gradient-main); color: #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
 .sec-tab.done { color: var(--success); background: var(--success-bg); border-color: var(--success); }
 
+/* Main Area Padding */
 #mainArea { flex: 1; padding: 15px 15px 120px 15px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; -webkit-overflow-scrolling: touch; }
 .q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-sm); margin-top: 10px; margin-bottom: 25px; transition: transform 0.2s; }
 .q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
@@ -91,7 +93,7 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
 .opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-/* 🔥 Fixed Footer 🔥 */
+/* 🔥 GUARANTEED FIXED FOOTER 🔥 */
 #examFooter { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: none; justify-content: space-between; gap: 10px; z-index: 1000; align-items: center; min-height: 70px; box-shadow: 0 -10px 20px rgba(0,0,0,0.05); }
 #examFooter .nav-btn { flex: 1; height: 46px; background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 700; font-size: 14px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition:0.2s;}
 #examFooter .btn-grid { flex: 0 0 50px !important; font-size: 20px; border:none; background:transparent;}
@@ -493,6 +495,7 @@ function syncOfflineResults() {
                 let updated = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
                 updated = updated.filter(u => u.timestamp !== res.timestamp);
                 localStorage.setItem('dsssb_unsynced_results', JSON.stringify(updated));
+                console.log("Offline result synced.");
             });
         });
     }
@@ -615,6 +618,7 @@ function startGame(isResuming) {
     document.querySelector('header').style.display = 'flex';
     document.getElementById('mainArea').style.display = 'block';
     
+    // 🔥 ALWAYS ENSURE FOOTER IS FLEX WHEN STARTING ANY MODE 🔥
     document.getElementById('examFooter').style.display = 'flex';
     
     if(!isResuming) {
@@ -714,6 +718,7 @@ function applyFont() {
     document.querySelectorAll('.opt').forEach(el => el.style.fontSize = (15 + fontOffset) + 'px');
 }
 
+// 🔥 Smart Hide/Show Solution Function 🔥
 window.toggleAppSolution = function(btn) {
     const content = btn.nextElementSibling;
     const icon = btn.querySelector('.toggle-icon');
@@ -757,11 +762,12 @@ function loadQuestion(idx) {
         let cls = "opt"; 
         const myAns = currentState.answers[idx];
         
+        // 🔥 UPDATE: Highlight only if user has attempted the question 🔥
         if ((currentState.submitted || isQuizAnswered) && myAns !== null) {
             if (i === correctIdx) cls += " correct-ans";
             else if (i === myAns && i !== correctIdx) cls += " wrong-ans";
         } else {
-            if(myAns === i) cls += " sel";
+            if(myAns === i) cls += " sel"; // This handles Exam mode selection
         }
 
         optsHtml += `<div class="${cls}" onclick="selectAns(${i})"><div class="opt-badge">${String.fromCharCode(65+i)}</div><div style="width:100%">${opt}</div></div>`;
@@ -966,11 +972,13 @@ function prev() {
     }
 }
 
+/* 🔥 FORCED VISIBILITY OF PREV/NEXT BUTTONS 🔥 */
 function updateNavButtons() {
     const btn = document.getElementById('nextBtn');
     const revBtn = document.getElementById('reviewNextBtn');
     const prevBtn = document.getElementById('prevBtn');
     
+    // Explicitly guarantee they are shown
     btn.style.display = "flex";
     prevBtn.style.display = "flex";
     
@@ -1089,7 +1097,91 @@ function toggleTheme() { document.body.classList.toggle('dark-mode'); }
 function toggleLang() { const btn = document.getElementById('langBtn'); btn.innerText = btn.innerText === "HI" ? "EN" : "HI"; loadQuestion(currentState.idx); }
 function openZoom(src) { document.getElementById('zoomImg').src = src; document.getElementById('zoomModal').style.display = 'flex'; }
 function closeZoom() { document.getElementById('zoomModal').style.display = 'none'; }
+function closeTg(){ document.getElementById('tgPopup').style.display = "none"; }
 function closeResult() { document.getElementById('resultModal').style.display = 'none'; }
+
+function openNotebook() {
+    document.getElementById('notebookModal').style.display = 'flex';
+    showNotebookTab('bookmarks');
+}
+function closeNotebook() {
+    document.getElementById('notebookModal').style.display = 'none';
+}
+function showNotebookTab(tabName) {
+    const btnB = document.getElementById('tabBookmarks');
+    const btnM = document.getElementById('tabMistakes');
+    const content = document.getElementById('notebookContent');
+    
+    if(tabName === 'bookmarks') {
+        btnB.className = "notebook-tab active";
+        btnM.className = "notebook-tab inactive";
+    } else {
+        btnM.className = "notebook-tab active";
+        btnB.className = "notebook-tab inactive";
+    }
+
+    let dataObj = {};
+    if(tabName === 'bookmarks') dataObj = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
+    else dataObj = JSON.parse(localStorage.getItem('dsssb_mistakes')) || {};
+
+    let grouped = {};
+    Object.values(dataObj).forEach(q => {
+        let sec = q.section || "General";
+        if(!grouped[sec]) grouped[sec] = [];
+        grouped[sec].push(q);
+    });
+
+    if(Object.keys(grouped).length === 0) {
+        content.innerHTML = `<div style="text-align:center; padding:40px 10px; color:var(--text-muted);">
+            <div style="font-size:40px; margin-bottom:10px;">${tabName === 'bookmarks' ? '🔖' : '❌'}</div>
+            <b>No questions saved yet!</b><br>
+            <span style="font-size:12px;">${tabName === 'bookmarks' ? 'Click the bookmark icon during the test to save questions here.' : 'Questions you answer incorrectly will appear here automatically.'}</span>
+        </div>`;
+        return;
+    }
+
+    let html = "";
+    for(let sec in grouped) {
+        html += `<h3 style="color:var(--primary); border-bottom:2px solid var(--primary); padding-bottom:5px; margin-top:20px; font-size:16px;">${sec} <span style="font-size:12px; color:var(--text-muted); float:right; background:var(--primary-light); padding:2px 8px; border-radius:10px;">${grouped[sec].length} Qs</span></h3>`;
+        
+        grouped[sec].forEach((q, idx) => {
+            const isHindi = document.getElementById('langBtn').innerText === "HI";
+            const qText = isHindi ? (q.q_hi || q.q_en) : (q.q_en || q.q_hi);
+            const optionsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
+            const correctAns = optionsArr[q.ans - 1];
+
+            html += `
+            <div class="card-dashboard" style="margin-bottom:15px; padding:15px; position:relative; background:var(--bg-card); border:1px solid var(--border-color);">
+                <div style="font-weight:600; font-size:14px; margin-bottom:10px; color:var(--text-main);">${qText}</div>
+                <div style="font-size:13px; color:var(--success); font-weight:bold; background:var(--success-bg); padding:10px; border-radius:8px; border-left:3px solid var(--success);">
+                    ✅ Correct Answer: <br><span style="color:var(--text-main); font-weight:500;">${correctAns}</span>
+                </div>
+                <div style="margin-top:12px; font-size:13px; color:var(--text-muted); background:var(--primary-light); padding:10px; border-radius:8px;">
+                    <b style="color:var(--primary-dark);">💡 Solution:</b><br>${q.solution || 'No detailed solution attached.'}
+                </div>
+            </div>`;
+        });
+    }
+    content.innerHTML = html;
+    if(window.MathJax) { MathJax.typesetPromise([content]).catch(err => console.log(err)); }
+}
+
+function sendResultToTelegram(name,score,c,w,s,time,accuracy){
+ fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
+  method:"POST", headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   chat_id:TELEGRAM_CHAT_ID,
+   text:`📘 ${CURRENT_TEST_TITLE}\n\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Correct: ${c}\n❌ Wrong: ${w}\n➖ Skipped: ${s}\n🎯 Score: ${score}\n📊 Accuracy: ${accuracy}%\n\n🔥 DSSSB PYQ Portal`
+  })
+ });
+}
+
+function fmt(s){
+  s = Math.max(0, s);
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
 
 function renderComparisonBar(label, userVal, maxVal, topperVal, maxTopperVal, unit = "") {
   const userPct = (userVal > 0) ? Math.min(100, (userVal / maxVal) * 100) : 0;
@@ -1207,16 +1299,19 @@ async function submitTest() {
     unsynced.push(userData);
     localStorage.setItem('dsssb_unsynced_results', JSON.stringify(unsynced));
 
-    db.ref(DB_REF_NAME).push(userData).then(() => {
+    db.ref(DB_REF_NAME).push(userData)
+    .then(() => {
         let currentUnsynced = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
         currentUnsynced = currentUnsynced.filter(u => u.timestamp !== userData.timestamp);
         localStorage.setItem('dsssb_unsynced_results', JSON.stringify(currentUnsynced));
         sendResultToTelegram(currentState.name, totalScore.toFixed(2), correct, wrong, skipped, timeStr, accuracy);
         return getRanksAndToppers(userData.score, userData.timeTaken);
-    }).catch(err => {
+    })
+    .catch(err => {
         showToast("⚠️ Device Offline. Result saved locally.", "warning");
         return { rank: '--', percentile: '--', total: '--', toppersList: [] };
-    }).then(data => {
+    })
+    .then(data => {
         let topperStats = { score: 0, accuracy: 0, correct: 0, wrong: 0, time: 0 };
         if (data.toppersList && data.toppersList.length > 0) {
             let t = data.toppersList[0];
@@ -1260,10 +1355,27 @@ async function submitTest() {
                 ${renderComparisonBar("Time Taken", timeSpentSeconds, TOTAL_TIME_MINS*60, topperStats.time, TOTAL_TIME_MINS*60)}
             </div>
 
+            <div class="card-dashboard" style="margin-top:15px;">
+                <h3 class="section-title">🏆 Top 10 Leaderboard</h3>
+                <div style="overflow-x:auto">
+                    <table class="topper-table">
+                        <tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr>
+                        ${data.toppersList && data.toppersList.length > 0 ? data.toppersList.map((t, idx) => `
+                        <tr style="${t.name === currentState.name ? 'background:var(--success-bg); font-weight:bold;' : ''}">
+                            <td>${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '#' + (idx + 1)))}</td>
+                            <td>${t.name} ${t.name === currentState.name ? '(You)' : ''}</td>
+                            <td><b>${t.score}</b></td>
+                            <td>${fmt(t.timeTaken)}</td>
+                        </tr>
+                        `).join('') : '<tr><td colspan="4" style="text-align:center;">Leaderboard not available offline.</td></tr>'}
+                    </table>
+                </div>
+            </div>
+
             <h3 style="margin-top:40px; border-left:5px solid var(--primary); padding-left:15px; color:var(--text-main);">Detailed Question Analysis</h3>
         `;
 
-        // 🔥 RESTORED PERFECT GHOST PDF GENERATION & SKIP LOGIC 🔥
+        // 🔥 PDF QUESTIONS RENDER LOGIC (Avoiding Cuts & Handling Skips) 🔥
         QUESTIONS.forEach((q, i) => {
             const correctIdx = parseInt(q.ans) - 1;
             const myAns = currentState.answers[i];
@@ -1286,7 +1398,7 @@ async function submitTest() {
                 let optStyle = "padding:12px 15px; border:1px solid #cbd5e1; border-radius:8px; font-size:15px; background:#f8fafc; color:#334155;";
                 let icon = "";
                 
-                // Show ticks/crosses ONLY if user attempted it
+                // 🔥 NEW LOGIC: Only highlight options if user actually attempted the question 🔥
                 if (myAns !== null) {
                     if (optIdx === correctIdx) {
                         optStyle = "padding:12px 15px; border:2px solid #10b981; border-radius:8px; font-size:15px; background:#d1fae5; color:#065f46; font-weight:bold;";
@@ -1296,6 +1408,7 @@ async function submitTest() {
                         icon = "❌ ";
                     }
                 }
+
                 optionsHTML += `<div style="${optStyle}">${icon}<b>${String.fromCharCode(65+optIdx)})</b> ${opt}</div>`;
             });
             optionsHTML += '</div>';
@@ -1325,25 +1438,26 @@ async function submitTest() {
                  <div style="text-align:center; margin-top:30px; padding-bottom:30px;">
                     <button onclick="downloadPDF()" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--bg-body); color:var(--primary); border:2px solid var(--primary); box-shadow:none;">Download Heavy PDF 📥</button>
                     <button onclick="reviewSolutions()" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--success); margin-left:10px;">Review Solutions 👁️</button>
+                    <button onclick="openNotebook()" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--warning); margin-left:10px; margin-top:10px;">View Mistake Book 📓</button>
                     <button onclick="window.location.href='index.html'" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--primary); margin-left:10px; margin-top:10px;">Back to Home 🏠</button>
                  </div>`;
 
         resBox.innerHTML = html;
 
-        new Chart(document.getElementById('pieChart'), { type: 'doughnut', data: { labels: ['Correct', 'Wrong', 'Skipped'], datasets: [{ data: [correct, wrong, skipped], backgroundColor: ['#10b981', '#ef4444', '#f59e0b'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false } } } });
+        new Chart(document.getElementById('pieChart'), { type: 'doughnut', data: { labels: ['Correct', 'Wrong', 'Skipped'], datasets: [{ data: [correct, wrong, skipped], backgroundColor: ['#10b981', '#ef4444', '#f59e0b'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#64748b' } }, title: { display: true, text: 'Overall Accuracy', color: '#1e293b' } } } });
         const secLabels = Object.keys(sectionScores);
         const secCorrect = secLabels.map(s => sectionScores[s].c);
         const secWrong = secLabels.map(s => sectionScores[s].w);
         const secSkipped = secLabels.map(s => sectionScores[s].s);
-        new Chart(document.getElementById('barChart'), { type: 'bar', data: { labels: secLabels, datasets: [{ label: 'Correct', data: secCorrect, backgroundColor: '#10b981' }, { label: 'Wrong', data: secWrong, backgroundColor: '#ef4444' }, { label: 'Skipped', data: secSkipped, backgroundColor: '#f59e0b' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { display:false } } } });
+        new Chart(document.getElementById('barChart'), { type: 'bar', data: { labels: secLabels, datasets: [{ label: 'Correct', data: secCorrect, backgroundColor: '#10b981' }, { label: 'Wrong', data: secWrong, backgroundColor: '#ef4444' }, { label: 'Skipped', data: secSkipped, backgroundColor: '#f59e0b' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom', labels: { color: '#64748b' } }, title: { display: true, text: 'Section-wise Performance', color: '#1e293b' } } } });
     });
 }
 
-/* 🔥 THE LEGENDARY GHOST WRAPPER FOR PDF FIX 🔥 */
+/* 🔥 GHOST WRAPPER FOR PDF FIX 🔥 */
 function downloadPDF() {
     const element = document.getElementById('pdfContent');
     
-    // Ghost wrapper banaya
+    // Create an invisible block wrapper so html2pdf can calculate page breaks
     const printWrapper = document.createElement('div');
     printWrapper.style.position = 'absolute';
     printWrapper.style.top = '0';
@@ -1352,46 +1466,32 @@ function downloadPDF() {
     printWrapper.style.background = '#f8fafc';
     printWrapper.style.zIndex = '-1000';
     printWrapper.style.display = 'block'; 
-
-    // VERY IMPORTANT: Scroll to top and unlock body to prevent blank cut-off
-    window.scrollTo(0, 0); 
-    const origOverflow = document.body.style.overflow;
-    const origPos = document.body.style.position;
-    document.body.style.overflow = 'visible';
-    document.body.style.position = 'relative';
     
     document.body.appendChild(printWrapper);
-    printWrapper.appendChild(element); // Element ko modal se bahar nikala
+    printWrapper.appendChild(element); // Take out of modal
 
     const opt = { 
         margin: 0.3, 
         filename: `DSSSB_PYQ_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`, 
         image: { type: 'jpeg', quality: 1.0 }, 
-        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 1000 }, 
+        html2canvas: { scale: 2, useCORS: true, logging: false }, 
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
     showToast("Generating High Quality PDF...", "info");
     
-    // 800ms wait kiya taaki HTML theek se render ho jaye
-    setTimeout(() => {
-        html2pdf().set(opt).from(element).save().then(() => { 
-            showToast("PDF Downloaded Successfully! 📥", "success"); 
-            // Wapas original jagah pe daala
-            document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild); 
-            document.body.removeChild(printWrapper);
-            document.body.style.overflow = origOverflow;
-            document.body.style.position = origPos;
-        }).catch(err => {
-            console.error(err);
-            showToast("Error generating PDF", "error");
-            document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild);
-            document.body.removeChild(printWrapper);
-            document.body.style.overflow = origOverflow;
-            document.body.style.position = origPos;
-        });
-    }, 800);
+    html2pdf().set(opt).from(element).save().then(() => { 
+        showToast("PDF Downloaded Successfully! 📥", "success"); 
+        // Put back in modal
+        document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild); 
+        document.body.removeChild(printWrapper);
+    }).catch(err => {
+        console.error(err);
+        showToast("Error generating PDF", "error");
+        document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild);
+        document.body.removeChild(printWrapper);
+    });
 }
 
 function reviewSolutions() {
@@ -1399,7 +1499,7 @@ function reviewSolutions() {
     currentState.idx = 0; currentState.secIdx = 0;
     renderSectionTabs(); loadQuestion(currentState.idx);
     
-    // Guarantee footer shows in review mode
+    // Make sure footer stays visible when returning to review!
     document.getElementById('examFooter').style.display = 'flex';
     
     showToast("Review Mode Activated 👁️", "success");
