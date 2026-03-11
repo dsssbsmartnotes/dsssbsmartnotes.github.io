@@ -91,9 +91,10 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
 .opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 8px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; width: 100%; }
+/* FIX: Footer buttons visibility */
+footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 10px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; width: 100%; }
 footer::-webkit-scrollbar { display: none; }
-footer .nav-btn { flex: 1; height: 44px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
+footer .nav-btn { flex: 1; height: 46px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); font-weight: 700; font-size: 14px; border-radius: 10px; }
 footer .btn-grid { flex: 0 0 50px !important; font-size: 20px; border-color: transparent; }
 footer .nav-btn.primary { background: var(--gradient-main); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 footer .btn-review-next { background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
@@ -151,12 +152,10 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 .modal-card { background: var(--bg-card); width: 100%; max-width: 800px; max-height: 90vh; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 1px solid var(--glass-border); }
 .modal-body { padding: 25px; overflow-y: auto; }
 
-/* Notebook specific styles */
 .notebook-tab { flex: 1; padding: 12px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; font-size: 14px; }
 .notebook-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 .notebook-tab.inactive { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-color); }
 
-/* Analysis UI */
 .analysis-container { max-width: 900px; margin: auto; display: flex; flex-direction: column; gap: 14px; padding: 10px 0; font-family: 'Poppins', sans-serif; }
 .card-dashboard { background: var(--bg-card); border-radius: 12px; padding: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
 .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px; color: var(--text-muted); }
@@ -186,7 +185,6 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 .topper-table td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
 .section-title { font-size: 16px; font-weight: 700; margin: 0 0 14px; color: var(--text-main); padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
 
-/* Discussion System */
 .discussion-section { margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px; }
 .comment-box { background: var(--bg-body); border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 13px; }
 .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
@@ -200,7 +198,6 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 .toggle-discuss-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
 .toggle-discuss-btn:hover { background: var(--primary-light); }
 
-/* Mobile Adjustments for Header so buttons don't break */
 @media(max-width: 480px) {
     #palettePanel { width: 85%; } 
     .brand span:nth-child(2) { font-size: 15px; }
@@ -210,7 +207,6 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
     .sec-tab { padding: 0 12px; font-size: 12px; height: 32px; }
 }
 
-/* Desktop UI */
 @media(min-width: 1024px) {
     body {
         display: grid; 
@@ -333,7 +329,7 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
         
         <div id="qContent" class="q-text"></div>
         <div id="opts"></div>
-        <div id="solutionDisplay" class="sol-box" style="display:none; margin-top:20px; background:var(--primary-light); padding:15px; border-left:4px solid var(--primary); color:var(--primary-dark); font-size:14px; border-radius:4px;"></div>
+        <div id="solutionDisplay" class="sol-box" style="display:none; margin-top:20px;"></div>
         
         <div id="discussionArea" style="display:none;">
             <button class="toggle-discuss-btn" onclick="toggleDiscussion()">💬 Discuss this Question</button>
@@ -409,7 +405,7 @@ footer .btn-review-next { background: var(--warning); color: #fff; border: none;
 
 <footer>
     <button class="nav-btn btn-grid" onclick="togglePalette()">▦</button>
-    <button class="nav-btn" onclick="prev()">◀ Prev</button>
+    <button class="nav-btn" id="prevBtn" onclick="prev()">◀ Prev</button>
     <button class="nav-btn btn-review-next" id="reviewNextBtn" onclick="reviewAndNext()">⭐ Review & Next</button>
     <button class="nav-btn primary" id="nextBtn" onclick="next()">Save & Next ▶</button>
 </footer>
@@ -577,7 +573,7 @@ function initApp() {
                 currentState.answers = new Array(QUESTIONS.length).fill(null);
                 currentState.review = new Array(QUESTIONS.length).fill(false);
                 currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
-                currentState.submitted = false; // special handling in loadQuestion
+                currentState.submitted = false; 
                 document.getElementById('resumeBox').style.display = 'none';
             } else {
                 currentState.answers = new Array(QUESTIONS.length).fill(null);
@@ -619,7 +615,10 @@ function startGame(isResuming) {
     document.getElementById('startScreen').style.display = 'none';
     document.querySelector('header').style.display = 'flex';
     document.getElementById('mainArea').style.display = 'block';
+    
+    // Ensure footer is visible
     document.querySelector('footer').style.display = 'flex';
+    
     renderSectionTabs();
     
     if(!currentState.timePerQ) currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
@@ -708,6 +707,23 @@ function applyFont() {
     document.querySelectorAll('.opt').forEach(el => el.style.fontSize = (15 + fontOffset) + 'px');
 }
 
+// 🔥 Hide/Show Solution Toggle Function 🔥
+window.toggleAppSolution = function(btn) {
+    const content = btn.nextElementSibling;
+    const icon = btn.querySelector('.toggle-icon');
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.innerText = '▲';
+        btn.style.background = 'var(--primary)';
+        btn.style.color = '#fff';
+    } else {
+        content.style.display = 'none';
+        icon.innerText = '▼';
+        btn.style.background = 'var(--primary-light)';
+        btn.style.color = 'var(--primary-dark)';
+    }
+};
+
 function loadQuestion(idx) {
     currentState.idx = idx; 
     const q = QUESTIONS[idx]; 
@@ -729,7 +745,6 @@ function loadQuestion(idx) {
     const correctIdx = parseInt(q.ans) - 1;
     const optsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
     
-    // 🔥 QUIZ MODE CHECK 🔥
     let isQuizAnswered = (TEST_MODE === 'quiz' && currentState.answers[idx] !== null);
     
     optsArr.forEach((opt, i) => {
@@ -755,7 +770,16 @@ function loadQuestion(idx) {
     const discussArea = document.getElementById('discussionArea');
 
     if(currentState.submitted || isQuizAnswered) {
-        solBox.innerHTML = `<b>💡 Solution:</b><br>${q.solution || 'No detailed solution provided.'}`;
+        // 🔥 Replaced Direct text with Toggle Button 🔥
+        solBox.innerHTML = `
+            <button onclick="toggleAppSolution(this)" style="width:100%; padding:12px 15px; background:var(--primary-light); color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:10px; font-size:14px; display:flex; justify-content:space-between; align-items:center; transition:0.3s;">
+                <span>👁️ View Detailed Solution</span>
+                <span class="toggle-icon">▼</span>
+            </button>
+            <div class="sol-content" style="display:none; background:var(--bg-body); padding:15px; border-left:4px solid var(--primary); font-size:14px; border-radius:8px; border:1px solid var(--border-color); line-height:1.6;">
+                <b>💡 Solution:</b><br><br>${q.solution || 'No detailed solution provided.'}
+            </div>
+        `;
         solBox.style.display = 'block';
         if(actionBtns) actionBtns.style.display = 'none'; 
         
@@ -859,9 +883,8 @@ function toggleBookmark() {
 
 function selectAns(i) { 
     if(currentState.submitted) return; 
-    // Prevent changing answer in Quiz Mode once selected
-    if(TEST_MODE === 'quiz' && currentState.answers[currentState.idx] !== null) return;
-
+    if(TEST_MODE === 'quiz' && currentState.answers[currentState.idx] !== null) return; // Prevent changing in quiz mode
+    
     currentState.answers[currentState.idx] = i; 
     saveState(); 
     loadQuestion(currentState.idx); 
@@ -937,7 +960,7 @@ function prev() {
     }
 }
 
-/* 🔥 Updated Nav Buttons for Quiz & Sol Mode 🔥 */
+/* 🔥 FIX: Footer Buttons now perfectly balance & remain visible 🔥 */
 function updateNavButtons() {
     const btn = document.getElementById('nextBtn');
     const revBtn = document.getElementById('reviewNextBtn');
@@ -1335,7 +1358,6 @@ async function submitTest() {
             <h3 style="margin-top:40px; border-left:5px solid var(--primary); padding-left:15px; color:var(--text-main);">Detailed Question Analysis</h3>
         `;
 
-        // 🔥 UPGRADED HEAVY QUALITY PDF GENERATION 🔥
         QUESTIONS.forEach((q, i) => {
             const correctIdx = parseInt(q.ans) - 1;
             const myAns = currentState.answers[i];
@@ -1408,24 +1430,51 @@ async function submitTest() {
     });
 }
 
+/* 🔥 FIX: PDF Blank Download Issue 🔥 */
 function downloadPDF() {
     const element = document.getElementById('pdfContent');
+    
+    // Ghost wrapper banaya taaki PDF full render ho
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.top = '0';
+    wrapper.style.left = '0';
+    wrapper.style.width = '1000px'; 
+    wrapper.style.background = '#f3f4f6';
+    wrapper.style.padding = '20px';
+    wrapper.style.zIndex = '-9999';
+    
+    document.body.appendChild(wrapper);
+    wrapper.appendChild(element); // Element ko modal se bahar nikala
+
     const opt = { 
         margin: 0.4, 
         filename: `DSSSB_PYQ_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`, 
         image: { type: 'jpeg', quality: 1.0 }, 
-        html2canvas: { scale: 3, useCORS: true, logging: false, windowWidth: 1024, letterRendering: true }, 
+        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 1000 }, 
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
+    
     showToast("Generating High Quality PDF...", "info");
-    html2pdf().set(opt).from(element).save().then(() => { showToast("PDF Downloaded Successfully! 📥", "success"); });
+    
+    html2pdf().set(opt).from(element).save().then(() => { 
+        showToast("PDF Downloaded Successfully! 📥", "success"); 
+        document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild); // Wapas daala
+        document.body.removeChild(wrapper);
+    }).catch(err => {
+        console.error(err);
+        showToast("Error generating PDF", "error");
+        document.getElementById('resultContent').insertBefore(element, document.getElementById('resultContent').firstChild);
+        document.body.removeChild(wrapper);
+    });
 }
 
 function reviewSolutions() {
     document.getElementById('resultModal').style.display = 'none';
     currentState.idx = 0; currentState.secIdx = 0;
     renderSectionTabs(); loadQuestion(currentState.idx);
+    document.querySelector('footer').style.display = 'flex'; // Ensure footer visible
     showToast("Review Mode Activated 👁️", "success");
 }
 
