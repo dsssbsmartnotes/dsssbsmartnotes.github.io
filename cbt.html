@@ -56,11 +56,9 @@ body.dark-mode {
 
 * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-/* 🔥 FLEXBOX LAYOUT MAGIC 🔥 */
 html, body { width: 100%; height: 100dvh; margin: 0; padding: 0; font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif; background: var(--bg-body-gradient); color: var(--text-main); overflow: hidden; user-select: none; transition: background 0.3s ease; }
 body { display: flex; flex-direction: column; }
 
-/* 🔥 Header Overlap FIX 🔥 */
 header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 50; height: var(--header-height); color: white; gap: 8px; }
 .brand { font-weight: 900; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
 #displayTitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
@@ -77,7 +75,6 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .sec-tab.active { background: var(--gradient-main); color: #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
 .sec-tab.done { color: var(--success); background: var(--success-bg); border-color: var(--success); }
 
-/* Main Area Padding */
 #mainArea { flex: 1; padding: 15px 15px 120px 15px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; -webkit-overflow-scrolling: touch; }
 .q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-sm); margin-top: 10px; margin-bottom: 25px; transition: transform 0.2s; }
 .q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
@@ -94,7 +91,6 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 .opt.wrong-ans { border-color: var(--danger); background: var(--danger-bg); }
 .opt.wrong-ans .opt-badge { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-/* 🔥 Solution Mode Footer Fix 🔥 */
 footer { flex-shrink: 0; background: var(--bg-card); padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 8px; display: none; z-index: 40; align-items: center; height: auto; min-height: 70px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); overflow-x: auto; scrollbar-width: none; width: 100%; }
 footer::-webkit-scrollbar { display: none; }
 footer .nav-btn { flex: 1; height: 44px; background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
@@ -454,7 +450,7 @@ setInterval(function() {
 window.addEventListener('resize', function() {
     const widthThreshold = window.outerWidth - window.innerWidth > 160;
     const heightThreshold = window.outerHeight - window.innerHeight > 160;
-    if ((widthThreshold || heightThreshold) && !currentState.submitted) {
+    if ((widthThreshold || heightThreshold) && !currentState.submitted && TEST_MODE !== 'quiz') {
         alert("🚨 Developer Tools Detected! Auto-submitting exam.");
         submitTest();
     }
@@ -542,6 +538,10 @@ function initApp() {
         document.getElementById('startNameInput').value = tName + " (Solution Mode)";
         document.getElementById('startExamBtn').innerText = "VIEW SOLUTIONS ➔";
         document.getElementById('timer').style.display = 'none'; 
+    } else if (TEST_MODE === 'quiz') {
+        document.getElementById('startNameInput').value = tName + " (Quiz Mode)";
+        document.getElementById('startExamBtn').innerText = "START QUIZ ⚡";
+        document.getElementById('timer').style.display = 'none'; 
     } else {
         document.getElementById('startNameInput').value = tName;
     }
@@ -572,6 +572,12 @@ function initApp() {
                     currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
                 }
                 currentState.submitted = true; 
+                document.getElementById('resumeBox').style.display = 'none';
+            } else if (TEST_MODE === 'quiz') {
+                currentState.answers = new Array(QUESTIONS.length).fill(null);
+                currentState.review = new Array(QUESTIONS.length).fill(false);
+                currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
+                currentState.submitted = false; // special handling in loadQuestion
                 document.getElementById('resumeBox').style.display = 'none';
             } else {
                 currentState.answers = new Array(QUESTIONS.length).fill(null);
@@ -605,7 +611,7 @@ function validateLogin() {
     const name = document.getElementById('startNameInput').value.trim();
     if(!name) return showToast("Name is missing!", "error");
     
-    currentState.name = name.replace(" (Solution Mode)", "");
+    currentState.name = name.replace(" (Solution Mode)", "").replace(" (Quiz Mode)", "");
     startGame(false);
 }
 
@@ -621,7 +627,7 @@ function startGame(isResuming) {
     if(!isResuming && TEST_MODE !== 'solution') currentState.idx = secIndices[0];
     loadQuestion(currentState.idx);
     
-    if(!document.fullscreenElement && TEST_MODE !== 'solution') {
+    if(!document.fullscreenElement && TEST_MODE === 'exam') {
         try { document.documentElement.requestFullscreen(); } catch(e){}
     }
     
@@ -629,6 +635,10 @@ function startGame(isResuming) {
         document.getElementById('mainSubmitBtn').style.display = 'none'; 
         document.getElementById('paletteStatsBox').style.display = 'none'; 
         showToast(`Showing Solutions...`, "success");
+    } else if (TEST_MODE === 'quiz') {
+        document.getElementById('mainSubmitBtn').style.display = 'none'; 
+        document.getElementById('paletteStatsBox').style.display = 'none'; 
+        showToast(`Quiz Mode Started ⚡`, "success");
     } else {
         startTimer();
         setInterval(saveState, 5000); 
@@ -638,7 +648,7 @@ function startGame(isResuming) {
 }
 
 function saveState() {
-    if (TEST_MODE === 'solution') return; 
+    if (TEST_MODE === 'solution' || TEST_MODE === 'quiz') return; 
     const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
     if(currentState.submitted) { localStorage.removeItem(specificStorageKey); return; }
     localStorage.setItem(specificStorageKey, JSON.stringify(currentState));
@@ -665,7 +675,7 @@ function renderSectionTabs() {
     const bar = document.getElementById('sectionBar'); let html = "";
     SECTION_MAP.forEach((sec, i) => {
         let cls = "sec-tab"; let icon = "🔒";
-        if (currentState.submitted) {
+        if (currentState.submitted || TEST_MODE === 'quiz') {
             cls += " done"; icon = "🔓";
             if (i === currentState.secIdx) { cls += " active"; icon = "👁️"; }
         } else {
@@ -678,7 +688,7 @@ function renderSectionTabs() {
 }
 
 function jumpSection(secIndex) {
-    if(currentState.submitted) {
+    if(currentState.submitted || TEST_MODE === 'quiz') {
         currentState.secIdx = secIndex;
         loadQuestion(secIndices[secIndex]);
         renderSectionTabs();
@@ -719,11 +729,14 @@ function loadQuestion(idx) {
     const correctIdx = parseInt(q.ans) - 1;
     const optsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
     
+    // 🔥 QUIZ MODE CHECK 🔥
+    let isQuizAnswered = (TEST_MODE === 'quiz' && currentState.answers[idx] !== null);
+    
     optsArr.forEach((opt, i) => {
         let cls = "opt"; 
         const myAns = currentState.answers[idx];
         
-        if (currentState.submitted) {
+        if (currentState.submitted || isQuizAnswered) {
             if (i === correctIdx) cls += " correct-ans";
             else if (i === myAns && i !== correctIdx) cls += " wrong-ans";
         } else {
@@ -741,7 +754,7 @@ function loadQuestion(idx) {
     const actionBtns = document.getElementById('actionButtons');
     const discussArea = document.getElementById('discussionArea');
 
-    if(currentState.submitted) {
+    if(currentState.submitted || isQuizAnswered) {
         solBox.innerHTML = `<b>💡 Solution:</b><br>${q.solution || 'No detailed solution provided.'}`;
         solBox.style.display = 'block';
         if(actionBtns) actionBtns.style.display = 'none'; 
@@ -764,7 +777,7 @@ function loadQuestion(idx) {
     applyFont(); 
     
     if(window.MathJax) {
-        const fullContent = contentDiv.innerHTML + optsContainer.innerHTML + (currentState.submitted ? solBox.innerHTML : "");
+        const fullContent = contentDiv.innerHTML + optsContainer.innerHTML + (currentState.submitted || isQuizAnswered ? solBox.innerHTML : "");
         if (fullContent.includes('$') || fullContent.includes('\\(')) {
             MathJax.typesetPromise([contentDiv, optsContainer, solBox]).catch(err => console.log(err));
         }
@@ -846,9 +859,12 @@ function toggleBookmark() {
 
 function selectAns(i) { 
     if(currentState.submitted) return; 
+    // Prevent changing answer in Quiz Mode once selected
+    if(TEST_MODE === 'quiz' && currentState.answers[currentState.idx] !== null) return;
+
     currentState.answers[currentState.idx] = i; 
-    loadQuestion(currentState.idx); 
     saveState(); 
+    loadQuestion(currentState.idx); 
 }
 
 function showConfirmDialog(title, desc, onProceed) {
@@ -875,7 +891,7 @@ function reviewAndNext() {
 
 function next() {
     if(currentState.idx < QUESTIONS.length - 1) {
-        if (currentState.submitted) {
+        if (currentState.submitted || TEST_MODE === 'quiz') {
             loadQuestion(currentState.idx + 1);
             return;
         }
@@ -896,7 +912,10 @@ function next() {
             loadQuestion(currentState.idx + 1); 
         }
     } else { 
-        if(!currentState.submitted) {
+        if(TEST_MODE === 'quiz') {
+            showToast("Quiz Completed! Returning home...", "success");
+            setTimeout(() => { window.location.href = "index.html"; }, 1500);
+        } else if(!currentState.submitted) {
             submitTestDialog();
         } else {
             showToast("End of Questions. Redirecting to Dashboard...", "info");
@@ -906,7 +925,7 @@ function next() {
 }
 
 function prev() {
-    if (currentState.submitted) {
+    if (currentState.submitted || TEST_MODE === 'quiz') {
         if(currentState.idx > 0) loadQuestion(currentState.idx - 1);
         return;
     }
@@ -918,23 +937,21 @@ function prev() {
     }
 }
 
-/* 🔥 FOOTER NAVIGATION FIX 🔥 */
+/* 🔥 Updated Nav Buttons for Quiz & Sol Mode 🔥 */
 function updateNavButtons() {
     const btn = document.getElementById('nextBtn');
     const revBtn = document.getElementById('reviewNextBtn');
     
-    if (currentState.submitted) {
-        // Solution Mode
+    if (currentState.submitted || TEST_MODE === 'quiz') {
         revBtn.style.display = "none";
         if(currentState.idx === QUESTIONS.length - 1) {
-            btn.innerText = "End Review";
+            btn.innerText = TEST_MODE === 'quiz' ? "Finish Quiz 🏁" : "End Review";
             btn.style.background = "var(--danger)";
         } else {
             btn.innerText = "Next ▶";
             btn.style.background = "var(--primary)";
         }
     } else {
-        // Exam Mode
         if(currentState.idx === QUESTIONS.length - 1) { 
             btn.innerText = "Finish Exam"; 
             btn.style.background = "var(--danger)"; 
@@ -952,7 +969,7 @@ function startTimer() {
     timerInt = setInterval(() => {
         if(currentState.submitted) return;
         
-        if (TEST_MODE !== 'solution' && currentState.idx !== undefined) {
+        if (TEST_MODE !== 'solution' && TEST_MODE !== 'quiz' && currentState.idx !== undefined) {
             currentState.timePerQ[currentState.idx] = (currentState.timePerQ[currentState.idx] || 0) + 1;
         }
 
@@ -989,13 +1006,15 @@ function renderPalette() {
         let startIdx = secIndices[currentState.secIdx];
         let endIdx = (currentState.secIdx === SECTION_MAP.length - 1) ? QUESTIONS.length : secIndices[currentState.secIdx + 1];
         
-        if (!currentState.submitted && i >= startIdx && i < endIdx) {
+        if (!currentState.submitted && TEST_MODE !== 'quiz' && i >= startIdx && i < endIdx) {
             if(myAns !== null) stats.ans++;
             else stats.unans++;
             if(currentState.review[i]) stats.rev++;
         }
 
-        if (currentState.submitted) {
+        let isQuizAnswered = (TEST_MODE === 'quiz' && myAns !== null);
+
+        if (currentState.submitted || isQuizAnswered) {
             const correctIdx = parseInt(q.ans) - 1;
             if (myAns === correctIdx) cls += " p-correct";
             else if (myAns !== null && myAns !== correctIdx) cls += " p-wrong";
@@ -1007,8 +1026,8 @@ function renderPalette() {
             else if(currentState.review[i]) cls += " review";
         }
         
-        let isAccessible = currentState.submitted;
-        if (!currentState.submitted) {
+        let isAccessible = currentState.submitted || TEST_MODE === 'quiz';
+        if (!currentState.submitted && TEST_MODE !== 'quiz') {
             if (i >= startIdx && i < endIdx) { isAccessible = true; }
         }
         
@@ -1026,7 +1045,7 @@ function renderPalette() {
         grid.appendChild(btn);
     });
 
-    if (!currentState.submitted && TEST_MODE !== 'solution') {
+    if (!currentState.submitted && TEST_MODE !== 'solution' && TEST_MODE !== 'quiz') {
         document.getElementById('c-ans').innerText = stats.ans;
         document.getElementById('c-unans').innerText = stats.unans;
         document.getElementById('c-rev').innerText = stats.rev;
@@ -1041,7 +1060,6 @@ function closeZoom() { document.getElementById('zoomModal').style.display = 'non
 function closeTg(){ document.getElementById('tgPopup').style.display = "none"; }
 function closeResult() { document.getElementById('resultModal').style.display = 'none'; }
 
-/* 🔥 NEW NOTEBOOK LOGIC 🔥 */
 function openNotebook() {
     document.getElementById('notebookModal').style.display = 'flex';
     showNotebookTab('bookmarks');
@@ -1105,11 +1123,7 @@ function showNotebookTab(tabName) {
         });
     }
     content.innerHTML = html;
-    
-    // Process math equations inside notebook
-    if(window.MathJax) {
-        MathJax.typesetPromise([content]).catch(err => console.log(err));
-    }
+    if(window.MathJax) { MathJax.typesetPromise([content]).catch(err => console.log(err)); }
 }
 
 function sendResultToTelegram(name,score,c,w,s,time,accuracy){
@@ -1195,8 +1209,6 @@ async function submitTest() {
 
     let totalScore = 0, correct = 0, wrong = 0, skipped = 0;
     let sectionScores = {};
-    
-    // Load mistakes diary to auto-save or auto-remove
     let mistakesDiary = JSON.parse(localStorage.getItem('dsssb_mistakes')) || {};
 
     QUESTIONS.forEach((q, i) => {
@@ -1212,16 +1224,13 @@ async function submitTest() {
             skipped++; sectionScores[secName].s++;
         } else if(myAns === correctIdx) { 
             correct++; totalScore += 1; sectionScores[secName].c++; 
-            // If student answered correctly this time, remove from mistake book
             if(mistakesDiary[qKey]) delete mistakesDiary[qKey];
         } else { 
             wrong++; totalScore -= 0.25; sectionScores[secName].w++; 
-            // Save wrong answer to mistake book
             mistakesDiary[qKey] = q;
         }
     });
 
-    // Save updated mistake book to device
     localStorage.setItem('dsssb_mistakes', JSON.stringify(mistakesDiary));
 
     const attempted = correct + wrong;
@@ -1271,34 +1280,34 @@ async function submitTest() {
         }
 
         let html = `
-        <div id="pdfContent" class="analysis-container">
-            <div style="text-align:center; padding: 10px 0 20px 0;">
-                <h2 style="color:var(--primary); margin:0; font-size:24px;">DSSSB PYQ EXAM REPORT</h2>
-                <p style="color:var(--text-muted); margin:5px 0 0 0;">${CURRENT_TEST_TITLE}</p>
+        <div id="pdfContent" class="analysis-container" style="background:#fff; padding:20px; border-radius:12px;">
+            <div style="text-align:center; padding: 10px 0 20px 0; border-bottom: 2px solid var(--border-color); margin-bottom: 20px;">
+                <h2 style="color:var(--primary); margin:0; font-size:26px; font-weight:900; letter-spacing:1px;">DSSSB PYQ EXAM REPORT</h2>
+                <p style="color:var(--text-muted); margin:8px 0 0 0; font-size:16px; font-weight:600;">${CURRENT_TEST_TITLE}</p>
             </div>
             
-            <div class="card-dashboard">
+            <div class="card-dashboard" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;">
                 <div class="info-grid">
                     <div><b>Name:</b> ${currentState.name}</div>
                     <div><b>Status:</b> ${totalScore >= DYNAMIC_CUTOFF ? '<span style="color:var(--success)">QUALIFIED 🏆</span>' : '<span style="color:var(--danger)">NOT QUALIFIED ❌</span>'} <span style="font-size:11px; color:var(--text-muted);">(Cut-off: ${DYNAMIC_CUTOFF})</span></div>
                 </div>
             </div>
 
-            <div class="card-dashboard score-summary">
-                <div class="score-item"><h4>🏆 Rank</h4><p>${data.rank} <span class="total-count">/ ${data.total}</span></p></div>
-                <div class="score-item"><h4>📊 Percentile</h4><p>${data.percentile}%</p></div>
-                <div class="score-item"><h4>🧮 Score</h4><p>${totalScore.toFixed(2)}</p></div>
-                <div class="score-item"><h4>⏱ Time</h4><p>${fmt(timeSpentSeconds)}</p></div>
+            <div class="card-dashboard score-summary" style="margin-top:15px; border:none; box-shadow:none;">
+                <div class="score-item" style="background:#e0e7ff; border:1px solid #c7d2fe;"><h4>🏆 Rank</h4><p>${data.rank} <span class="total-count">/ ${data.total}</span></p></div>
+                <div class="score-item" style="background:#d1fae5; border:1px solid #a7f3d0;"><h4>📊 Percentile</h4><p style="color:#065f46;">${data.percentile}%</p></div>
+                <div class="score-item" style="background:#fef3c7; border:1px solid #fde68a;"><h4>🧮 Score</h4><p style="color:#b45309;">${totalScore.toFixed(2)}</p></div>
+                <div class="score-item" style="background:#fee2e2; border:1px solid #fecaca;"><h4>⏱ Time</h4><p style="color:#991b1b;">${fmt(timeSpentSeconds)}</p></div>
             </div>
 
-            <div class="card-dashboard attempt-summary">
+            <div class="card-dashboard attempt-summary" style="margin-top:15px;">
                <div class="attempt-box at-correct">✅ Correct<span>${correct}</span></div>
                <div class="attempt-box at-wrong">❌ Wrong<span>${wrong}</span></div>
                <div class="attempt-box at-unattempted">🟡 Skipped<span>${skipped}</span></div>
                <div class="attempt-box at-total">✍️ Attempted<span>${attempted} / ${QUESTIONS.length}</span></div>
             </div>
 
-            <div class="card-dashboard">
+            <div class="card-dashboard" style="margin-top:15px;">
                 <h3 class="section-title">📊 You vs Topper</h3>
                 ${renderComparisonBar("Score", totalScore.toFixed(2), QUESTIONS.length, topperStats.score, QUESTIONS.length)}
                 ${renderComparisonBar("Accuracy", accuracy, 100, topperStats.accuracy, 100, "%")}
@@ -1306,7 +1315,7 @@ async function submitTest() {
                 ${renderComparisonBar("Time Taken", timeSpentSeconds, TOTAL_TIME_MINS*60, topperStats.time, TOTAL_TIME_MINS*60)}
             </div>
 
-            <div class="card-dashboard">
+            <div class="card-dashboard" style="margin-top:15px;">
                 <h3 class="section-title">🏆 Top 10 Leaderboard</h3>
                 <div style="overflow-x:auto">
                     <table class="topper-table">
@@ -1323,20 +1332,17 @@ async function submitTest() {
                 </div>
             </div>
 
-            <div class="dashboard-grid" style="margin-top:20px; display: grid; gap: 20px;">
-                <div class="card-dashboard" style="height:250px;"><canvas id="pieChart"></canvas></div>
-                <div class="card-dashboard" style="height:250px;"><canvas id="barChart"></canvas></div>
-            </div>
             <h3 style="margin-top:40px; border-left:5px solid var(--primary); padding-left:15px; color:var(--text-main);">Detailed Question Analysis</h3>
         `;
 
+        // 🔥 UPGRADED HEAVY QUALITY PDF GENERATION 🔥
         QUESTIONS.forEach((q, i) => {
             const correctIdx = parseInt(q.ans) - 1;
             const myAns = currentState.answers[i];
             let statusBadge = "";
-            if(myAns === null) statusBadge = `<span style="background:#94a3b8; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">SKIPPED</span>`;
-            else if(myAns === correctIdx) statusBadge = `<span style="background:#10b981; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">CORRECT</span>`;
-            else statusBadge = `<span style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px;">WRONG</span>`;
+            if(myAns === null) statusBadge = `<span style="background:#94a3b8; color:#fff; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:bold;">🟡 SKIPPED</span>`;
+            else if(myAns === correctIdx) statusBadge = `<span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:bold;">✅ CORRECT</span>`;
+            else statusBadge = `<span style="background:#ef4444; color:#fff; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:bold;">❌ WRONG</span>`;
             
             const timeTakenSec = currentState.timePerQ[i] || 0;
             const tMin = Math.floor(timeTakenSec/60);
@@ -1347,28 +1353,48 @@ async function submitTest() {
             const qText = isHindi ? (q.q_hi || q.q_en) : (q.q_en || q.q_hi);
             const optionsArr = isHindi ? (q.op_hi || q.op_en) : (q.op_en || q.op_hi);
 
+            let optionsHTML = '<div style="margin-top:15px; display:flex; flex-direction:column; gap:10px;">';
+            optionsArr.forEach((opt, optIdx) => {
+                let optStyle = "padding:12px 15px; border:1px solid #cbd5e1; border-radius:8px; font-size:15px; background:#f8fafc; color:#334155;";
+                let icon = "";
+                if (optIdx === correctIdx) {
+                    optStyle = "padding:12px 15px; border:2px solid #10b981; border-radius:8px; font-size:15px; background:#d1fae5; color:#065f46; font-weight:bold;";
+                    icon = "✅ ";
+                } else if (optIdx === myAns && myAns !== correctIdx) {
+                    optStyle = "padding:12px 15px; border:2px solid #ef4444; border-radius:8px; font-size:15px; background:#fee2e2; color:#991b1b; font-weight:bold;";
+                    icon = "❌ ";
+                }
+                optionsHTML += `<div style="${optStyle}">${icon}<b>${String.fromCharCode(65+optIdx)})</b> ${opt}</div>`;
+            });
+            optionsHTML += '</div>';
+
             html += `
-                <div class="card-dashboard" style="margin-bottom:15px; padding:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; color:var(--text-muted); font-size:13px;">
-                        <div><b>Q.${i+1} (${q.section || "General"})</b> ${statusBadge}</div>
-                        <div style="font-size:11px; font-weight:bold; background:var(--bg-body); padding:4px 8px; border-radius:6px;">⏱️ ${timeStrDisplay}</div>
+                <div class="card-dashboard pdf-q-card" style="margin-bottom:25px; padding:25px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; color:var(--text-muted); font-size:14px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+                        <div><b style="color:var(--primary); font-size:16px;">Q.${i+1}</b> <span style="margin-left:8px; font-weight:600;">(${q.section || "General"})</span> &nbsp;&nbsp; ${statusBadge}</div>
+                        <div style="font-size:13px; font-weight:bold; background:#f1f5f9; padding:6px 12px; border-radius:8px; color:#475569;">⏱️ Time: ${timeStrDisplay}</div>
                     </div>
-                    <div style="font-weight:500; margin-bottom:15px; color:var(--text-main); font-size:16px;">${qText}</div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; font-size:13px; background:var(--bg-body); padding:12px; border-radius:8px;">
-                        <div><b style="color:var(--text-muted);">Your Answer:</b> <br>${myAns !== null ? String.fromCharCode(65+myAns)+') '+optionsArr[myAns] : 'Not Attempted'}</div>
-                        <div><b style="color:var(--text-muted);">Correct Answer:</b> <br><span style="color:var(--success); font-weight:bold;">${String.fromCharCode(65+correctIdx)+') '+optionsArr[correctIdx]}</span></div>
+                    <div style="font-weight:600; margin-bottom:20px; color:#0f172a; font-size:17px; line-height:1.6;">${qText}</div>
+                    
+                    ${optionsHTML}
+                    
+                    <div style="margin-top:20px; background:#f0fdf4; padding:15px; border-left:5px solid #16a34a; color:#166534; font-size:15px; border-radius:6px; font-weight:500;">
+                        <b>✅ Correct Answer:</b> ${String.fromCharCode(65+correctIdx)}) ${optionsArr[correctIdx]}
                     </div>
-                    <div style="margin-top:15px; background:var(--primary-light); padding:15px; border-left:4px solid var(--primary); color:var(--primary-dark); font-size:14px; border-radius:4px;"><b>💡 Solution:</b><br>${q.solution || 'No solution provided.'}</div>
+                    
+                    <div style="margin-top:15px; background:#eff6ff; padding:15px; border-left:5px solid #2563eb; color:#1e3a8a; font-size:15px; border-radius:6px; line-height:1.5;">
+                        <b style="color:#1d4ed8; font-size:16px;">💡 Detailed Solution:</b><br><br>${q.solution || 'No detailed solution provided.'}
+                    </div>
                 </div>
             `;
         });
 
         html += `</div>
                  <div style="text-align:center; margin-top:30px; padding-bottom:30px;">
-                    <button onclick="downloadPDF()" class="btn-primary" style="width:auto; padding:12px 30px; background:var(--bg-body); color:var(--primary); border:2px solid var(--primary); box-shadow:none;">Download PDF Report 📥</button>
-                    <button onclick="reviewSolutions()" class="btn-primary" style="width:auto; padding:12px 30px; background:var(--success); margin-left:10px;">Review Solutions 👁️</button>
-                    <button onclick="openNotebook()" class="btn-primary" style="width:auto; padding:12px 30px; background:var(--warning); margin-left:10px; margin-top:10px;">View Mistake Book 📓</button>
-                    <button onclick="window.location.href='index.html'" class="btn-primary" style="width:auto; padding:12px 30px; background:var(--primary); margin-left:10px; margin-top:10px;">Back to Home 🏠</button>
+                    <button onclick="downloadPDF()" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--bg-body); color:var(--primary); border:2px solid var(--primary); box-shadow:none;">Download Heavy PDF 📥</button>
+                    <button onclick="reviewSolutions()" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--success); margin-left:10px;">Review Solutions 👁️</button>
+                    <button onclick="openNotebook()" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--warning); margin-left:10px; margin-top:10px;">View Mistake Book 📓</button>
+                    <button onclick="window.location.href='index.html'" class="btn-primary" style="width:auto; padding:14px 35px; font-size:16px; background:var(--primary); margin-left:10px; margin-top:10px;">Back to Home 🏠</button>
                  </div>`;
 
         resBox.innerHTML = html;
@@ -1384,8 +1410,15 @@ async function submitTest() {
 
 function downloadPDF() {
     const element = document.getElementById('pdfContent');
-    const opt = { margin: 0.3, filename: `DSSSB_PYQ_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
-    showToast("Generating PDF... Please wait", "info");
+    const opt = { 
+        margin: 0.4, 
+        filename: `DSSSB_PYQ_Report_${currentState.name.replace(/\s+/g, '_')}.pdf`, 
+        image: { type: 'jpeg', quality: 1.0 }, 
+        html2canvas: { scale: 3, useCORS: true, logging: false, windowWidth: 1024, letterRendering: true }, 
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    showToast("Generating High Quality PDF...", "info");
     html2pdf().set(opt).from(element).save().then(() => { showToast("PDF Downloaded Successfully! 📥", "success"); });
 }
 
