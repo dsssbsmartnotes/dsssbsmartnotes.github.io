@@ -11,11 +11,11 @@
 
 <link rel="manifest" href="/manifest.json">
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <script>
@@ -531,13 +531,6 @@ window.onload = function() {
     else if(hour >= 17) greeting = "Good Evening 🌙";
     document.getElementById('greetingText').innerText = greeting;
 
-    setTimeout(() => {
-        if(document.getElementById('loader').style.display !== 'none') {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-        }
-    }, 3500); 
-
     const theme = localStorage.getItem('theme');
     if(theme === 'dark') document.body.classList.add('dark-mode');
     
@@ -547,7 +540,7 @@ window.onload = function() {
         if(snap.val() === true) {
             document.getElementById('maintenanceScreen').style.display = 'flex';
             document.getElementById('app').style.display = 'none';
-            document.getElementById('loader').style.display = 'none';
+            if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none';
         } else {
             document.getElementById('maintenanceScreen').style.display = 'none';
         }
@@ -899,7 +892,6 @@ function removeNotebookItem(key, type) {
     }
 }
 
-// 🔥 REATTEMPT FUNCTION UPDATED FOR DYNAMIC URLS 🔥
 function reattemptTest(testId, fullUrlQuery) {
     if(confirm("Re-attempting will clear your previous answers on this device. Continue?")) {
         localStorage.removeItem("dsssb_cbt_rank_v2_" + testId); 
@@ -908,7 +900,7 @@ function reattemptTest(testId, fullUrlQuery) {
     }
 }
 
-/* 9. MAIN DATA FETCHING */
+/* 🔥 9. MAIN DATA FETCHING (LAZY LOAD IMPLEMENTED) 🔥 */
 async function fetchData(user) {
     try {
         if(currentUserId !== "guest") {
@@ -917,9 +909,9 @@ async function fetchData(user) {
             userRef.onDisconnect().update({ state: 'offline', lastActive: firebase.database.ServerValue.TIMESTAMP });
         }
         
-        const [testsSnap, resultsSnap, proSnap, notesSnap] = await Promise.all([ 
+        // 🚀 ONLY FETCH DASHBOARD ESSENTIALS FIRST (Super Fast)
+        const [testsSnap, proSnap, notesSnap] = await Promise.all([ 
             db.ref("dsssb_tests_db").once("value"), 
-            db.ref("dsssb_results_live").once("value"), 
             db.ref("dsssb_pro_users").once("value"), 
             db.ref("dsssb_notes_db").once("value") 
         ]);
@@ -958,57 +950,66 @@ async function fetchData(user) {
         searchNotes(''); 
         renderVideos();
 
-        const res = resultsSnap.val() || {}, testData = testsSnap.val() || {}; 
-        let userMap = {}, myTestCount = 0, subScores = { 'Maths': [], 'English': [], 'Hindi': [], 'GK': [], 'Reasoning': [] };
-
-        Object.values(res).forEach(r => {
-            let rName = r.name || "Student", safeScore = parseFloat(r.score) || 0;
-            if(!userMap[rName]) userMap[rName] = {s:0, c:0, isMe: false};
-            userMap[rName].s += safeScore; 
-            userMap[rName].c++;
-            
-            if (String(r.userId || "").trim() === String(currentUserId).trim() || rName === currentUser) {
-                userMap[rName].isMe = true; 
-                myTestCount++; 
-                if(r.testId) attemptedTestIds.add(r.testId); 
-                
-                let cat = r.category || (testData[r.testId] ? testData[r.testId].category : "GK");
-                let max = r.testId && testData[r.testId] ? (parseInt(testData[r.testId].qs) || parseInt(testData[r.testId].marks) || 20) : 20;
-                let percent = (safeScore / max) * 100;
-                let matchedCat = Object.keys(subScores).find(k => cat.toLowerCase().includes(k.toLowerCase()));
-                
-                if(matchedCat) subScores[matchedCat].push(percent); else subScores['GK'].push(percent); 
-            }
-        });
-
-        document.getElementById('valTests').innerText = myTestCount;
-        let lb = Object.keys(userMap).map(k=>({name: k, avg: userMap[k].s / userMap[k].c, isMe: userMap[k].isMe})).sort((a,b) => b.avg - a.avg);
-        let myRank = lb.findIndex(u => u.isMe) + 1; 
-        document.getElementById('valRank').innerText = myRank > 0 ? `#${myRank}` : '--';
-        renderLeaderboard(lb);
-
-        let chartAverages = []; 
-        ['Maths', 'English', 'Hindi', 'GK', 'Reasoning'].forEach(cat => { 
-            let arr = subScores[cat]; 
-            chartAverages.push(Math.round(arr.length > 0 ? (arr.reduce((a,b)=>a+b, 0) / arr.length) : 0)); 
-        });
-        
-        renderCharts(chartAverages);
+        const testData = testsSnap.val() || {}; 
         allTests = Object.keys(testData).map(key => ({ dbKey: key, ...testData[key] }));
         filterTests('all', document.querySelector('.filter-pill'));
 
-        if (myTestCount > 0) {
-            let goalCard = document.getElementById('dailyGoalCard');
-            if(goalCard) {
-                goalCard.classList.add('completed');
-                document.getElementById('dgStatus').innerText = 'Completed ✅';
+        // 🚀 REMOVE LOADER IMMEDIATELY AFTER TESTS LOAD 🚀
+        if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none'; 
+        document.getElementById('app').style.display = 'block'; 
+
+        // 🚀 BACKGROUND FETCH: Load heavy Leaderboard results silently
+        db.ref("dsssb_results_live").once("value").then(resultsSnap => {
+            const res = resultsSnap.val() || {};
+            let userMap = {}, myTestCount = 0, subScores = { 'Maths': [], 'English': [], 'Hindi': [], 'GK': [], 'Reasoning': [] };
+
+            Object.values(res).forEach(r => {
+                let rName = r.name || "Student", safeScore = parseFloat(r.score) || 0;
+                if(!userMap[rName]) userMap[rName] = {s:0, c:0, isMe: false};
+                userMap[rName].s += safeScore; 
+                userMap[rName].c++;
+                
+                if (String(r.userId || "").trim() === String(currentUserId).trim() || rName === currentUser) {
+                    userMap[rName].isMe = true; 
+                    myTestCount++; 
+                    if(r.testId) attemptedTestIds.add(r.testId); 
+                    
+                    let cat = r.category || (testData[r.testId] ? testData[r.testId].category : "GK");
+                    let max = r.testId && testData[r.testId] ? (parseInt(testData[r.testId].qs) || parseInt(testData[r.testId].marks) || 20) : 20;
+                    let percent = (safeScore / max) * 100;
+                    let matchedCat = Object.keys(subScores).find(k => cat.toLowerCase().includes(k.toLowerCase()));
+                    
+                    if(matchedCat) subScores[matchedCat].push(percent); else subScores['GK'].push(percent); 
+                }
+            });
+
+            document.getElementById('valTests').innerText = myTestCount;
+            let lb = Object.keys(userMap).map(k=>({name: k, avg: userMap[k].s / userMap[k].c, isMe: userMap[k].isMe})).sort((a,b) => b.avg - a.avg);
+            let myRank = lb.findIndex(u => u.isMe) + 1; 
+            document.getElementById('valRank').innerText = myRank > 0 ? `#${myRank}` : '--';
+            renderLeaderboard(lb);
+
+            let chartAverages = []; 
+            ['Maths', 'English', 'Hindi', 'GK', 'Reasoning'].forEach(cat => { 
+                let arr = subScores[cat]; 
+                chartAverages.push(Math.round(arr.length > 0 ? (arr.reduce((a,b)=>a+b, 0) / arr.length) : 0)); 
+            });
+            
+            renderCharts(chartAverages);
+            filterTests('all', document.querySelector('.filter-pill')); // Refresh UI to show Attempted buttons
+
+            if (myTestCount > 0) {
+                let goalCard = document.getElementById('dailyGoalCard');
+                if(goalCard) {
+                    goalCard.classList.add('completed');
+                    document.getElementById('dgStatus').innerText = 'Completed ✅';
+                }
             }
-        }
+        });
 
     } catch(e) { 
         console.error("Data Load Error:", e); 
-    } finally { 
-        document.getElementById('loader').style.display = 'none'; 
+        if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none'; 
         document.getElementById('app').style.display = 'block'; 
     }
 }
@@ -1066,7 +1067,6 @@ function filterTests(cat, el, searchQuery = "") {
         let isSaved = savedTests.includes(t.dbKey);
         let liveHTML = ((t.isLive && t.isLive.toString() === 'true') || (t.scheduledTime && Date.now() >= t.scheduledTime)) ? '<div class="live-badge">🔴 LIVE NOW</div>' : '';
         
-        // 🔥 DYNAMIC PARAMS LOGIC FOR URL 🔥
         let pm = t.pm !== undefined ? parseFloat(t.pm) : 1;
         let nm = t.nm !== undefined ? parseFloat(t.nm) : 0.25;
         let isLocked = (t.lock === false || t.lock === "false") ? false : true;
