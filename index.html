@@ -899,11 +899,12 @@ function removeNotebookItem(key, type) {
     }
 }
 
-function reattemptTest(testId, title, time) {
+// 🔥 REATTEMPT FUNCTION UPDATED FOR DYNAMIC URLS 🔥
+function reattemptTest(testId, fullUrlQuery) {
     if(confirm("Re-attempting will clear your previous answers on this device. Continue?")) {
         localStorage.removeItem("dsssb_cbt_rank_v2_" + testId); 
         localStorage.removeItem("dsssb_cbt_rank_v2_" + testId + "_final"); 
-        window.location.href = `cbt.html?testid=${testId}&title=${encodeURIComponent(title)}&time=${time}&mode=exam`;
+        window.location.href = `cbt.html?${fullUrlQuery}`;
     }
 }
 
@@ -1012,6 +1013,8 @@ async function fetchData(user) {
     }
 }
 
+
+/* 10. RENDERERS & SMART SEARCH */
 const debouncedTestSearch = debounce((val) => searchTests(val), 300);
 const debouncedNoteSearch = debounce((val) => searchNotes(val), 300);
 
@@ -1063,15 +1066,22 @@ function filterTests(cat, el, searchQuery = "") {
         let isSaved = savedTests.includes(t.dbKey);
         let liveHTML = ((t.isLive && t.isLive.toString() === 'true') || (t.scheduledTime && Date.now() >= t.scheduledTime)) ? '<div class="live-badge">🔴 LIVE NOW</div>' : '';
         
+        // 🔥 DYNAMIC PARAMS LOGIC FOR URL 🔥
+        let pm = t.pm !== undefined ? parseFloat(t.pm) : 1;
+        let nm = t.nm !== undefined ? parseFloat(t.nm) : 0.25;
+        let isLocked = (t.lock === false || t.lock === "false") ? false : true;
+        
+        let urlQuery = `testid=${t.dbKey}&title=${encodeURIComponent(t.title)}&time=${t.time||120}&pm=${pm}&nm=${nm}&lock=${isLocked}`;
+        
         let buttonHTML = locked ? 
             `<button class="start-btn locked" onclick="document.getElementById('paymentModal').style.display='flex'">Unlock Premium</button>` : 
             isAttempted ? 
             `<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:5px;">
-                <button class="start-btn" style="background:var(--bg-body); color:var(--text-main); border:1px solid var(--border); padding: 8px; font-size:12px;" onclick="reattemptTest('${t.dbKey}', '${(t.title||"").replace(/'/g, "\\'")}', ${t.time||120})">🔄 Retake</button>
-                <button class="start-btn" style="background:var(--warning); color:#fff; border:none; padding: 8px; font-size:12px;" onclick="window.location.href='cbt.html?testid=${t.dbKey}&title=${encodeURIComponent(t.title)}&mode=quiz'">⚡ Quiz Mode</button>
-                <button class="start-btn" style="padding: 8px; background:#10b981; font-size:12px;" onclick="window.location.href='cbt.html?testid=${t.dbKey}&title=${encodeURIComponent(t.title)}&mode=solution'">👁️ Solutions</button>
+                <button class="start-btn" style="background:var(--bg-body); color:var(--text-main); border:1px solid var(--border); padding: 8px; font-size:12px;" onclick="reattemptTest('${t.dbKey}', '${urlQuery}&mode=exam')">🔄 Retake</button>
+                <button class="start-btn" style="background:var(--warning); color:#fff; border:none; padding: 8px; font-size:12px;" onclick="window.location.href='cbt.html?${urlQuery}&mode=quiz'">⚡ Quiz Mode</button>
+                <button class="start-btn" style="padding: 8px; background:#10b981; font-size:12px;" onclick="window.location.href='cbt.html?${urlQuery}&mode=solution'">👁️ Solutions</button>
             </div>` : 
-            `<button class="start-btn" onclick="window.location.href='cbt.html?testid=${t.dbKey}&title=${encodeURIComponent(t.title)}&time=${t.time||120}&mode=exam'">Start Mock Test ➔</button>`;
+            `<button class="start-btn" onclick="window.location.href='cbt.html?${urlQuery}&mode=exam'">Start Mock Test ➔</button>`;
         
         html += `<div class="test-card ${locked?'locked':''}">
                     ${liveHTML}
