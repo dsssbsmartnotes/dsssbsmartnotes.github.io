@@ -411,22 +411,46 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 
 <script>
 /* =========================
-   FIREBASE CONFIG & INIT
+   SAFE STORAGE HELPERS (Anti-Crash)
    ========================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI",
-  authDomain: "dsssbexamportal.firebaseapp.com",
-  databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "dsssbexamportal",
-  storageBucket: "dsssbexamportal.firebasestorage.app",
-  messagingSenderId: "853373171134",
-  appId: "1:853373171134:web:77b967374e6f34311af5ef"
+function getSafeData(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
+function setSafeData(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+function removeSafeData(key) { try { localStorage.removeItem(key); } catch(e) {} }
+
+/* =========================
+   FIREBASE CONFIG & SAFE INIT
+   ========================= */
+let db = { 
+    ref: function() { 
+        return { 
+            on: function(){}, 
+            once: function(){ return Promise.resolve({exists:()=>false, val:()=>null, forEach:()=>{} }); }, 
+            set: function(){ return Promise.resolve(); }, 
+            push: function(){ return Promise.resolve(); },
+            remove: function(){ return Promise.resolve(); }
+        }; 
+    } 
 };
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+try {
+    const firebaseConfig = {
+      apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI",
+      authDomain: "dsssbexamportal.firebaseapp.com",
+      databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "dsssbexamportal",
+      storageBucket: "dsssbexamportal.firebasestorage.app",
+      messagingSenderId: "853373171134",
+      appId: "1:853373171134:web:77b967374e6f34311af5ef"
+    };
+
+    if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+    }
+} catch (err) {
+    console.error("Firebase Init Error:", err);
 }
-const db = firebase.database();
+
 const DB_REF_NAME = "dsssb_results_live";
 const DB_DISCUSS_REF = "dsssb_discussions"; 
 
@@ -488,13 +512,13 @@ let currentDiscussionRef = null;
 window.addEventListener('online', syncOfflineResults);
 
 function syncOfflineResults() {
-  const unsynced = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+  const unsynced = JSON.parse(getSafeData('dsssb_unsynced_results') || '[]');
   if (unsynced.length > 0 && navigator.onLine) {
       unsynced.forEach((res, index) => {
           db.ref(DB_REF_NAME).push(res).then(() => {
-              let updated = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+              let updated = JSON.parse(getSafeData('dsssb_unsynced_results') || '[]');
               updated = updated.filter(u => u.timestamp !== res.timestamp);
-              localStorage.setItem('dsssb_unsynced_results', JSON.stringify(updated));
+              setSafeData('dsssb_unsynced_results', JSON.stringify(updated));
           });
       });
   }
@@ -526,11 +550,11 @@ function initApp() {
       let u = window.Telegram.WebApp.initDataUnsafe.user;
       tName = u.first_name + (u.last_name ? " " + u.last_name : "");
       tId = u.id.toString();
-      localStorage.setItem('dsssb_user_name', tName);
-      localStorage.setItem('dsssb_user_id', tId);
+      setSafeData('dsssb_user_name', tName);
+      setSafeData('dsssb_user_id', tId);
   } else {
-      let savedName = localStorage.getItem('dsssb_user_name');
-      let savedId = localStorage.getItem('dsssb_user_id');
+      let savedName = getSafeData('dsssb_user_name');
+      let savedId = getSafeData('dsssb_user_id');
       if(savedName) { tName = savedName; tId = savedId || "guest"; }
   }
   
@@ -564,7 +588,7 @@ function initApp() {
           calcSectionIndices();
           
           if (TEST_MODE === 'solution') {
-              const finalSaved = localStorage.getItem(specificStorageKey + "_final");
+              const finalSaved = getSafeData(specificStorageKey + "_final");
               if (finalSaved) { currentState = JSON.parse(finalSaved); } 
               else {
                   currentState.answers = new Array(QUESTIONS.length).fill(null);
@@ -584,12 +608,12 @@ function initApp() {
               currentState.review = new Array(QUESTIONS.length).fill(false);
               currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
               
-              const saved = localStorage.getItem(specificStorageKey);
+              const saved = getSafeData(specificStorageKey);
               if(saved) {
                   let savedState = JSON.parse(saved);
                   if(savedState.answers && savedState.answers.length === QUESTIONS.length) {
                       document.getElementById('resumeBox').style.display = 'block';
-                  } else { localStorage.removeItem(specificStorageKey); }
+                  } else { removeSafeData(specificStorageKey); }
               }
           }
       } else {
@@ -669,13 +693,13 @@ function closeTg(){
 function saveState() {
   if (TEST_MODE === 'solution' || TEST_MODE === 'quiz') return; 
   const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
-  if(currentState.submitted) { localStorage.removeItem(specificStorageKey); return; }
-  localStorage.setItem(specificStorageKey, JSON.stringify(currentState));
+  if(currentState.submitted) { removeSafeData(specificStorageKey); return; }
+  setSafeData(specificStorageKey, JSON.stringify(currentState));
 }
 
 function loadState() { 
   const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
-  const saved = localStorage.getItem(specificStorageKey); 
+  const saved = getSafeData(specificStorageKey); 
   if(saved) { 
       currentState = JSON.parse(saved); 
       if(!currentState.timePerQ) currentState.timePerQ = new Array(QUESTIONS.length).fill(0);
@@ -685,7 +709,7 @@ function loadState() {
 
 function clearState() { 
   const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
-  localStorage.removeItem(specificStorageKey); 
+  removeSafeData(specificStorageKey); 
   document.getElementById('resumeBox').style.display = 'none'; 
   showToast("Session Cleared", "info"); 
 }
@@ -818,7 +842,7 @@ function loadQuestion(idx) {
       if(actionBtns) actionBtns.style.display = 'flex';
   }
 
-  let bms = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
+  let bms = JSON.parse(getSafeData('dsssb_bookmarks')) || {};
   let qk = CURRENT_TEST_ID + "_Q" + idx;
   document.getElementById('bookmarkBtn').innerText = bms[qk] ? "⭐" : "🔖";
 
@@ -893,7 +917,7 @@ function postComment() {
 }
 
 function toggleBookmark() {
-  let bookmarks = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
+  let bookmarks = JSON.parse(getSafeData('dsssb_bookmarks')) || {};
   let qKey = CURRENT_TEST_ID + "_Q" + currentState.idx;
   if(bookmarks[qKey]) {
       delete bookmarks[qKey];
@@ -904,7 +928,7 @@ function toggleBookmark() {
       showToast("Question Bookmarked ⭐", "success");
       document.getElementById('bookmarkBtn').innerText = "⭐";
   }
-  localStorage.setItem('dsssb_bookmarks', JSON.stringify(bookmarks));
+  setSafeData('dsssb_bookmarks', JSON.stringify(bookmarks));
 }
 
 function selectAns(i) { 
@@ -1152,8 +1176,8 @@ function showNotebookTab(tabName) {
   }
 
   let dataObj = {};
-  if(tabName === 'bookmarks') dataObj = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
-  else dataObj = JSON.parse(localStorage.getItem('dsssb_mistakes')) || {};
+  if(tabName === 'bookmarks') dataObj = JSON.parse(getSafeData('dsssb_bookmarks')) || {};
+  else dataObj = JSON.parse(getSafeData('dsssb_mistakes')) || {};
 
   let grouped = {};
   Object.values(dataObj).forEach(q => {
@@ -1233,7 +1257,6 @@ return `
 </div>`;
 }
 
-// 🔥 FIXED: TOP 10 RANKS WITH UNIQUE USERS 🔥
 function getRanksAndToppers(myScore, myTime) {
   return db.ref(DB_REF_NAME).once("value").then(snapshot => {
       let attempts = [];
@@ -1242,7 +1265,6 @@ function getRanksAndToppers(myScore, myTime) {
           if(val && val.score !== undefined && val.testId === CURRENT_TEST_ID) { attempts.push(val); }
       });
       
-      // Filter out duplicate attempts by the same user, keep their best score
       let userBest = {};
       attempts.forEach(a => {
           let k = a.userId || a.name;
@@ -1292,15 +1314,15 @@ async function submitTest() {
   if(window.innerWidth < 1024) togglePalette(); 
   
   const specificStorageKey = STORAGE_KEY + "_" + CURRENT_TEST_ID;
-  localStorage.setItem(specificStorageKey + "_final", JSON.stringify(currentState));
-  localStorage.removeItem(specificStorageKey); 
+  setSafeData(specificStorageKey + "_final", JSON.stringify(currentState));
+  removeSafeData(specificStorageKey); 
   
   renderPalette();
   renderSectionTabs();
 
   let totalScore = 0, correct = 0, wrong = 0, skipped = 0;
   let sectionScores = {};
-  let mistakesDiary = JSON.parse(localStorage.getItem('dsssb_mistakes')) || {};
+  let mistakesDiary = JSON.parse(getSafeData('dsssb_mistakes')) || {};
 
   QUESTIONS.forEach((q, i) => {
       const secName = q.section || "General";
@@ -1322,16 +1344,15 @@ async function submitTest() {
       }
   });
 
-  localStorage.setItem('dsssb_mistakes', JSON.stringify(mistakesDiary));
+  setSafeData('dsssb_mistakes', JSON.stringify(mistakesDiary));
 
   const attempted = correct + wrong;
   const accuracy = attempted > 0 ? ((correct/attempted)*100).toFixed(1) : 0;
   const timeSpentSeconds = (TOTAL_TIME_MINS * 60) - currentState.time;
   const timeStr = `${Math.floor(timeSpentSeconds/60)}m ${timeSpentSeconds%60}s`;
 
-  let tId = localStorage.getItem('dsssb_user_id') || "guest";
+  let tId = getSafeData('dsssb_user_id') || "guest";
   
-  // 🔥 Pushing timePerQ to database 🔥
   const userData = {
       name: currentState.name, userId: tId, testId: CURRENT_TEST_ID, 
       score: parseFloat(totalScore.toFixed(2)), timeTaken: timeSpentSeconds,
@@ -1348,21 +1369,20 @@ async function submitTest() {
   document.getElementById('resultModal').style.display = 'flex';
   document.getElementById('mainSubmitBtn').style.display = 'none';
 
-  let unsynced = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+  let unsynced = JSON.parse(getSafeData('dsssb_unsynced_results') || '[]');
   unsynced.push(userData);
-  localStorage.setItem('dsssb_unsynced_results', JSON.stringify(unsynced));
+  setSafeData('dsssb_unsynced_results', JSON.stringify(unsynced));
 
   db.ref(DB_REF_NAME).push(userData).then(() => {
-      let currentUnsynced = JSON.parse(localStorage.getItem('dsssb_unsynced_results') || '[]');
+      let currentUnsynced = JSON.parse(getSafeData('dsssb_unsynced_results') || '[]');
       currentUnsynced = currentUnsynced.filter(u => u.timestamp !== userData.timestamp);
-      localStorage.setItem('dsssb_unsynced_results', JSON.stringify(currentUnsynced));
+      setSafeData('dsssb_unsynced_results', JSON.stringify(currentUnsynced));
       sendResultToTelegram(currentState.name, totalScore.toFixed(2), correct, wrong, skipped, timeStr, accuracy);
       return getRanksAndToppers(userData.score, userData.timeTaken);
   }).catch(err => {
       showToast("⚠️ Device Offline. Result saved locally.", "warning");
       return { rank: '--', percentile: '--', total: '--', toppersList: [] };
   }).then(data => {
-      // 🔥 EXTRACTING TOPPER TIME PER Q 🔥
       let topperStats = { score: 0, accuracy: 0, correct: 0, wrong: 0, time: 0, timePerQ: [] };
       if (data.toppersList && data.toppersList.length > 0) {
           let t = data.toppersList[0];
@@ -1442,7 +1462,6 @@ async function submitTest() {
           else if(myAns === correctIdx) statusBadge = `<span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:bold;">✅ CORRECT</span>`;
           else statusBadge = `<span style="background:#ef4444; color:#fff; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:bold;">❌ WRONG</span>`;
           
-          // 🔥 SHOW YOU VS TOPPER TIME 🔥
           const timeTakenSec = currentState.timePerQ[i] || 0;
           const topperTimeSec = topperStats.timePerQ[i] || 0;
           
