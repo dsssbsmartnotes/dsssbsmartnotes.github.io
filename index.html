@@ -30,7 +30,7 @@ window.MathJax = {
 <style>
 /* --- THEME VARIABLES --- */
 :root {
-    --primary: #4f46e5; --primary-light: #e0e7ff;
+    --primary: #4f46e5; --primary-light: #e0e7ff; --primary-dark: #3730a3;
     --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
     --text-main: #1f2937; --text-muted: #6b7280;
     --bg-body: #f4f6f8; --bg-card: #ffffff;
@@ -39,7 +39,7 @@ window.MathJax = {
     --nav-height: 70px;
 }
 body.dark-mode {
-    --primary: #6366f1; --primary-light: rgba(99, 102, 241, 0.15);
+    --primary: #6366f1; --primary-light: rgba(99, 102, 241, 0.15); --primary-dark: #818cf8;
     --text-main: #f9fafb; --text-muted: #9ca3af;
     --bg-body: #0f172a; --bg-card: #1e293b;
     --bg-glass: rgba(30, 41, 59, 0.85);
@@ -47,7 +47,7 @@ body.dark-mode {
 }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
 
-body { background: var(--bg-body); color: var(--text-main); padding-bottom: var(--nav-height); transition: background 0.3s ease, color 0.3s ease; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+body { display: block; background: var(--bg-body); color: var(--text-main); padding-bottom: var(--nav-height); transition: background 0.3s ease, color 0.3s ease; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; overflow-x: hidden; }
 
 @keyframes tabFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .tab-content { animation: tabFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -87,8 +87,8 @@ body { background: var(--bg-body); color: var(--text-main); padding-bottom: var(
 .dark-mode .daily-goal-card.completed { background: linear-gradient(135deg, #064e3b, #022c22); border-color: #065f46; }
 
 .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 15px 20px 0; }
-.action-item { background: var(--bg-card); padding: 12px 8px; border-radius: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.2s; }
-.action-item:active { transform: translateY(2px); }
+.action-item { background: var(--bg-card); padding: 12px 8px; border-radius: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.2s; border-bottom: 3px solid var(--border); }
+.action-item:active { transform: translateY(2px); border-bottom-width: 1px; margin-top: 2px;}
 .action-item i { font-size: 20px; color: var(--primary); }
 .action-item span { font-size: 11px; font-weight: 600; color: var(--text-muted); }
 
@@ -102,56 +102,91 @@ body { background: var(--bg-body); color: var(--text-main); padding-bottom: var(
 .notebook-banner:active { transform: scale(0.98); }
 .nb-icon-box { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; }
 
-.target-exams-section { padding: 0 20px; margin-bottom: 20px; }
-.section-title { font-weight: 800; margin-bottom: 12px; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
-.exam-folders-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.exam-folder-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 15px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-.exam-folder-card:active { transform: scale(0.95); }
-.folder-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; margin-bottom: 10px; }
-.folder-icon-blue { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
-.folder-icon-purple { color: #a855f7; background: rgba(168, 85, 247, 0.1); }
-.folder-icon-green { color: #10b981; background: rgba(16, 185, 129, 0.1); }
-.folder-title { font-size: 11px; font-weight: 800; color: var(--text-main); line-height: 1.4; margin-bottom: 10px; }
-.folder-action { font-size: 10px; font-weight: 700; padding: 5px 10px; border-radius: 8px; }
-.folder-action-blue { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
-.folder-action-purple { color: #a855f7; background: rgba(168, 85, 247, 0.1); }
-.folder-action-green { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+/* 🔥 HEAVY 3D FOLDERS SYSTEM 🔥 */
+@keyframes glowPulse { 0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); } 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); } }
+
+.folder-3d-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px 12px; }
+.folder-3d { position: relative; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px;}
+.folder-3d:active { transform: scale(0.95); }
+.folder-3d.glowing { animation: glowPulse 2.5s infinite; border-radius: 16px; }
+
+.folder-3d .f-tab { width: 45%; height: 18px; background: inherit; border-radius: 10px 10px 0 0; position: absolute; top: -14px; left: 10px; filter: brightness(0.80); border: 1px solid rgba(255,255,255,0.1); border-bottom: none;}
+.folder-3d .f-body { background: inherit; padding: 22px 15px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: flex-start; position: relative; z-index: 2; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); border-bottom: 4px solid rgba(0,0,0,0.2);}
+.folder-3d .f-body.center { align-items: center; text-align: center; padding: 22px 10px; }
+.folder-3d .f-body::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%); pointer-events: none;}
+
+.f-icon { font-size: 28px; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+.f-name { font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.2); letter-spacing: 0.5px; line-height: 1.3;}
+
+/* Folder Colors */
+.f-live { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.f-saved { background: linear-gradient(135deg, #f59e0b, #b45309); }
+.f-attempt { background: linear-gradient(135deg, #10b981, #047857); }
+.f-full { background: linear-gradient(135deg, #4f46e5, #3730a3); }
+.f-math { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.f-reas { background: linear-gradient(135deg, #9333ea, #7e22ce); }
+.f-eng { background: linear-gradient(135deg, #ec4899, #be185d); }
+.f-hin { background: linear-gradient(135deg, #f97316, #c2410c); }
+.f-gk { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+.f-comp { background: linear-gradient(135deg, #64748b, #475569); }
+.f-blue { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
+.f-purple { background: linear-gradient(135deg, #8b5cf6, #581c87); }
+.f-green { background: linear-gradient(135deg, #10b981, #047857); }
+
+.horizontal-3d-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 15px 20px 25px; scrollbar-width: none; }
+.horizontal-3d-scroll::-webkit-scrollbar { display: none; }
+.horizontal-3d-scroll .folder-3d { min-width: 120px; flex-shrink: 0; }
+
+.section-title { font-weight: 800; margin-bottom: 12px; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+.target-exams-section { padding: 0 20px; margin-bottom: 25px; }
 
 .qod-card { background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%); border: 1px solid #fed7aa; border-radius: 18px; padding: 18px; margin: 0 20px 20px; box-shadow: 0 6px 15px rgba(251, 146, 60, 0.1); }
 .dark-mode .qod-card { background: linear-gradient(135deg, #2a1b0d, #1a0f05); border-color: #431407; }
 .qod-tag { background: #f97316; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
-.qod-opt { padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; cursor: pointer; text-align: center; font-weight: 600; margin-bottom:8px; transition: 0.2s; }
-.qod-opt:active { transform: scale(0.98); }
+.qod-opt { padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; cursor: pointer; text-align: center; font-weight: 600; margin-bottom:8px; transition: 0.2s; border-bottom: 3px solid var(--border);}
+.qod-opt:active { transform: translateY(2px); border-bottom-width: 1px; }
 .qod-opt.correct { background: #dcfce7 !important; border-color: #16a34a !important; color: #16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.1); }
 .qod-opt.wrong { background: #fee2e2 !important; border-color: #dc2626 !important; color: #dc2626; }
 
+/* --- HEAVY 3D FILTER PILLS FOR MOCKS PAGE --- */
 .list-container { padding: 0 20px; }
 .search-box { background: var(--bg-card); padding: 12px 18px; border-radius: 14px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; margin-bottom: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
 .search-box input { border: none; background: transparent; width: 100%; font-size: 14px; color: var(--text-main); outline: none; }
-.filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 5px; scrollbar-width: none; }
+.filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 5px; scrollbar-width: none; }
 .filter-scroll::-webkit-scrollbar { display: none; }
-.filter-pill { padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-.filter-pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); transform: translateY(-1px); }
+.filter-pill { 
+    padding: 10px 18px; background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-body) 100%); 
+    border: 1px solid var(--border); border-bottom: 3px solid #cbd5e1; border-radius: 12px; 
+    font-size: 12px; font-weight: 800; color: var(--text-muted); white-space: nowrap; 
+    cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
+}
+.dark-mode .filter-pill { border-bottom-color: #1e293b; }
+.filter-pill:active { transform: translateY(2px); border-bottom-width: 1px; }
+.filter-pill.active { 
+    background: var(--gradient-main); color: white; border: none; border-bottom: 3px solid var(--primary-dark); 
+    box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4); 
+}
 
-.test-card, .note-card, .video-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 15px; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: 0.2s; }
-.test-card, .note-card { padding: 18px; } 
+/* CARDS HEAVY UI */
+.test-card, .note-card, .video-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 18px; position: relative; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,0.04); transition: 0.2s; border-bottom: 4px solid var(--border); }
+.test-card, .note-card { padding: 20px; } 
 .video-card { padding: 0; cursor: pointer; }
 
-.save-btn { background: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer; position: absolute; top: 15px; right: 15px; z-index: 10; transition: 0.3s; display: grid; place-items: center; }
+.save-btn { background: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border); width: 34px; height: 34px; border-radius: 50%; font-size: 14px; cursor: pointer; position: absolute; top: 15px; right: 15px; z-index: 10; transition: 0.3s; display: grid; place-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 .save-btn.saved { color: #f59e0b; background: #fef3c7; border-color: #fde68a; filter: drop-shadow(0 2px 5px rgba(245, 158, 11, 0.3)); }
 .dark-mode .save-btn.saved { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4); }
 
-.live-badge { display: inline-block; margin-bottom: 10px; background: #ef4444; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; animation: pulseLive 1.5s infinite; letter-spacing: 0.5px; }
-.test-card.locked::after, .note-card.locked::after { content: "🔒 PRO"; position: absolute; top: 15px; right: 55px; background: var(--warning); color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; z-index: 5; }
+.live-badge { display: inline-block; margin-bottom: 10px; background: #ef4444; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; animation: pulseLive 1.5s infinite; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(239,68,68,0.4);}
+.test-card.locked::after, .note-card.locked::after { content: "🔒 PRO"; position: absolute; top: 15px; right: 55px; background: var(--warning); color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; z-index: 5; box-shadow: 0 2px 5px rgba(245,158,11,0.4);}
 
 @keyframes pulseLive { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-.t-title { font-weight: 800; font-size: 16px; margin-bottom: 8px; line-height: 1.3; padding-right: 30px;}
-.t-info { display: flex; gap: 15px; font-size: 12px; color: var(--text-muted); margin-bottom: 15px; font-weight: 600; }
-.start-btn, .download-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
-.start-btn:active, .download-btn:active { transform: scale(0.98); }
-.start-btn.locked { background: #fee2e2; color: #ef4444; box-shadow: none; border: 1px solid #fca5a5; }
-.download-btn { background: var(--bg-card); color: var(--primary); border: 2px solid var(--primary); box-shadow: none; }
+.t-title { font-weight: 800; font-size: 16px; margin-bottom: 10px; line-height: 1.3; padding-right: 30px;}
+.t-info { display: flex; gap: 15px; font-size: 12px; color: var(--text-muted); margin-bottom: 18px; font-weight: 700; background: var(--bg-body); padding: 8px 12px; border-radius: 8px;}
+.start-btn, .download-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); border-bottom: 3px solid var(--primary-dark);}
+.start-btn:active, .download-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+.start-btn.locked { background: #fee2e2; color: #ef4444; box-shadow: none; border: 1px solid #fca5a5; border-bottom: 3px solid #f87171;}
+.download-btn { background: var(--bg-card); color: var(--primary); border: 2px solid var(--primary); border-bottom: 3px solid var(--primary); box-shadow: none; }
 
 .vid-thumb { width: 100%; height: 180px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
 .vid-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
@@ -165,7 +200,7 @@ body { background: var(--bg-body); color: var(--text-main); padding-bottom: var(
 .progress-card { background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 .prog-ring { width: 100%; height: 12px; background: var(--bg-body); border-radius: 10px; overflow: hidden; margin-top: 12px; border: 1px solid var(--border); }
 .prog-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #8b5cf6); width: 0%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-.subject-group { margin-bottom: 15px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.subject-group { margin-bottom: 15px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border-bottom: 3px solid var(--border);}
 .subject-head { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.01); cursor: pointer; font-weight: 800; font-size: 14px; }
 .topic-list { display: none; padding: 5px 15px 15px; }
 .topic-list.open { display: block; animation: fadeIn 0.3s; }
@@ -173,15 +208,16 @@ body { background: var(--bg-body); color: var(--text-main); padding-bottom: var(
 .topic-item:last-child { border-bottom: none; padding-bottom: 0; }
 .topic-chk { width: 20px; height: 20px; accent-color: var(--primary); }
 
-.nav-bar { position: fixed; bottom: 0; width: 100%; height: var(--nav-height); background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
-.nav-item { text-align: center; color: var(--text-muted); font-size: 10px; font-weight: 700; opacity: 0.7; cursor: pointer; flex: 1; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.nav-item i { font-size: 20px; margin-bottom: 4px; display: block; transition: 0.3s; }
-.nav-item.active { color: var(--primary); opacity: 1; transform: translateY(-3px); }
-.nav-item.active i { transform: scale(1.15); }
+.nav-bar { position: fixed; bottom: 0; width: 100%; height: var(--nav-height); background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -4px 25px rgba(0,0,0,0.05); }
+.nav-item { text-align: center; color: var(--text-muted); font-size: 10px; font-weight: 800; opacity: 0.6; cursor: pointer; flex: 1; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.nav-item i { font-size: 22px; margin-bottom: 4px; display: block; transition: 0.3s; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.05));}
+.nav-item.active { color: var(--primary); opacity: 1; transform: translateY(-4px); }
+.nav-item.active i { transform: scale(1.15); filter: drop-shadow(0 4px 6px rgba(79,70,229,0.3));}
 
 .chart-box { background: var(--bg-card); padding: 18px; border-radius: 18px; border: 1px solid var(--border); margin: 0 20px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); flex: 1;}
 .rank-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; }
 
+/* SKELETON LOADER */
 .skeleton-loader { display: flex; flex-direction: column; gap: 20px; padding: 20px; }
 .sk-header { display: flex; gap: 15px; align-items: center; }
 .sk-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--border); animation: sk-pulse 1.5s infinite; }
@@ -193,7 +229,7 @@ body { background: var(--bg-body); color: var(--text-main); padding-bottom: var(
 .news-container { background: linear-gradient(90deg, #4f46e5, #8b5cf6); color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
 .modal-content { background: var(--bg-card); width: 100%; max-width: 360px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-textarea, input[type="text"] { width: 100%; padding: 14px; margin: 10px 0 20px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-body); color: var(--text-main); outline:none; font-size: 14px; transition: 0.2s; }
+textarea, input[type="text"] { width: 100%; padding: 14px; margin: 10px 0 20px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-body); color: var(--text-main); outline:none; font-size: 14px; transition: 0.2s; border-bottom: 3px solid var(--border);}
 textarea:focus, input[type="text"]:focus { border-color: var(--primary); }
 textarea { height: 120px; resize: none; }
 
@@ -201,12 +237,16 @@ textarea { height: 120px; resize: none; }
 @keyframes fadeInOut { 0% { opacity: 0; bottom: 80px; } 15% { opacity: 1; bottom: 90px; } 85% { opacity: 1; bottom: 90px; } 100% { opacity: 0; bottom: 80px; } }
 
 @media (min-width: 1024px) {
-    body { padding-bottom: 0; display: flex; background: var(--bg-body); }
+    body { padding-bottom: 0; display: flex; background: var(--bg-body); overflow-x: hidden; }
+    
     .nav-bar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; flex-direction: column; justify-content: flex-start; padding-top: 40px; gap: 10px; border-top: none; border-right: 1px solid var(--border); box-shadow: 4px 0 15px rgba(0,0,0,0.02); background: var(--bg-card); }
     .nav-item { width: 100%; text-align: left; padding: 15px 30px; font-size: 15px; display: flex; align-items: center; gap: 20px; border-radius: 0 30px 30px 0; margin-right: 20px; transition: 0.3s; cursor: pointer; opacity: 0.7;}
     .nav-item i { margin-bottom: 0; font-size: 20px; width: 24px; text-align: center; display: inline-block; }
     .nav-item.active { background: var(--primary-light); border-left: 4px solid var(--primary); transform: translateY(0); opacity: 1; font-weight: 800;}
-    #app { margin-left: 260px; padding: 30px 40px; max-width: 1300px; width: calc(100% - 260px); margin-right: auto; }
+    
+    #loader { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+    #app { margin-left: 260px; padding: 30px 40px; max-width: 1300px; width: calc(100% - 260px); margin-right: auto; display: none; min-height: 100vh; }
+    
     .hero-header { border-radius: 20px; top: 20px; margin-bottom: 30px; border: 1px solid var(--border); padding: 20px 30px;}
     .user-info h1 { font-size: 22px; }
     .quick-actions { padding: 0; margin-bottom: 25px; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -220,6 +260,12 @@ textarea { height: 120px; resize: none; }
     .test-card, .note-card, .video-card { margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; height: 100%;}
     .pwa-banner, .segment-control, .countdown-box, .daily-goal-card, .qod-card { margin-left: 0; margin-right: 0; }
     #pwaBannerBtn { padding: 10px 24px; font-size: 14px; cursor: pointer;}
+    
+    /* 🔥 HEAVY HOVER EFFECTS ON DESKTOP 🔥 */
+    .folder-3d-grid { grid-template-columns: repeat(4, 1fr); gap: 25px; }
+    .folder-3d:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+    .test-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+    .mega-folder:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
 }
 </style>
 </head>
@@ -328,23 +374,80 @@ textarea { height: 120px; resize: none; }
             <div class="nb-icon-box"><i class="fas fa-chevron-right"></i></div>
         </div>
 
+        <div class="section-title" style="margin: 25px 20px 10px;">📂 Explore Categories</div>
+        <div class="horizontal-3d-scroll">
+            <div class="folder-3d f-live" onclick="openExamFolder('Live')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">🔴</span><span class="f-name">Live Tests</span></div>
+            </div>
+            <div class="folder-3d f-saved" onclick="openExamFolder('Saved')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">⭐</span><span class="f-name">Saved</span></div>
+            </div>
+            <div class="folder-3d f-attempt" onclick="openExamFolder('Attempted')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">✅</span><span class="f-name">Attempted</span></div>
+            </div>
+            <div class="folder-3d f-full" onclick="openExamFolder('Full Mock')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">📦</span><span class="f-name">Full Mocks</span></div>
+            </div>
+            <div class="folder-3d f-math" onclick="openExamFolder('Maths')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">🧮</span><span class="f-name">Maths</span></div>
+            </div>
+            <div class="folder-3d f-reas" onclick="openExamFolder('Reasoning')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">🧠</span><span class="f-name">Reasoning</span></div>
+            </div>
+            <div class="folder-3d f-eng" onclick="openExamFolder('English')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">🅰️</span><span class="f-name">English</span></div>
+            </div>
+            <div class="folder-3d f-hin" onclick="openExamFolder('Hindi')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">अ</span><span class="f-name">Hindi</span></div>
+            </div>
+            <div class="folder-3d f-gk" onclick="openExamFolder('GK')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">🌍</span><span class="f-name">Gen. GK</span></div>
+            </div>
+            <div class="folder-3d f-comp" onclick="openExamFolder('Computer')">
+                <div class="f-tab"></div>
+                <div class="f-body"><span class="f-icon">💻</span><span class="f-name">Computer</span></div>
+            </div>
+        </div>
+
         <div class="target-exams-section">
-            <div class="section-title">📁 Target Exams</div>
-            <div class="exam-folders-grid" id="examFoldersGrid">
-                <div class="exam-folder-card" onclick="openExamFolder('asst_sup')">
-                    <div class="folder-icon folder-icon-blue">👮‍♂️</div>
-                    <div class="folder-title">Asst.<br>Supt.</div>
-                    <div class="folder-action folder-action-blue">Explore 👉</div>
+            <div class="section-title">🎯 Specific Exams</div>
+            <div class="folder-3d-grid">
+                <div class="folder-3d f-blue" onclick="openExamFolder('asst_sup')">
+                    <div class="f-tab"></div>
+                    <div class="f-body center">
+                        <span class="f-icon">👮‍♂️</span>
+                        <span class="f-name">Asst. Supt</span>
+                    </div>
                 </div>
-                <div class="exam-folder-card" onclick="openExamFolder('dass_grade_2')">
-                    <div class="folder-icon folder-icon-purple">🎓</div>
-                    <div class="folder-title">DASS<br>Grade II</div>
-                    <div class="folder-action folder-action-purple">Explore 👉</div>
+                <div class="folder-3d f-purple" onclick="openExamFolder('dass_grade_2')">
+                    <div class="f-tab"></div>
+                    <div class="f-body center">
+                        <span class="f-icon">🎓</span>
+                        <span class="f-name">DASS Gr II</span>
+                    </div>
                 </div>
-                <div class="exam-folder-card" onclick="openExamFolder('my_attempts')">
-                    <div class="folder-icon folder-icon-green">📝</div>
-                    <div class="folder-title">My<br>Attempts</div>
-                    <div class="folder-action folder-action-green">View 👉</div>
+                <div class="folder-3d f-green glowing" onclick="openExamFolder('ssc_pyq')">
+                    <div class="f-tab"></div>
+                    <div class="f-body center">
+                        <span class="f-icon">🏛️</span>
+                        <span class="f-name">SSC PYQ</span>
+                    </div>
+                </div>
+                <div class="folder-3d f-attempt" onclick="openExamFolder('my_attempts')">
+                    <div class="f-tab"></div>
+                    <div class="f-body center">
+                        <span class="f-icon">📝</span>
+                        <span class="f-name">My Attempts</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -376,7 +479,7 @@ textarea { height: 120px; resize: none; }
                 <i class="fas fa-search" style="color:var(--text-muted);"></i>
                 <input type="text" id="testSearch" placeholder="Search for Mocks or Subjects..." onkeyup="debouncedTestSearch(this.value)">
             </div>
-            <div class="filter-scroll">
+            <div class="filter-scroll" id="mockFiltersRow">
                 <div class="filter-pill active" onclick="filterTests('all', this)">All Tests</div>
                 <div class="filter-pill" style="color:#ef4444;" onclick="filterTests('Live', this)">Live 🔴</div>
                 <div class="filter-pill" style="color:#f59e0b;" onclick="filterTests('Saved', this)">Saved ⭐</div>
@@ -389,7 +492,7 @@ textarea { height: 120px; resize: none; }
                 <div class="filter-pill" onclick="filterTests('Computer', this)">Computer</div>
                 <div class="filter-pill" onclick="filterTests('GK', this)">GK</div>
             </div>
-            <div id="testListContainer"></div>
+            <div id="testListContainer" style="margin-top: 15px;"></div>
         </div>
     </div>
 
@@ -408,6 +511,67 @@ textarea { height: 120px; resize: none; }
             </div>
             <div id="videosSection" class="list-container" style="display:none;">
                 <div id="videoListContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-vault" class="tab-content" style="display:none; padding: 20px;">
+        <h2 style="font-size:24px; font-weight:900; margin-bottom:5px; color:var(--text-main);">Premium Vault</h2>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:25px; font-weight:600;">Access dedicated PYQ and subject-wise mocks.</p>
+        
+        <div class="mega-folder ssc-folder" onclick="openExamFolder('ssc_pyq', false)">
+            <div class="mf-icon">🏛️</div>
+            <div class="mf-content">
+                <h3>SSC PYQ Series</h3>
+                <p>CGL, CHSL, MTS & CPO</p>
+            </div>
+            <div class="mf-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+
+        <h3 style="font-size:16px; font-weight:800; margin: 30px 0 15px; color:var(--text-main);">Subject Wise Folders</h3>
+        
+        <div class="folder-3d-grid">
+            <div class="folder-3d f-math" onclick="openExamFolder('Maths', true)">
+                <div class="f-tab"></div>
+                <div class="f-body center">
+                    <span class="f-icon">🧮</span>
+                    <span class="f-name">Maths</span>
+                </div>
+            </div>
+            <div class="folder-3d f-reas" onclick="openExamFolder('Reasoning', true)">
+                <div class="f-tab"></div>
+                <div class="f-body center">
+                    <span class="f-icon">🧠</span>
+                    <span class="f-name">Reasoning</span>
+                </div>
+            </div>
+            <div class="folder-3d f-eng" onclick="openExamFolder('English', true)">
+                <div class="f-tab"></div>
+                <div class="f-body center">
+                    <span class="f-icon">🅰️</span>
+                    <span class="f-name">English</span>
+                </div>
+            </div>
+            <div class="folder-3d f-hin" onclick="openExamFolder('Hindi', true)">
+                <div class="f-tab"></div>
+                <div class="f-body center">
+                    <span class="f-icon">अ</span>
+                    <span class="f-name">Hindi</span>
+                </div>
+            </div>
+            <div class="folder-3d f-gk" onclick="openExamFolder('GK', true)">
+                <div class="f-tab"></div>
+                <div class="f-body center">
+                    <span class="f-icon">🌍</span>
+                    <span class="f-name">Gen. GK</span>
+                </div>
+            </div>
+            <div class="folder-3d f-comp" onclick="openExamFolder('Computer', true)">
+                <div class="f-tab"></div>
+                <div class="f-body center">
+                    <span class="f-icon">💻</span>
+                    <span class="f-name">Computer</span>
+                </div>
             </div>
         </div>
     </div>
@@ -456,7 +620,7 @@ textarea { height: 120px; resize: none; }
         <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900;">Upgrade to DSSSB PRO</h2>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px; font-weight:600;">Unlock All Premium Mock Tests, Video Classes & PDF Notes!</p>
         
-        <div style="background:var(--primary-light); color:var(--primary-dark); padding:15px; border-radius:12px; margin-bottom:15px; font-size: 14px; font-weight: 700;">
+        <div style="background:var(--primary-light); color:var(--primary-dark); padding:12px; border-radius:12px; margin-bottom:15px; font-size: 14px; font-weight: 700;">
             Special Offer: ₹99 <span style="font-size:12px; text-decoration:line-through; color:grey;">₹499</span>
         </div>
         
@@ -489,30 +653,55 @@ textarea { height: 120px; resize: none; }
     <div class="nav-item active" onclick="switchTab('home', this)"><i class="fas fa-home"></i> <span>Home</span></div>
     <div class="nav-item" onclick="switchTab('tests', this)"><i class="fas fa-file-signature"></i> <span>Mocks</span></div>
     <div class="nav-item" id="nav-study" onclick="switchTab('study', this)"><i class="fas fa-book-open"></i> <span>Study</span></div>
-    <div class="nav-item" onclick="switchTab('syllabus', this)"><i class="fas fa-chart-pie"></i> <span>Tracker</span></div>
+    <div class="nav-item" onclick="switchTab('vault', this)"><i class="fas fa-layer-group"></i> <span>Vault</span></div>
     <div class="nav-item" onclick="switchTab('rank', this)"><i class="fas fa-trophy"></i> <span>Ranks</span></div>
     <div class="nav-item" onclick="switchTab('bookmarks', this)"><i class="fas fa-bookmark"></i> <span>Notebook</span></div>
 </div>
 
 <script>
-/* 1. CONFIGURATION */
-const firebaseConfig = { apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI", authDomain: "dsssbexamportal.firebaseapp.com", databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "dsssbexamportal", storageBucket: "dsssbexamportal.firebasestorage.app", messagingSenderId: "853373171134", appId: "1:853373171134:web:77b967374e6f34311af5ef" };
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+/* 🔥 1. EMERGENCY UI UNLOCKER (Never crashes) 🔥 */
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const loaderEl = document.getElementById('loader');
+        const appEl = document.getElementById('app');
+        if (loaderEl) loaderEl.style.display = 'none';
+        if (appEl) appEl.style.display = 'block';
+    }, 1500); 
+});
+
+/* 🔥 2. SAFE STORAGE HELPERS 🔥 */
+function getSafeData(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
+function setSafeData(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+function removeSafeData(key) { try { localStorage.removeItem(key); } catch(e) {} }
+
+/* 3. CONFIGURATION & SAFE FIREBASE INIT */
+let db = { 
+    ref: function() { 
+        return { 
+            on: function(){}, 
+            once: function(){ return Promise.resolve({exists:()=>false, val:()=>null, forEach:()=>{} }); }, 
+            set: function(){ return Promise.resolve(); }, 
+            push: function(){ return Promise.resolve(); },
+            remove: function(){ return Promise.resolve(); }
+        }; 
+    } 
+};
+
+try {
+    const firebaseConfig = { apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI", authDomain: "dsssbexamportal.firebaseapp.com", databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "dsssbexamportal", storageBucket: "dsssbexamportal.firebasestorage.app", messagingSenderId: "853373171134", appId: "1:853373171134:web:77b967374e6f34311af5ef" };
+    if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+    }
+} catch(err) {
+    console.error("Firebase Auth Error (Offline Mode):", err);
+}
 
 let currentUser = "Student", currentUserId = "guest", isPro = false;
 let myScores = [], allTests = [], allNotes = [];
 let lastAlertTime = 0;
 let attemptedTestIds = new Set(); 
 
-/* 2. STATIC DATA */
-const syllabusDB = {
-    "Reasoning": ["Analogy", "Classification", "Series", "Coding-Decoding", "Blood Relation", "Direction", "Venn Diagram", "Mirror Image", "Dice & Cube", "Ranking"],
-    "Maths": ["Number System", "HCF & LCM", "Percentage", "Profit & Loss", "SI & CI", "Time & Work", "Time Speed Distance", "Average", "Ratio", "Mensuration"],
-    "English": ["Reading Comprehension", "Synonyms & Antonyms", "Idioms & Phrases", "One Word Substitution", "Spelling Errors", "Spotting Errors", "Sentence Improvement", "Fill in Blanks"],
-    "Hindi": ["Sandhi", "Samas", "Upsarg-Pratyay", "Vilom Shabd", "Paryayvachi", "Muhavare", "Vakya Shuddhi", "Anekarthi Shabd"],
-    "GK": ["History", "Geography", "Polity", "Economics", "Science", "Current Affairs", "Static GK"]
-};
 let fallbackQOD = { q: "Fetching today's challenge...", opt: ["-", "-", "-", "-"], ans: 0 };
 
 function debounce(func, delay = 300) {
@@ -523,15 +712,15 @@ function debounce(func, delay = 300) {
     };
 }
 
-/* 3. INITIALIZATION & DYNAMIC GREETING */
-window.onload = function() {
+/* 4. MAIN APP INITIALIZATION */
+function initDashboard() {
     const hour = new Date().getHours();
     let greeting = "Good Morning ☀️";
     if(hour >= 12 && hour < 17) greeting = "Good Afternoon 🌤️";
     else if(hour >= 17) greeting = "Good Evening 🌙";
     document.getElementById('greetingText').innerText = greeting;
 
-    const theme = localStorage.getItem('theme');
+    const theme = getSafeData('theme');
     if(theme === 'dark') document.body.classList.add('dark-mode');
     
     checkStreak(); startCountdown(); renderSyllabus();
@@ -564,17 +753,7 @@ window.onload = function() {
         } else { document.getElementById('newsSection').style.display = 'none'; }
     });
 
-    db.ref('dsssb_config/qod').on('value', snap => {
-        if(snap.exists()) {
-            const d = snap.val();
-            document.getElementById('qodQuestion').innerText = d.q;
-            let html = "";
-            d.opt.forEach((o, i) => html += `<div class="qod-opt" onclick="checkQOD(this, ${i}, ${d.ans})">${o}</div>`);
-            document.getElementById('qodOptions').innerHTML = html;
-        } else {
-            document.getElementById('qodQuestion').innerText = fallbackQOD.q;
-        }
-    });
+    loadAutoQOD();
 
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
         const tg = window.Telegram.WebApp; tg.expand();
@@ -584,9 +763,9 @@ window.onload = function() {
         currentUser = u.first_name + (u.last_name ? " " + u.last_name : "");
         currentUserId = u.id.toString();
         
-        localStorage.setItem('dsssb_user_name', currentUser);
-        localStorage.setItem('dsssb_user_id', currentUserId);
-        if(u.photo_url) localStorage.setItem('dsssb_user_photo', u.photo_url);
+        setSafeData('dsssb_user_name', currentUser);
+        setSafeData('dsssb_user_id', currentUserId);
+        if(u.photo_url) setSafeData('dsssb_user_photo', u.photo_url);
 
         document.getElementById('uName').innerText = u.first_name;
         if(u.photo_url) document.getElementById('uAvatar').innerHTML = `<img src="${u.photo_url}">`;
@@ -594,16 +773,58 @@ window.onload = function() {
         
         if(document.getElementById('displayUserId')) document.getElementById('displayUserId').innerText = currentUserId;
 
-        fetchData(u);
+        fetchData({username: "guest", id: currentUserId});
     } else {
         checkLocalUser();
     }
-};
+}
+
+// Init on DOM load
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+/* 🔥 AUTO QOD ENGINE 🔥 */
+function loadAutoQOD() {
+    db.ref('dsssb_questions_db/auto_qod').once('value').then(snap => {
+        if(snap.exists()) {
+            let qList = snap.val();
+            if(Array.isArray(qList) && qList.length > 0) {
+                const today = new Date();
+                const daysSinceEpoch = Math.floor((today.getTime() + (5.5 * 60 * 60 * 1000)) / (1000 * 60 * 60 * 24));
+                const idx = daysSinceEpoch % qList.length;
+                const d = qList[idx];
+                
+                let qText = d.q_hi || d.q_en || "Question loading...";
+                let opts = d.op_hi || d.op_en || ["-", "-", "-", "-"];
+                let ansIdx = parseInt(d.ans) - 1;
+                
+                document.getElementById('qodQuestion').innerHTML = qText;
+                let html = "";
+                opts.forEach((o, i) => {
+                    html += `<div class="qod-opt" onclick="checkQOD(this, ${i}, ${ansIdx})">${o}</div>`;
+                });
+                document.getElementById('qodOptions').innerHTML = html;
+                return;
+            }
+        }
+        
+        db.ref('dsssb_config/qod').on('value', manualSnap => {
+            if(manualSnap.exists()) {
+                const d = manualSnap.val();
+                document.getElementById('qodQuestion').innerText = d.q;
+                let html = "";
+                d.opt.forEach((o, i) => html += `<div class="qod-opt" onclick="checkQOD(this, ${i}, ${d.ans})">${o}</div>`);
+                document.getElementById('qodOptions').innerHTML = html;
+            } else {
+                document.getElementById('qodQuestion').innerText = "Update QOD from Admin Panel or upload to 'auto_qod' Test ID.";
+            }
+        });
+    }).catch(err => console.error("QOD Error:", err));
+}
 
 function checkLocalUser() {
-    const savedName = localStorage.getItem('dsssb_user_name');
-    const savedId = localStorage.getItem('dsssb_user_id');
-    const savedPhoto = localStorage.getItem('dsssb_user_photo');
+    const savedName = getSafeData('dsssb_user_name');
+    const savedId = getSafeData('dsssb_user_id');
+    const savedPhoto = getSafeData('dsssb_user_photo');
 
     if (savedName && savedId && savedId !== "guest") {
         currentUser = savedName;
@@ -617,6 +838,8 @@ function checkLocalUser() {
         fetchData({username: "guest", id: currentUserId});
     } else {
         document.getElementById('appLoginModal').style.display = 'flex';
+        if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none';
+        document.getElementById('app').style.display = 'none';
     }
 }
 
@@ -627,8 +850,8 @@ function registerPlayStoreUser() {
     if(n.length < 3) return showToast("Please enter your full name");
     if(p.length < 8) return showToast("Please enter a valid mobile number");
 
-    localStorage.setItem('dsssb_user_name', n);
-    localStorage.setItem('dsssb_user_id', p);
+    setSafeData('dsssb_user_name', n);
+    setSafeData('dsssb_user_id', p);
     
     document.getElementById('appLoginModal').style.display = 'none';
     window.location.reload();
@@ -637,7 +860,7 @@ function registerPlayStoreUser() {
 /* 4. UTILS & UI */
 function toggleTheme() { 
     document.body.classList.toggle('dark-mode'); 
-    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
+    setSafeData('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
 }
 
 function switchTab(tab, el) { 
@@ -663,33 +886,49 @@ function showToast(msg) {
     setTimeout(() => { toast.style.display = 'none'; }, 2500); 
 }
 
-/* 5. GAMIFICATION & ACTIONS */
-function openExamFolder(folderId) {
+/* 5. SMART ROUTING FROM 3D FOLDERS */
+function openExamFolder(folderId, isSubject = false) {
     const testTabIcon = document.querySelectorAll('.nav-item')[1];
     switchTab('tests', testTabIcon);
     const searchInput = document.getElementById('testSearch');
-    if (folderId === 'my_attempts') {
-        searchInput.value = '';
-        let attemptedPill = Array.from(document.querySelectorAll('.filter-pill')).find(p => p.innerText.includes('Attempted'));
-        filterTests('Attempted', attemptedPill);
-        showToast("Showing your attempted tests 📝");
+    
+    searchInput.value = ''; 
+
+    let pillText = folderId;
+    if(folderId === 'my_attempts') pillText = 'Attempted';
+    if(folderId === 'Live') pillText = 'Live';
+    if(folderId === 'Saved') pillText = 'Saved';
+    if(folderId === 'Full Mock') pillText = 'Full Mock';
+
+    let pills = Array.from(document.querySelectorAll('.filter-pill'));
+    let targetPill = pills.find(p => p.innerText.toLowerCase().includes(pillText.toLowerCase()));
+
+    if (targetPill) {
+        filterTests(folderId, targetPill);
+        const row = document.getElementById('mockFiltersRow');
+        const scrollPos = targetPill.offsetLeft - (row.clientWidth / 2) + (targetPill.clientWidth / 2);
+        row.scrollTo({ left: scrollPos, behavior: 'smooth' });
     } else {
-        let searchText = folderId === 'asst_sup' ? 'Assistant Superintendent' : 'DASS Grade II';
+        let searchText = folderId;
+        if(folderId === 'asst_sup') searchText = 'Assistant Superintendent';
+        if(folderId === 'dass_grade_2') searchText = 'DASS Grade II';
+        if(folderId === 'ssc_pyq') searchText = 'SSC';
+        
         searchInput.value = searchText;
-        filterTests('all', document.querySelector('.filter-pill'), searchText);
-        showToast("Searching tests for: " + searchText);
+        filterTests('all', document.querySelector('.filter-pill.active'), searchText);
     }
+    showToast(`Opening ${folderId} Vault 📂`);
 }
 
 function checkStreak() {
-    const last = localStorage.getItem('lastVisit');
+    const last = getSafeData('lastVisit');
     const today = new Date().toDateString();
-    let s = parseInt(localStorage.getItem('streak') || 0);
+    let s = parseInt(getSafeData('streak') || 0);
     if(last !== today) { 
         const y = new Date(); y.setDate(y.getDate()-1); 
         if(last === y.toDateString()) s++; else s = 1; 
-        localStorage.setItem('lastVisit', today); 
-        localStorage.setItem('streak', s); 
+        setSafeData('lastVisit', today); 
+        setSafeData('streak', s); 
     }
     document.getElementById('valStreak').innerText = s;
 }
@@ -744,9 +983,17 @@ async function installApp() {
 }
 
 /* 6. SYLLABUS TRACKER */
+const syllabusDB = {
+    "Reasoning": ["Analogy", "Classification", "Series", "Coding-Decoding", "Blood Relation", "Direction", "Venn Diagram", "Mirror Image", "Dice & Cube", "Ranking"],
+    "Maths": ["Number System", "HCF & LCM", "Percentage", "Profit & Loss", "SI & CI", "Time & Work", "Time Speed Distance", "Average", "Ratio", "Mensuration"],
+    "English": ["Reading Comprehension", "Synonyms & Antonyms", "Idioms & Phrases", "One Word Substitution", "Spelling Errors", "Spotting Errors", "Sentence Improvement", "Fill in Blanks"],
+    "Hindi": ["Sandhi", "Samas", "Upsarg-Pratyay", "Vilom Shabd", "Paryayvachi", "Muhavare", "Vakya Shuddhi", "Anekarthi Shabd"],
+    "GK": ["History", "Geography", "Polity", "Economics", "Science", "Current Affairs", "Static GK"]
+};
+
 function renderSyllabus() {
     const container = document.getElementById('syllabusList');
-    let saved = JSON.parse(localStorage.getItem('syllabusProgress') || '{}');
+    let saved = JSON.parse(getSafeData('syllabusProgress') || '{}');
     let html = "";
     Object.keys(syllabusDB).forEach((sub, i) => {
         html += `<div class="subject-group"><div class="subject-head" onclick="toggleTopic('sub${i}')"><span>📚 ${sub}</span> <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i></div><div class="topic-list" id="sub${i}">`;
@@ -763,14 +1010,14 @@ function renderSyllabus() {
 
 function toggleTopic(id) { document.getElementById(id).classList.toggle('open'); }
 function updateSyllabus(key, el) { 
-    let saved = JSON.parse(localStorage.getItem('syllabusProgress') || '{}'); 
+    let saved = JSON.parse(getSafeData('syllabusProgress') || '{}'); 
     if(el.checked) saved[key] = true; else delete saved[key]; 
-    localStorage.setItem('syllabusProgress', JSON.stringify(saved)); 
+    setSafeData('syllabusProgress', JSON.stringify(saved)); 
     calcProgress(); 
 }
 
 function calcProgress() {
-    let saved = JSON.parse(localStorage.getItem('syllabusProgress') || '{}');
+    let saved = JSON.parse(getSafeData('syllabusProgress') || '{}');
     let total = 0; Object.values(syllabusDB).forEach(list => total += list.length);
     let done = Object.keys(saved).length;
     let pct = Math.round((done/total)*100);
@@ -805,7 +1052,7 @@ function submitReport() {
 
 function toggleSaveTest(testId, el, event) {
     event.stopPropagation(); 
-    let savedTests = JSON.parse(localStorage.getItem('savedTests') || '[]');
+    let savedTests = JSON.parse(getSafeData('savedTests') || '[]');
     if (savedTests.includes(testId)) {
         savedTests = savedTests.filter(id => id !== testId);
         el.classList.remove('saved'); 
@@ -817,7 +1064,7 @@ function toggleSaveTest(testId, el, event) {
         el.innerHTML = '<i class="fas fa-star"></i>'; 
         showToast("Test Saved ⭐"); 
     }
-    localStorage.setItem('savedTests', JSON.stringify(savedTests));
+    setSafeData('savedTests', JSON.stringify(savedTests));
 }
 
 function switchNotebook(type) {
@@ -830,8 +1077,8 @@ function switchNotebook(type) {
 function renderNotebook(type = 'bookmarks') {
     const container = document.getElementById('bookmarksListContainer');
     let dataObj = {};
-    if(type === 'bookmarks') dataObj = JSON.parse(localStorage.getItem('dsssb_bookmarks')) || {};
-    else dataObj = JSON.parse(localStorage.getItem('dsssb_mistakes')) || {};
+    if(type === 'bookmarks') dataObj = JSON.parse(getSafeData('dsssb_bookmarks')) || {};
+    else dataObj = JSON.parse(getSafeData('dsssb_mistakes')) || {};
 
     let grouped = {};
     Object.keys(dataObj).forEach(k => {
@@ -883,10 +1130,10 @@ function renderNotebook(type = 'bookmarks') {
 
 function removeNotebookItem(key, type) {
     let storageKey = type === 'bookmarks' ? 'dsssb_bookmarks' : 'dsssb_mistakes';
-    let data = JSON.parse(localStorage.getItem(storageKey)) || {};
+    let data = JSON.parse(getSafeData(storageKey)) || {};
     if(data[key]) {
         delete data[key];
-        localStorage.setItem(storageKey, JSON.stringify(data));
+        setSafeData(storageKey, JSON.stringify(data));
         showToast("Removed from Notebook");
         renderNotebook(type);
     }
@@ -894,13 +1141,13 @@ function removeNotebookItem(key, type) {
 
 function reattemptTest(testId, fullUrlQuery) {
     if(confirm("Re-attempting will clear your previous answers on this device. Continue?")) {
-        localStorage.removeItem("dsssb_cbt_rank_v2_" + testId); 
-        localStorage.removeItem("dsssb_cbt_rank_v2_" + testId + "_final"); 
+        removeSafeData("dsssb_cbt_rank_v2_" + testId); 
+        removeSafeData("dsssb_cbt_rank_v2_" + testId + "_final"); 
         window.location.href = `cbt.html?${fullUrlQuery}`;
     }
 }
 
-/* 🔥 9. MAIN DATA FETCHING (LAZY LOAD IMPLEMENTED) 🔥 */
+/* 9. MAIN DATA FETCHING */
 async function fetchData(user) {
     try {
         if(currentUserId !== "guest") {
@@ -909,12 +1156,14 @@ async function fetchData(user) {
             userRef.onDisconnect().update({ state: 'offline', lastActive: firebase.database.ServerValue.TIMESTAMP });
         }
         
-        // 🚀 ONLY FETCH DASHBOARD ESSENTIALS FIRST (Super Fast)
         const [testsSnap, proSnap, notesSnap] = await Promise.all([ 
             db.ref("dsssb_tests_db").once("value"), 
             db.ref("dsssb_pro_users").once("value"), 
             db.ref("dsssb_notes_db").once("value") 
-        ]);
+        ]).catch(e => {
+            console.error("Promise.all error:", e);
+            return [{exists:()=>false, val:()=>null}, {exists:()=>false, val:()=>null}, {exists:()=>false, val:()=>null}];
+        });
 
         isPro = false;
         if(proSnap.exists()) {
@@ -952,13 +1201,12 @@ async function fetchData(user) {
 
         const testData = testsSnap.val() || {}; 
         allTests = Object.keys(testData).map(key => ({ dbKey: key, ...testData[key] }));
-        filterTests('all', document.querySelector('.filter-pill'));
+        filterTests('all', document.querySelector('.filter-pill.active'));
 
-        // 🚀 REMOVE LOADER IMMEDIATELY AFTER TESTS LOAD 🚀
         if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none'; 
         document.getElementById('app').style.display = 'block'; 
 
-        // 🚀 BACKGROUND FETCH: Load heavy Leaderboard results silently
+        // 🚀 BACKGROUND FETCH: Leaderboard results silently
         db.ref("dsssb_results_live").once("value").then(resultsSnap => {
             const res = resultsSnap.val() || {};
             let userMap = {}, myTestCount = 0, subScores = { 'Maths': [], 'English': [], 'Hindi': [], 'GK': [], 'Reasoning': [] };
@@ -996,7 +1244,7 @@ async function fetchData(user) {
             });
             
             renderCharts(chartAverages);
-            filterTests('all', document.querySelector('.filter-pill')); // Refresh UI to show Attempted buttons
+            filterTests('all', document.querySelector('.filter-pill.active')); 
 
             if (myTestCount > 0) {
                 let goalCard = document.getElementById('dailyGoalCard');
@@ -1005,7 +1253,7 @@ async function fetchData(user) {
                     document.getElementById('dgStatus').innerText = 'Completed ✅';
                 }
             }
-        });
+        }).catch(e => console.error("Leaderboard fetch error:", e));
 
     } catch(e) { 
         console.error("Data Load Error:", e); 
@@ -1014,8 +1262,6 @@ async function fetchData(user) {
     }
 }
 
-
-/* 10. RENDERERS & SMART SEARCH */
 const debouncedTestSearch = debounce((val) => searchTests(val), 300);
 const debouncedNoteSearch = debounce((val) => searchNotes(val), 300);
 
@@ -1032,8 +1278,11 @@ function filterTests(cat, el, searchQuery = "") {
     }
     
     let list = [...allTests].reverse();
-    let savedTests = JSON.parse(localStorage.getItem('savedTests') || '[]');
+    let savedTests = JSON.parse(getSafeData('savedTests') || '[]');
     
+    // EXCLUDE auto_qod from dashboard list
+    list = list.filter(t => t.dbKey !== 'auto_qod');
+
     if (searchQuery) { 
         let q = searchQuery.toLowerCase().trim();
         if(q === 'reas') q = 'reasoning';
