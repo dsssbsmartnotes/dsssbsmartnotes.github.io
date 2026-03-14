@@ -77,9 +77,17 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
 
 #mainArea { flex: 1; padding: 15px 15px 120px 15px; overflow-y: auto; overflow-x: hidden; display: none; position: relative; -webkit-overflow-scrolling: touch; }
 .q-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-sm); margin-top: 10px; margin-bottom: 25px; transition: transform 0.2s; }
-.q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.q-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; align-items: center; flex-wrap: wrap; gap: 10px; }
 .q-text { font-size: 17px; line-height: 1.6; margin-bottom: 20px; font-weight: 500; color: var(--text-main); transition: font-size 0.2s; }
 .q-text img, .opt img { max-width: 100%; height: auto; border-radius: 8px; cursor: zoom-in; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 8px; }
+
+/* --- NEW: Question Badges inside Portal --- */
+.q-meta-badges { display: flex; gap: 8px; margin-bottom: 10px; font-size: 11px; flex-wrap: wrap; width: 100%; }
+.badge-topic { background: var(--primary-light); color: var(--primary-dark); padding: 4px 10px; border-radius: 6px; font-weight: 700; border: 1px solid rgba(99, 102, 241, 0.2); }
+.badge-diff { padding: 4px 10px; border-radius: 6px; font-weight: 700; border: 1px solid var(--border-color); }
+.badge-diff.easy { background: var(--success-bg); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+.badge-diff.medium { background: var(--warning-bg); color: #b77c00; border-color: rgba(245, 158, 11, 0.3); }
+.badge-diff.hard { background: var(--danger-bg); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
 
 .opt { display: flex; align-items: center; padding: 14px; border: 2px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); background: var(--bg-card); font-size: 15px; position: relative; overflow: hidden; }
 .opt:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
@@ -324,6 +332,8 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
                 <button id="bookmarkBtn" onclick="toggleBookmark()" style="background:transparent; border:none; cursor:pointer; font-size:18px; padding:0; transition:0.2s;" title="Save to Notebook">🔖</button>
             </span>
             <span style="font-family:monospace; font-size:14px;"><span style="color:var(--success)">+<span id="posMarkDisp">1.0</span></span> &nbsp;|&nbsp; <span style="color:var(--danger)">-<span id="negMarkDisp">0.25</span></span></span>
+            
+            <div id="qMetaData" class="q-meta-badges"></div>
         </div>
         
         <div id="qContent" class="q-text"></div>
@@ -785,6 +795,22 @@ function loadQuestion(idx) {
 
   document.getElementById('qNumDisp').innerText = idx + 1;
   
+  // --- ADD META BADGES HERE ---
+  const metaContainer = document.getElementById('qMetaData');
+  let metaHtml = "";
+  if (q.topic) {
+      metaHtml += `<span class="badge-topic">🏷️ ${q.topic}</span>`;
+  }
+  if (q.difficulty) {
+      let dL = q.difficulty.toLowerCase();
+      let diffLabel = dL.charAt(0).toUpperCase() + dL.slice(1);
+      if (dL === 'easy') metaHtml += `<span class="badge-diff easy">🟢 ${diffLabel}</span>`;
+      else if (dL === 'medium') metaHtml += `<span class="badge-diff medium">🟡 ${diffLabel}</span>`;
+      else if (dL === 'hard') metaHtml += `<span class="badge-diff hard">🔴 ${diffLabel}</span>`;
+  }
+  metaContainer.innerHTML = metaHtml;
+  // ----------------------------
+
   const contentDiv = document.getElementById('qContent');
   contentDiv.innerHTML = isHindi ? (q.q_hi || q.q_en) : (q.q_en || q.q_hi);
   contentDiv.querySelectorAll('img').forEach(img => { img.onclick = () => openZoom(img.src); });
