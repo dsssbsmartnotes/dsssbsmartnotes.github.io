@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,8 +10,6 @@
 
 <link rel="manifest" href="/manifest.json">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -234,9 +233,18 @@ header { flex-shrink: 0; background: var(--gradient-header); box-shadow: 0 4px 2
     .q-card { box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); }
     .opt { padding: 18px; } 
 }
+
+/* Preloader styles */
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body onload="initApp()">
+
+<div id="preloader" style="position: fixed; inset: 0; background: var(--bg-body-gradient); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div style="width: 50px; height: 50px; border: 5px solid rgba(99, 102, 241, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+    <h3 style="color: var(--primary); margin: 0;">Loading Test Data...</h3>
+    <p style="color: var(--text-muted); font-size: 12px;">Please wait</p>
+</div>
 
 <div id="customConfirm">
     <div class="confirm-box">
@@ -586,6 +594,10 @@ function initApp() {
   });
 
   db.ref('dsssb_questions_db/' + CURRENT_TEST_ID).once('value').then(snap => {
+      // Hide Preloader once data is fetched
+      const preloader = document.getElementById('preloader');
+      if (preloader) preloader.style.display = 'none';
+      
       if(snap.exists()) {
           QUESTIONS = snap.val();
           SECTION_MAP = [];
@@ -629,7 +641,11 @@ function initApp() {
       } else {
           alert("⚠️ Alert: Test not found!");
       }
-  }).catch(err => { alert("Error loading test data: " + err.message); });
+  }).catch(err => { 
+      const preloader = document.getElementById('preloader');
+      if (preloader) preloader.style.display = 'none';
+      alert("Error loading test data: " + err.message); 
+  });
 }
 
 function calcSectionIndices() { 
@@ -1619,5 +1635,9 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(err => console.error('Service Worker Error:', err)); });
 }
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+
 </body>
 </html>
