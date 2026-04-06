@@ -140,7 +140,7 @@
                 max-height: none !important; 
                 white-space: pre !important; 
                 font-family: 'Courier New', Courier, monospace !important; 
-                font-size: 14px !important; 
+                font-size: 18px !important; /* UPDATED: Changed from 14px to 18px for better readability */
                 font-weight: bold !important; 
                 color: #000 !important;
                 line-height: 2 !important; 
@@ -389,7 +389,7 @@
         typingBox.addEventListener('paste', e => e.preventDefault());
         typingBox.addEventListener('drop', e => e.preventDefault());
         
-        // Tab Key Fix with 5 Spaces
+        // Tab Key Fix with 5 Spaces & SOUND FIX
         typingBox.addEventListener('keydown', function(e) {
             if (e.key === 'Tab') {
                 e.preventDefault(); 
@@ -398,6 +398,15 @@
                 let tabSpaces = "     "; 
                 this.value = this.value.substring(0, start) + tabSpaces + this.value.substring(end);
                 this.selectionStart = this.selectionEnd = start + tabSpaces.length;
+            }
+
+            // ADDED: KEYPRESS SOUND LOGIC
+            if(document.getElementById('examSoundCheck') && document.getElementById('examSoundCheck').checked && e.key !== 'Tab' && e.key !== 'Backspace') {
+                keyClickSound.currentTime = 0;
+                let kpPromise = keyClickSound.play();
+                if(kpPromise !== undefined) {
+                    kpPromise.catch(err => {});
+                }
             }
         });
     }
@@ -423,8 +432,12 @@
     let currentPassageId = "";
     let isPro = false;
     
-    const examAudio = new Audio('https://upload.wikimedia.org/wikipedia/commons/4/4b/Keyboard_typing_sound.ogg');
+    // SOUND FIX APPLIED HERE WITH USER'S CUSTOM GITHUB LINK
+    const examAudio = new Audio('https://dsssbsmartnotes.github.io/dragon-studio-keyboard-typing-sound-effect-335503.mp3');
     examAudio.loop = true;
+    examAudio.load();
+    const keyClickSound = new Audio('https://www.soundjay.com/button/sounds/button-09.mp3');
+    keyClickSound.load();
     
     let progressChartInstance = null;
 
@@ -658,7 +671,7 @@
         const charsPerLine = 75; 
         let customMins = document.getElementById('testTimeInput').value || 10;
         
-        const header = `DSSSB/TE-26/D17                                                     TIME ${customMins} MINUTES
+        const header = `DSSSB/TE-26/D17                                                              TIME ${customMins} MINUTES
                        TYPEWRITING SPEED TEST: 35 w.p.m.
 
 Note: Type the following passage accurately using double line spacing. Start typing only on getting the
@@ -747,8 +760,13 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         if(testStarted) return;
         testStarted = true;
         
+        // EXAM SOUND PROMISE FIX APPLIED HERE
         if(document.getElementById('examSoundCheck').checked) {
-            examAudio.play().catch(e => console.log("Audio autoplay blocked by browser until user interacts."));
+            examAudio.currentTime = 0;
+            let playPromise = examAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {}).catch(error => console.log("Autoplay prevented:", error));
+            }
         }
         
         let userMins = parseInt(document.getElementById('testTimeInput').value) || 10;
