@@ -443,7 +443,12 @@
         isPro = false;
 
         db.ref("dsssb_pro_users").once("value", (snapshot) => {
-            snapshot.forEach(child => { if(child.val().id == mobile || child.key == mobile) { isPro = true; } });
+            snapshot.forEach(child => { 
+                let val = child.val();
+                if(child.key == mobile || val == mobile || (val && val.id == mobile) || (val && val.mobile == mobile) || (val && val.phone == mobile)) { 
+                    isPro = true; 
+                } 
+            });
 
             document.getElementById('dashName').innerText = name;
             document.getElementById('dashMobile').innerText = mobile;
