@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSSSB Smart Notes - Premium Typing Simulator</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* CSS SECURITY LAYER */
+        body { 
+            font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; 
+            -webkit-user-select: none; -ms-user-select: none; user-select: none; 
+        }
+        input, textarea, select { -webkit-user-select: text; -ms-user-select: text; user-select: text; }
+
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2, h3 { text-align: center; color: #2c3e50; }
+        .student-section { background: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #bce8f1; }
+        
+        select, input[type="text"], input[type="number"] { width: 100%; padding: 10px; font-size: 16px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;}
+        textarea { width: 100%; padding: 12px; font-size: 18px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; resize: vertical; margin-bottom: 15px; transition: height 0.3s ease; }
+        
+        #userTyping { height: 150px; border: 2px solid #3498db; background-color: #f9f9f9; }
+        #userTyping:disabled { background-color: #e0e0e0; cursor: not-allowed; }
+        #evaluatedTyping { min-height: 150px; border: 2px solid #2ecc71; background-color: #fdfdfd; padding: 12px; font-family: Arial, sans-serif; font-size: 16px; border-radius: 5px; margin-bottom: 15px; white-space: pre-wrap; display: none; line-height: 1.6; }
+        
+        .wrong-word { background-color: #ffcccc; color: #c0392b; font-weight: bold; padding: 2px 4px; border-radius: 3px; }
+        .missed-word { background-color: #e0e0e0; color: #7f8c8d; font-style: italic; padding: 0 3px; border-radius: 3px; font-size: 0.95em; }
+        .orig-wrong { background-color: #ffcccc; color: #c0392b; border-radius: 2px; text-decoration: underline; }
+        .orig-missed { background-color: #e0e0e0; color: #7f8c8d; text-decoration: line-through; border-radius: 2px; }
+        
+        .error-log-box { background: #fff5f5; border: 1px solid #ffcccc; padding: 15px; border-radius: 5px; margin-bottom: 15px; display: none; }
+        .error-log-box h4 { margin-top: 0; color: #c0392b; font-size: 16px; border-bottom: 1px solid #ffcccc; padding-bottom: 5px; }
+        .error-log-box ul { margin: 0; padding-left: 20px; font-size: 15px; line-height: 1.5; color: #444; }
+        
+        button { display: inline-block; width: 100%; margin: 10px 0; padding: 12px; background-color: #3498db; color: white; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+        button:hover { background-color: #2980b9; }
+        .btn-print { background-color: #27ae60; margin:0; }
+        .btn-print:hover { background-color: #2ecc71; }
+        .btn-zoom { background-color: #34495e; width: auto; padding: 12px 20px; margin-left: 5px; }
+        .btn-zoom:hover { background-color: #2c3e50; }
+        .btn-submit { background-color: #e67e22; }
+        .btn-submit:hover { background-color: #d35400; }
+        .btn-start { background-color: #8e44ad; }
+        .btn-start:hover { background-color: #732d91; }
+        .btn-dash { background-color: #34495e; margin-bottom:15px; }
+        .btn-dash:hover { background-color: #2c3e50; }
+        
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .test-settings { background: #fdfdfd; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;}
+        .test-settings label { font-size: 16px; font-weight: bold; color: #2c3e50; margin: 5px 10px; }
+        .test-settings input[type="number"] { width: 60px; padding: 5px; font-size: 16px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
+        .test-settings input[type="checkbox"] { transform: scale(1.3); margin-right: 8px; cursor: pointer; }
+
+        pre { background: #fdfdfd; padding: 20px; border: 2px solid #7f8c8d; overflow-x: auto; overflow-y: auto; max-height: 350px; font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: bold; color: #111; line-height: 2; white-space: pre; }
+        .timer-box { text-align: center; font-size: 24px; font-weight: bold; color: #c0392b; margin: 10px 0; }
+        
+        .result-box { background: #e8f8f5; border-left: 5px solid #1abc9c; padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 18px; display: none; }
+        .result-box span { font-weight: bold; color: #c0392b; }
+        
+        .leaderboard-section { margin-top: 30px; display: none; }
+        .lb-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .lb-table th { background: #34495e; color: #fff; padding: 10px; font-size: 14px; }
+        .lb-table td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 14px; }
+        .qual-pass { background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .qual-fail { background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .rank-1 { background-color: #fef08a; } 
+        .rank-2 { background-color: #e2e8f0; } 
+        .rank-3 { background-color: #fed7aa; } 
+
+        .promo-link { text-align: center; margin-top: 25px; font-size: 16px; font-weight: bold; color: #2c3e50; display: none; }
+        .promo-link a { color: #0088cc; text-decoration: none; }
+
+        .pay-overlay { display: none; background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .pay-card { background: #fff; color: #333; padding: 25px; border-radius: 15px; max-width: 400px; width: 100%; text-align: center; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .pro-badge { background: linear-gradient(135deg, #FFD700, #F59E0B); color: #000; padding: 3px 8px; border-radius: 5px; font-weight: 800; font-size: 12px; margin-left: 10px; }
+        .qr-box { background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0; border: 2px dashed #bdc3c7; }
+        .qr-image { width: 150px; height: 150px; border-radius: 8px; border: 3px solid #3498db; padding: 5px; background: white; margin-bottom: 10px; }
+
+        /* Dashboard Styles */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #3498db; border-right: 1px solid #ddd; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+        .dashboard-header h3 { margin: 0; color: #2c3e50; text-align: left;}
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .dash-card { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .dash-card h4 { margin-top: 0; color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; margin-bottom: 15px; }
+        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .dashboard-header { flex-direction: column; align-items: flex-start; gap: 10px;} }
+
+        @media print {
+            @page { margin: 1cm; size: A4 portrait; } 
+            body { background: #fff; padding: 0; }
+            .no-print { display: none !important; }
+            .container { box-shadow: none; padding: 0; margin: 0; max-width: 100%; border: none; }
+            pre { border: none !important; padding: 0 !important; overflow: visible !important; max-height: none !important; white-space: pre !important; font-size: 12px !important; font-weight: normal !important; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="no-print">
+        <h2>DSSSB Smart Notes <span id="userStatusBadge"></span></h2>
+        
+        <div id="loginArea" class="student-section">
+            <h3 style="margin-top:0;">Login to Student Dashboard</h3>
+            <p>अपना रजिस्टर्ड मोबाइल नंबर और नाम डालें:</p>
+            <input type="number" id="userMobile" placeholder="Registered Mobile Number (User ID)">
+            <input type="text" id="studentNameInput" placeholder="Enter Your Name">
+            <button id="btnVerify" onclick="verifyAndFetch()">Login / Register</button>
+        </div>
+
+        <div id="dashboardArea" style="display:none;">
+            <div class="dashboard-header">
+                <div>
+                    <h3>Welcome, <span id="dashName" style="color:#2980b9;"></span>! <span id="dashBadge"></span></h3>
+                    <p style="margin:5px 0 0 0; font-size:14px; color:gray;">Student ID: <span id="dashMobile"></span></p>
+                </div>
+                <button id="btnUpgradeDash" onclick="document.getElementById('paymentOverlay').style.display='flex'" style="display:none; width:auto; background:#f39c12; margin:0; padding:8px 15px;">👑 Unlock PRO Tests</button>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="dash-card">
+                    <h4>🚀 Start a Typing Test</h4>
+                    <p style="font-size:14px; color:#555; margin-bottom:10px;">Select a passage to begin your practice. Pro users have access to all previous year DSSSB passages.</p>
+                    <select id="passageSelect" style="border: 2px solid #3498db; padding: 12px;">
+                        <option value="">-- Loading Passages... --</option>
+                    </select>
+                    <button onclick="loadSelectedPassage()" style="margin-top:15px;">Start Selected Test</button>
+                </div>
+
+                <div class="dash-card">
+                    <h4>📊 My Past Records</h4>
+                    <div style="max-height:180px; overflow-y:auto;">
+                        <table class="lb-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Speed</th>
+                                    <th>Acc.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userHistoryBody">
+                                <tr><td colspan="3">No tests attempted yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dash-card" style="margin-top:20px;">
+                <h4>📈 Speed Progress Graph (WPM)</h4>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentOverlay" class="pay-overlay">
+        <div class="pay-card">
+            <div style="font-size: 40px; margin-bottom: 5px;">👑</div>
+            <h2 style="color:#f59e0b; margin-top: 0; margin-bottom: 10px;">Unlock Premium Tests</h2>
+            <p style="font-size: 14px; color: #555;">सिर्फ <b>₹49</b> में पाएं 20+ DSSSB प्रैक्टिस पैसेज, लाइव रैंकिंग और लाइफटाइम एक्सेस।</p>
+            
+            <div class="qr-box">
+                <p style="margin: 0 0 10px 0; font-weight: 900; color: #2c3e50; font-size: 18px;">Scan to Pay ₹49</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=8587961053@jupiteraxis%26pn=DSSSB_Premium%26am=49%26cu=INR" alt="UPI QR Code" class="qr-image">
+                <p style="margin: 0; font-size: 14px; font-weight: bold; color: #e67e22;">UPI ID: 8587961053@jupiteraxis</p>
+            </div>
+
+            <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin:15px 0;">
+                <b>Admin WhatsApp: 8587961053</b><br>
+                <span style="font-size:12px; color:grey;">पेमेंट के बाद स्क्रीनशॉट भेजें, एक्सेस तुरंत चालू होगा।</span>
+            </div>
+            
+            <button onclick="window.open('https://t.me/DSSSB_PYQS')" style="background:#0088cc; padding: 10px; font-size: 15px;"><i class="fab fa-telegram-plane"></i> Message Admin on Telegram</button>
+            <button onclick="closePayment()" style="background:#7f8c8d; margin-top:10px; padding: 10px; font-size: 15px;">Go Back</button>
+        </div>
+    </div>
+
+    <div id="outputSection" style="display: none;">
+        <button class="btn-dash no-print" onclick="backToDashboard()">⬅️ Back to My Dashboard</button>
+        
+        <div class="controls-bar no-print">
+            <button class="btn-print" onclick="window.print()" style="flex-grow: 1;">📥 Download Passage as PDF</button>
+            <div style="display: flex;">
+                <button class="btn-zoom" onclick="changeZoom(2)" title="Increase Font Size">A+</button>
+                <button class="btn-zoom" onclick="changeZoom(-2)" title="Decrease Font Size">A-</button>
+            </div>
+        </div>
+        
+        <p id="readingHeader" class="no-print" style="margin-bottom: 5px;"><b>Reading Area (Original Passage):</b></p>
+        <pre id="outputText"></pre>
+        
+        <div class="no-print mt-4">
+            <hr>
+            <h3>Start Typing Test</h3>
+            <div class="test-settings">
+                <label>⏳ Timer: <input type="number" id="testTimeInput" value="10" min="1" max="60" onchange="updateTimerDisplay()"> Min</label>
+                <label><input type="checkbox" id="disableBackspaceCheck"> 🚫 Disable Backspace</label>
+                <label><input type="checkbox" id="paperModeCheck"> 📄 Paper to Screen Mode</label>
+                <label><input type="checkbox" id="examSoundCheck"> 🎧 Exam Hall Sound</label>
+            </div>
+            
+            <div id="timerDisplay" class="timer-box">Time Left: 10:00</div>
+            <button id="btnStart" class="btn-start" onclick="startTest()">🚀 Start Test</button>
+            <textarea id="userTyping" placeholder="Click 'Start Test' to begin typing..." disabled spellcheck="false"></textarea>
+            
+            <p id="evaluatedTitle" style="display:none; font-weight:bold; margin-bottom: 5px;">Your Typed Output (Errors Highlighted):</p>
+            <div id="evaluatedTyping"></div>
+            
+            <div id="errorDetailsBox" class="error-log-box">
+                <h4>Error Analysis</h4>
+                <ul id="errorList"></ul>
+            </div>
+
+            <button id="btnSubmit" class="btn-submit" onclick="evaluateTest(false)" style="display:none;">Submit Test Early</button>
+            
+            <div id="results" class="result-box">
+                <h3 style="margin-top:0;">Your Result</h3>
+                <p>Status: <span id="resStatus">Pending</span></p>
+                <p>Gross Speed: <span id="resGrossSpeed">0</span> WPM</p>
+                <p>Net Speed: <span id="resNetSpeed">0</span> WPM</p>
+                <p>Accuracy: <span id="resAccuracy">0%</span></p>
+                <hr>
+                <p style="font-size: 14px; margin-bottom:0;">Time Taken: <span id="resTime">0:00</span> | Strokes: <span id="resStrokes">0</span> | Words: <span id="resWords">0</span> | Errors: <span id="resErrors">0</span></p>
+                
+                <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:15px;">🏆 Download Score Card</button>
+            </div>
+
+            <div id="leaderboardArea" class="leaderboard-section">
+                <h3>🏆 Live Leaderboard</h3>
+                <p style="text-align:center; font-size:12px; color:gray;">(Qualifying Criteria: 35+ WPM & 97%+ Accuracy)</p>
+                <table class="lb-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Net Speed</th>
+                            <th>Accuracy</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lbTableBody">
+                        <tr><td colspan="5">Loading Ranks...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="scoreCardTemplate" style="position:fixed; left:-9999px; top:0; width:650px; background:linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); padding:40px; border:10px solid #2c3e50; border-radius:15px; text-align:center; font-family:Arial, sans-serif; box-sizing:border-box;">
+    <h1 style="color:#2c3e50; margin-top:0; font-size:36px; border-bottom:3px solid #3498db; display:inline-block; padding-bottom:10px;">CERTIFICATE OF EXCELLENCE</h1>
+    <p style="font-size:20px; color:#555; margin-top:20px;">This is proudly presented to</p>
+    <h2 id="scName" style="color:#2980b9; font-size:38px; margin:15px 0; text-transform:uppercase;">Student Name</h2>
+    <p style="font-size:18px; color:#555;">for successfully Qualifying the DSSSB Typing Standard Test.</p>
+    
+    <div style="display:flex; justify-content:space-around; background:#fff; padding:20px; border-radius:10px; margin:30px 0; box-shadow:0 6px 15px rgba(0,0,0,0.08); border:2px dashed #bdc3c7;">
+        <div>
+            <h3 style="margin:0; color:#c0392b; font-size:32px;" id="scWpm">35 WPM</h3>
+            <p style="margin:5px 0 0 0; font-size:16px; color:gray; font-weight:bold;">Net Speed</p>
+        </div>
+        <div>
+            <h3 style="margin:0; color:#16a34a; font-size:32px;" id="scAcc">98%</h3>
+            <p style="margin:5px 0 0 0; font-size:16px; color:gray; font-weight:bold;">Accuracy</p>
+        </div>
+    </div>
+    
+    <div style="margin-top:30px; font-weight:900; font-size:24px; color:#e67e22; letter-spacing:1px;">Powered by @DSSSB_PYQS</div>
+    <p style="margin:10px 0 0 0; font-size:14px; color:#7f8c8d; font-weight:bold;" id="scDate">Date</p>
+</div>
+
+<script>
+    // ADVANCED JAVASCRIPT SECURITY LAYER
+    if (window.top !== window.self) { window.top.location = window.self.location; }
+    Object.keys(console).forEach(function(key) { console[key] = function() {}; });
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    document.addEventListener('keydown', function(e) {
+        let key = e.key ? e.key.toLowerCase() : "";
+        if (key === 'f12' || e.keyCode === 123) { e.preventDefault(); return false; }
+        if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) { e.preventDefault(); return false; }
+        if (e.ctrlKey && ['u', 's', 'p', 'c', 'v', 'x', 'a'].includes(key)) { e.preventDefault(); return false; }
+        if (e.metaKey && e.altKey && ['i', 'j', 'u'].includes(key)) { e.preventDefault(); return false; }
+    });
+
+    ['dragstart', 'drop', 'copy', 'cut', 'paste'].forEach(function(evt) {
+        document.addEventListener(evt, function(e) {
+            if (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") { e.preventDefault(); }
+        });
+    });
+
+    const typingBox = document.getElementById('userTyping');
+    if(typingBox) {
+        typingBox.addEventListener('paste', e => e.preventDefault());
+        typingBox.addEventListener('drop', e => e.preventDefault());
+    }
+
+    setInterval(function() { (function() { return false; }['constructor']('debugger')()); }, 1000);
+
+    // CORE APPLICATION LOGIC
+    const firebaseConfig = {
+        apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI",
+        authDomain: "dsssbexamportal.firebaseapp.com",
+        databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "dsssbexamportal",
+        storageBucket: "dsssbexamportal.firebasestorage.app",
+        messagingSenderId: "853373171134",
+        appId: "1:853373171134:web:77b967374e6f34311af5ef"
+    };
+    
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.database();
+
+    let passagesData = {}; 
+    let currentLoadedPassageText = "";
+    let currentPassageId = "";
+    let isPro = false;
+    
+    // Setup Audio for Background typing
+    const examAudio = new Audio('https://upload.wikimedia.org/wikipedia/commons/4/4b/Keyboard_typing_sound.ogg');
+    examAudio.loop = true;
+    
+    // Global Chart Instance
+    let progressChartInstance = null;
+
+    // LOGIN & DASHBOARD LOGIC
+    async function verifyAndFetch() {
+        const mobile = document.getElementById('userMobile').value.trim();
+        const name = document.getElementById('studentNameInput').value.trim();
+        if(!mobile || !name) { alert("Mobile और Name दोनों जरूरी हैं!"); return; }
+
+        document.getElementById('btnVerify').innerText = "Logging in...";
+        isPro = false;
+
+        db.ref("dsssb_pro_users").once("value", (snapshot) => {
+            snapshot.forEach(child => { if(child.val().id == mobile || child.key == mobile) { isPro = true; } });
+
+            // Setup Dashboard Info
+            document.getElementById('dashName').innerText = name;
+            document.getElementById('dashMobile').innerText = mobile;
+
+            if(isPro) {
+                document.getElementById('userStatusBadge').innerHTML = '<span class="pro-badge">PRO</span>';
+                document.getElementById('dashBadge').innerHTML = '<span class="pro-badge">PRO MEMBER</span>';
+                document.getElementById('btnUpgradeDash').style.display = 'none';
+            } else {
+                document.getElementById('userStatusBadge').innerHTML = '';
+                document.getElementById('dashBadge').innerHTML = '<span style="font-size:12px; color:gray; font-weight:normal;">(Free User)</span>';
+                document.getElementById('btnUpgradeDash').style.display = 'block';
+            }
+            
+            loadAllPassages(); 
+            loadUserHistory(mobile); 
+            
+            document.getElementById('btnVerify').innerText = "Login / Register";
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('dashboardArea').style.display = 'block';
+        });
+    }
+
+    function loadAllPassages() {
+        db.ref("typing_passages").on("value", (snap) => {
+            const select = document.getElementById('passageSelect');
+            select.innerHTML = '<option value="">-- Select a Test Passage --</option>';
+            passagesData = {};
+            let isFirst = true;
+            
+            snap.forEach(child => {
+                passagesData[child.key] = { content: child.val().content, title: child.val().title };
+                let opt = document.createElement('option');
+                opt.value = child.key;
+                
+                if (isFirst || isPro) {
+                    opt.textContent = child.val().title + (isFirst && !isPro ? " 🎁 (FREE)" : "");
+                    opt.dataset.locked = "false";
+                } else {
+                    opt.textContent = child.val().title + " 🔒 (PRO)";
+                    opt.dataset.locked = "true";
+                }
+                
+                select.appendChild(opt);
+                isFirst = false;
+            });
+            localStorage.setItem('cached_passages', JSON.stringify(passagesData));
+        });
+    }
+
+    function loadUserHistory(mobile) {
+        db.ref("user_typing_records/" + mobile).on("value", (snap) => {
+            let html = "";
+            let records = [];
+            if(snap.exists()) {
+                snap.forEach(child => { records.push(child.val()); });
+                
+                // For Graph (Ascending Order)
+                let chartLabels = [];
+                let chartData = [];
+                records.forEach(r => {
+                    let d = new Date(r.timestamp);
+                    chartLabels.push(d.toLocaleDateString('en-GB'));
+                    chartData.push(r.wpm);
+                });
+                
+                renderChart(chartLabels, chartData);
+
+                // For Table (Descending Order)
+                records.reverse(); 
+                records.forEach(r => {
+                    let dateObj = new Date(r.timestamp);
+                    let dateStr = dateObj.toLocaleDateString('en-GB') + " " + dateObj.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+                    html += `<tr><td>${dateStr}</td><td style="color:#0284c7;">${r.wpm} WPM</td><td style="color:#16a34a;">${r.accuracy}%</td></tr>`;
+                });
+                document.getElementById('userHistoryBody').innerHTML = html;
+            } else {
+                document.getElementById('userHistoryBody').innerHTML = "<tr><td colspan='3' style='color:grey; padding: 20px;'>No tests attempted yet.</td></tr>";
+                renderChart([], []);
+            }
+        });
+    }
+
+    // UPDATED: Progress Chart Render
+    function renderChart(labels, data) {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        if(progressChartInstance) { progressChartInstance.destroy(); }
+        
+        progressChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Net WPM Speed',
+                    data: data,
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#e67e22',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Now behaves correctly due to the parent container
+                scales: {
+                    y: { beginAtZero: true, suggestedMax: 45 }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    function loadSelectedPassage() {
+        const select = document.getElementById('passageSelect');
+        currentPassageId = select.value;
+        const sName = document.getElementById('studentNameInput').value.trim();
+
+        if(!sName) { alert("Please refresh and login first!"); return; }
+        if(!currentPassageId) { alert("Please select a passage from the dropdown!"); return; }
+        
+        const selectedOption = select.options[select.selectedIndex];
+        
+        if(selectedOption.dataset.locked === "true") {
+            document.getElementById('paymentOverlay').style.display = 'flex';
+            return;
+        }
+
+        let passageObj = passagesData[currentPassageId] || JSON.parse(localStorage.getItem('cached_passages') || '{}')[currentPassageId];
+        if(!passageObj || !passageObj.content) { alert("Passage not found!"); return; }
+
+        let testTitle = passageObj.title || "";
+        if (testTitle.toUpperCase().includes("MEGA TEST")) {
+            let now = new Date();
+            let currentDay = now.getDay(); 
+            let currentHour = now.getHours(); 
+            
+            if (currentDay !== 0 || currentHour < 10 || currentHour >= 12) {
+                alert("🚨 MEGA TEST LOCKED!\n\nयह टेस्ट केवल रविवार (Sunday) को सुबह 10:00 AM से दोपहर 12:00 PM तक ही खुला रहेगा।");
+                select.value = "";
+                return;
+            }
+        }
+
+        let content = passageObj.content;
+        content = content.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+
+        currentLoadedPassageText = content;
+        
+        document.getElementById('dashboardArea').style.display = 'none';
+        document.getElementById('outputSection').style.display = 'block';
+        
+        generateFormat(content);
+        loadLeaderboard(currentPassageId);
+    }
+
+    function backToDashboard() {
+        clearInterval(timerInterval);
+        examAudio.pause(); 
+        examAudio.currentTime = 0;
+        document.getElementById('outputSection').style.display = 'none';
+        document.getElementById('dashboardArea').style.display = 'block';
+        document.getElementById('passageSelect').value = ""; 
+    }
+
+    function closePayment() { document.getElementById('paymentOverlay').style.display = 'none'; }
+
+    function loadLeaderboard(testId) {
+        document.getElementById('leaderboardArea').style.display = 'block';
+        db.ref("typing_leaderboard/" + testId).on("value", (snap) => {
+            let results = [];
+            if(snap.exists()) { snap.forEach(child => { results.push(child.val()); }); }
+            
+            results.sort((a, b) => {
+                if (b.netWPM !== a.netWPM) return b.netWPM - a.netWPM;
+                return b.accuracy - a.accuracy;
+            });
+
+            let html = "";
+            if (results.length === 0) {
+                html = "<tr><td colspan='5' style='color:grey;'>No one has attempted this test yet. Be the first!</td></tr>";
+            } else {
+                results.forEach((r, index) => {
+                    let rankClass = index === 0 ? 'rank-1' : (index === 1 ? 'rank-2' : (index === 2 ? 'rank-3' : ''));
+                    let statusHtml = r.qualified ? '<span class="qual-pass">✅ Qualified</span>' : '<span class="qual-fail">❌ Disqualified</span>';
+                    html += `<tr class="${rankClass}"><td>#${index + 1}</td><td style="text-align:left;">${r.name}</td><td style="color:#0284c7;">${r.netWPM} WPM</td><td style="color:#16a34a;">${r.accuracy}%</td><td>${statusHtml}</td></tr>`;
+                });
+            }
+            document.getElementById('lbTableBody').innerHTML = html;
+        });
+    }
+
+    let timerInterval = null;
+    let timeRemaining = 600; 
+    let testStarted = false;
+    let currentZoom = 16; 
+
+    function changeZoom(val) {
+        currentZoom += val;
+        if(currentZoom < 10) currentZoom = 10; 
+        if(currentZoom > 30) currentZoom = 30; 
+        document.getElementById('outputText').style.fontSize = currentZoom + 'px';
+    }
+
+    function updateTimerDisplay() {
+        if(!testStarted) {
+            let mins = document.getElementById('testTimeInput').value || 10;
+            document.getElementById('timerDisplay').innerText = `Time Left: ${mins}:00`;
+        }
+    }
+
+    function buildFormattedPassage(textToFormat, wordStatuses = null) {
+        const charsPerLine = 85; 
+        let customMins = document.getElementById('testTimeInput').value || 10;
+        
+        const header = `DSSSB/TE-26/D17                                              TIME ${customMins} MINUTES
+                       TYPEWRITING SPEED TEST: 35 w.p.m.
+
+Note: Type the following passage accurately using double line spacing. Start typing only on getting the
+"Start" signal. If the whole passage is completed once, repeat it. However, typing must be stopped
+immediately at the "Stop" signal. Do not type strokes given in the right hand margin.
+----------------------------------------------------------------------------------------------------
+                                                                                             Strokes`;
+
+        let paragraphs = textToFormat.split('\n');
+        let outputLines = [];
+        let cumulativeStrokes = 0;
+        let globalWordIndex = 0;
+
+        for (let i = 0; i < paragraphs.length; i++) {
+            let para = paragraphs[i].trim();
+            if (!para) continue; 
+            let words = para.split(/\s+/);
+            let currentVisibleLine = "     "; 
+            let currentHtmlLine = "     ";    
+
+            for (let j = 0; j < words.length; j++) {
+                let word = words[j];
+                let styledWord = word;
+                if (wordStatuses) {
+                    let status = wordStatuses[globalWordIndex];
+                    if (status === 'wrong') styledWord = `<span class="orig-wrong">${word}</span>`;
+                    else if (status === 'missed') styledWord = `<span class="orig-missed">${word}</span>`;
+                }
+                if (currentVisibleLine.length + word.length <= charsPerLine) {
+                    if (currentVisibleLine === "     ") { currentVisibleLine += word; currentHtmlLine += styledWord; } 
+                    else { currentVisibleLine += " " + word; currentHtmlLine += " " + styledWord; }
+                } else {
+                    cumulativeStrokes += currentVisibleLine.length;
+                    let spacesToAdd = charsPerLine + 5 - currentVisibleLine.length;
+                    outputLines.push(currentHtmlLine + " ".repeat(spacesToAdd > 0 ? spacesToAdd : 0) + cumulativeStrokes.toString().padStart(5, ' '));
+                    currentVisibleLine = word; currentHtmlLine = styledWord;
+                }
+                globalWordIndex++;
+            }
+            if (currentVisibleLine.trim()) {
+                cumulativeStrokes += currentVisibleLine.length;
+                let spacesToAdd = charsPerLine + 5 - currentVisibleLine.length;
+                outputLines.push(currentHtmlLine + " ".repeat(spacesToAdd > 0 ? spacesToAdd : 0) + cumulativeStrokes.toString().padStart(5, ' '));
+            }
+        }
+        return header + "\n" + outputLines.join('\n');
+    }
+
+    function generateFormat(text) {
+        document.getElementById('outputText').innerHTML = buildFormattedPassage(text, null); 
+        document.getElementById('outputText').style.fontSize = currentZoom + 'px'; 
+        resetTestUI();
+    }
+
+    function resetTestUI() {
+        clearInterval(timerInterval);
+        examAudio.pause(); 
+        examAudio.currentTime = 0;
+        
+        let userMins = parseInt(document.getElementById('testTimeInput').value) || 10;
+        timeRemaining = userMins * 60;
+        testStarted = false;
+        updateTimerDisplay();
+        
+        let typingArea = document.getElementById('userTyping');
+        typingArea.value = ""; 
+        typingArea.style.display = 'block'; 
+        typingArea.style.height = '150px';
+        typingArea.disabled = true;
+        
+        document.getElementById('outputText').style.display = 'block';
+        document.getElementById('readingHeader').style.display = 'block';
+        
+        document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, null);
+        document.getElementById('testTimeInput').disabled = false;
+        document.getElementById('evaluatedTyping').style.display = 'none';
+        document.getElementById('evaluatedTitle').style.display = 'none';
+        document.getElementById('errorDetailsBox').style.display = 'none';
+        document.getElementById('btnStart').style.display = 'inline-block';
+        document.getElementById('btnSubmit').style.display = 'none';
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('btnDownloadScore').style.display = 'none';
+    }
+
+    function startTest() {
+        if(testStarted) return;
+        testStarted = true;
+        
+        if(document.getElementById('examSoundCheck').checked) {
+            examAudio.play().catch(e => console.log("Audio autoplay blocked by browser until user interacts."));
+        }
+        
+        let userMins = parseInt(document.getElementById('testTimeInput').value) || 10;
+        timeRemaining = userMins * 60;
+        document.getElementById('testTimeInput').disabled = true; 
+
+        let typingArea = document.getElementById('userTyping');
+        typingArea.disabled = false;
+        typingArea.focus();
+        
+        if (document.getElementById('paperModeCheck').checked) {
+            document.getElementById('outputText').style.display = 'none';
+            document.getElementById('readingHeader').style.display = 'none';
+            typingArea.style.height = '350px'; 
+        }
+
+        document.getElementById('btnStart').style.display = 'none';
+        document.getElementById('btnSubmit').style.display = 'inline-block';
+
+        let disableBackspace = document.getElementById('disableBackspaceCheck').checked;
+        if(disableBackspace) { document.getElementById('userTyping').addEventListener('keydown', function(e) { if (e.key === 'Backspace') { e.preventDefault(); } }); }
+
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            let m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+            let s = (timeRemaining % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `Time Left: ${m}:${s}`;
+            if(timeRemaining <= 0) { clearInterval(timerInterval); evaluateTest(true); }
+        }, 1000);
+    }
+
+    function evaluateTest(isAutoSubmit) {
+        clearInterval(timerInterval);
+        examAudio.pause(); 
+        
+        const typingArea = document.getElementById('userTyping');
+        const evaluatedArea = document.getElementById('evaluatedTyping');
+        const errorListUl = document.getElementById('errorList');
+        const errorDetailsBox = document.getElementById('errorDetailsBox');
+        
+        document.getElementById('btnSubmit').style.display = 'none';
+        document.getElementById('outputText').style.display = 'block';
+        document.getElementById('readingHeader').style.display = 'block';
+        typingArea.style.height = '150px';
+
+        if(isAutoSubmit) { alert("Time's up! Test Auto-Submitted."); }
+
+        const originalText = currentLoadedPassageText.trim();
+        const typedText = typingArea.value.trim().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+
+        let userMins = parseInt(document.getElementById('testTimeInput').value) || 10;
+        let totalTestTimeSec = userMins * 60;
+        let timeTakenSec = totalTestTimeSec - timeRemaining;
+        if (timeTakenSec === 0) timeTakenSec = 1; 
+        let timeTakenMin = timeTakenSec / 60;
+        
+        let m = Math.floor(timeTakenSec / 60).toString().padStart(2, '0');
+        let s = (timeTakenSec % 60).toString().padStart(2, '0');
+        let timeString = `${m}:${s} Minutes`;
+
+        const totalStrokes = typingArea.value.length;
+        const originalWords = originalText.split(/\s+/);
+        const typedWords = typedText === "" ? [] : typedText.split(/\s+/);
+
+        let errors = 0; 
+        let evaluatedHTML = "";
+        let errorDetails = [];
+        let originalWordStatus = new Array(originalWords.length).fill('untyped');
+        let i = 0; let j = 0; 
+        
+        while (j < typedWords.length && i < originalWords.length) {
+            if (originalWords[i] === typedWords[j]) {
+                evaluatedHTML += typedWords[j] + " "; originalWordStatus[i] = 'correct'; i++; j++;
+            } else {
+                let skippedInOrig = -1; let extraInTyped = -1;
+                for (let k = 1; k <= 4 && (i + k) < originalWords.length; k++) { if (originalWords[i + k] === typedWords[j]) { skippedInOrig = k; break; } }
+                for (let k = 1; k <= 4 && (j + k) < typedWords.length; k++) { if (originalWords[i] === typedWords[j + k]) { extraInTyped = k; break; } }
+                
+                if (skippedInOrig !== -1 && (extraInTyped === -1 || skippedInOrig <= extraInTyped)) {
+                    for (let k = 0; k < skippedInOrig; k++) { 
+                        evaluatedHTML += `<span class="missed-word">[Missed]</span> `; 
+                        originalWordStatus[i] = 'missed'; 
+                        errorDetails.push(`<li>Missed word: <b>${originalWords[i]}</b></li>`);
+                        errors++; i++; 
+                    }
+                } else if (extraInTyped !== -1 && (skippedInOrig === -1 || extraInTyped < skippedInOrig)) {
+                    for (let k = 0; k < extraInTyped; k++) { 
+                        evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
+                        errorDetails.push(`<li>Extra word typed: <b style="color:#c0392b;">${typedWords[j]}</b></li>`);
+                        errors++; j++; 
+                    }
+                } else {
+                    evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
+                    originalWordStatus[i] = 'wrong'; 
+                    errorDetails.push(`<li>You typed: <b style="color:#c0392b;">${typedWords[j]}</b> &rarr; Real word: <b style="color:#27ae60;">${originalWords[i]}</b></li>`);
+                    errors++; i++; j++;
+                }
+            }
+        }
+        while (j < typedWords.length) { 
+            evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
+            errorDetails.push(`<li>Extra word typed: <b style="color:#c0392b;">${typedWords[j]}</b></li>`);
+            errors++; j++; 
+        }
+
+        document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, originalWordStatus);
+
+        typingArea.style.display = 'none';
+        
+        document.getElementById('evaluatedTitle').style.display = 'block';
+        evaluatedArea.innerHTML = evaluatedHTML.trim() === "" ? "<i>No text typed.</i>" : evaluatedHTML.trim();
+        evaluatedArea.style.display = 'block';
+        
+        if (errorDetails.length > 0) {
+            errorListUl.innerHTML = errorDetails.join('');
+            errorDetailsBox.style.display = 'block';
+        } else {
+            errorDetailsBox.style.display = 'none';
+        }
+
+        let grossWPM = (totalStrokes / 5) / timeTakenMin;
+        let netWPM = Math.round(grossWPM - (errors / timeTakenMin));
+        if (netWPM < 0) netWPM = 0; 
+
+        let totalWordsEvaluated = typedWords.length + errors; 
+        let accuracy = 0;
+        if (totalWordsEvaluated > 0) { accuracy = ((totalWordsEvaluated - errors) / totalWordsEvaluated) * 100; if(accuracy > 100) accuracy = 100; }
+        accuracy = parseFloat(accuracy.toFixed(2));
+
+        let isQualified = netWPM >= 35 && accuracy >= 97;
+        let statusHtml = isQualified ? '<span style="color:#166534; background:#dcfce7; padding:2px 8px; border-radius:4px;">✅ Qualified (DSSSB Standard)</span>' : '<span style="color:#991b1b; background:#fee2e2; padding:2px 8px; border-radius:4px;">❌ Disqualified (Need 35+ WPM & 97%+ Acc)</span>';
+
+        document.getElementById('resStatus').innerHTML = statusHtml;
+        document.getElementById('resTime').textContent = timeString;
+        document.getElementById('resStrokes').textContent = totalStrokes;
+        document.getElementById('resWords').textContent = typedWords.length;
+        document.getElementById('resErrors').textContent = errors;
+        document.getElementById('resGrossSpeed').textContent = Math.round(grossWPM);
+        document.getElementById('resNetSpeed').textContent = netWPM;
+        document.getElementById('resAccuracy').textContent = accuracy + "%";
+        document.getElementById('results').style.display = 'block';
+
+        let sName = document.getElementById('studentNameInput').value.trim() || "Anonymous Student";
+        let mobile = document.getElementById('userMobile').value.trim();
+        let testTitle = passagesData[currentPassageId] ? passagesData[currentPassageId].title : "Typing Test";
+        
+        if (isQualified) {
+            document.getElementById('scName').innerText = sName;
+            document.getElementById('scWpm').innerText = netWPM + " WPM";
+            document.getElementById('scAcc').innerText = accuracy + "%";
+            document.getElementById('scDate').innerText = "Issued on: " + new Date().toLocaleDateString('en-GB');
+            document.getElementById('btnDownloadScore').style.display = 'inline-block';
+        } else {
+            document.getElementById('btnDownloadScore').style.display = 'none';
+        }
+
+        if (currentPassageId) { 
+            db.ref("typing_leaderboard/" + currentPassageId).push({ 
+                name: sName, 
+                netWPM: netWPM, 
+                accuracy: accuracy, 
+                qualified: isQualified, 
+                timestamp: firebase.database.ServerValue.TIMESTAMP 
+            }); 
+            
+            db.ref("user_typing_records/" + mobile).push({
+                testId: currentPassageId,
+                testName: testTitle,
+                wpm: netWPM,
+                accuracy: accuracy,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+    }
+
+    function downloadScoreCard() {
+        let btn = document.getElementById('btnDownloadScore');
+        let originalText = btn.innerText;
+        btn.innerText = "⏳ Generating Certificate...";
+        
+        let card = document.getElementById('scoreCardTemplate');
+        
+        card.style.left = '0px';
+        card.style.zIndex = '-100';
+        
+        html2canvas(card, { scale: 2 }).then(canvas => {
+            let link = document.createElement('a');
+            link.download = 'DSSSB_Typing_Certificate.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            
+            card.style.left = '-9999px';
+            btn.innerText = originalText;
+        });
+    }
+</script>
+
+</body>
+</html>
