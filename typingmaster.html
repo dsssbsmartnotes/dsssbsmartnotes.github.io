@@ -19,15 +19,27 @@
         }
         input, textarea, select { -webkit-user-select: text; -ms-user-select: text; user-select: text; }
 
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        /* WIDE CONTAINER FOR SIDE-BY-SIDE LAYOUT */
+        .container { max-width: 1300px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2, h3 { text-align: center; color: #2c3e50; }
         .student-section { background: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #bce8f1; }
         
         select, input[type="text"], input[type="number"] { width: 100%; padding: 10px; font-size: 16px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;}
         textarea { width: 100%; padding: 12px; font-size: 18px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; resize: vertical; margin-bottom: 15px; transition: height 0.3s ease; }
         
-        #userTyping { height: 150px; border: 2px solid #3498db; background-color: #f9f9f9; }
+        /* NOTEPAD STYLE UPDATE FOR TYPING BOX - INCREASED HEIGHT */
+        #userTyping { 
+            height: 250px; 
+            border: 2px solid #3498db; 
+            background-color: #ffffff; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 18px;
+            line-height: 1.5;
+            color: #000;
+            white-space: pre-wrap;
+        }
         #userTyping:disabled { background-color: #e0e0e0; cursor: not-allowed; }
+        
         #evaluatedTyping { min-height: 150px; border: 2px solid #2ecc71; background-color: #fdfdfd; padding: 12px; font-family: Arial, sans-serif; font-size: 16px; border-radius: 5px; margin-bottom: 15px; white-space: pre-wrap; display: none; line-height: 1.6; }
         
         .wrong-word { background-color: #ffcccc; color: #c0392b; font-weight: bold; padding: 2px 4px; border-radius: 3px; }
@@ -45,23 +57,48 @@
         .btn-print:hover { background-color: #2ecc71; }
         .btn-zoom { background-color: #34495e; width: auto; padding: 12px 20px; margin-left: 5px; }
         .btn-zoom:hover { background-color: #2c3e50; }
-        .btn-submit { background-color: #e67e22; }
+        .btn-submit { background-color: #e67e22; padding: 15px; font-size: 18px; }
         .btn-submit:hover { background-color: #d35400; }
-        .btn-start { background-color: #8e44ad; }
+        .btn-start { background-color: #8e44ad; padding: 15px; font-size: 18px; }
         .btn-start:hover { background-color: #732d91; }
         .btn-dash { background-color: #34495e; margin-bottom:15px; }
         .btn-dash:hover { background-color: #2c3e50; }
+        .btn-info { background-color: #16a085; }
+        .btn-info:hover { background-color: #1abc9c; }
         
         .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .test-settings { background: #fdfdfd; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;}
-        .test-settings label { font-size: 16px; font-weight: bold; color: #2c3e50; margin: 5px 10px; }
-        .test-settings input[type="number"] { width: 60px; padding: 5px; font-size: 16px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
-        .test-settings input[type="checkbox"] { transform: scale(1.3); margin-right: 8px; cursor: pointer; }
 
-        pre { background: #fdfdfd; padding: 20px; border: 2px solid #7f8c8d; overflow-x: auto; overflow-y: auto; max-height: 350px; font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: bold; color: #111; line-height: 2; white-space: pre; }
-        .timer-box { text-align: center; font-size: 24px; font-weight: bold; color: #c0392b; margin: 10px 0; }
+        /* PERFECT SIDEBAR LAYOUT STYLES - SIDEBAR SHIFTED TO LEFT */
+        .test-layout { display: flex; gap: 30px; align-items: flex-start; margin-top: 15px; }
+        .test-main { flex: 1; min-width: 0; }
+        .test-sidebar { width: 320px; background: #f8fcfb; padding: 20px; border: 2px solid #bce8f1; border-radius: 8px; flex-shrink: 0; position: sticky; top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); order: -1; }
         
-        .result-box { background: #e8f8f5; border-left: 5px solid #1abc9c; padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 18px; display: none; }
+        .settings-panel { background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .test-settings-vertical label { display: block; font-size: 15px; font-weight: bold; color: #34495e; margin-bottom: 12px; cursor: pointer; }
+        .test-settings-vertical input[type="checkbox"] { transform: scale(1.3); margin-right: 10px; cursor: pointer; vertical-align: middle; }
+        .test-settings-vertical input[type="number"] { width: 60px; padding: 4px; font-size: 16px; text-align: center; border: 1px solid #ccc; border-radius: 4px; display: inline-block; margin: 0 5px; }
+        
+        @media (max-width: 950px) {
+            .test-layout { flex-direction: column-reverse; }
+            .test-sidebar { width: 100%; position: static; margin-bottom: 20px; }
+        }
+
+        /* SCREEN READING AREA - Adjusted Font Size to prevent horizontal scroll */
+        pre { 
+            background: #fdfdfd; padding: 20px; border: 2px solid #7f8c8d; 
+            overflow-x: auto; overflow-y: auto; max-height: 400px; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #111; 
+            line-height: 2; 
+            white-space: pre; 
+            letter-spacing: 0.5px; 
+            margin-top: 0;
+        }
+        .timer-box { text-align: center; font-size: 32px; font-weight: bold; color: #c0392b; background: #fff; border: 2px dashed #e74c3c; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        
+        .result-box { background: #e8f8f5; border-left: 5px solid #1abc9c; padding: 15px; border-radius: 4px; font-size: 18px; display: none; }
         .result-box span { font-weight: bold; color: #c0392b; }
         
         .leaderboard-section { margin-top: 30px; display: none; }
@@ -74,16 +111,12 @@
         .rank-2 { background-color: #e2e8f0; } 
         .rank-3 { background-color: #fed7aa; } 
 
-        .promo-link { text-align: center; margin-top: 25px; font-size: 16px; font-weight: bold; color: #2c3e50; display: none; }
-        .promo-link a { color: #0088cc; text-decoration: none; }
-
         .pay-overlay { display: none; background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .pay-card { background: #fff; color: #333; padding: 25px; border-radius: 15px; max-width: 400px; width: 100%; text-align: center; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .pro-badge { background: linear-gradient(135deg, #FFD700, #F59E0B); color: #000; padding: 3px 8px; border-radius: 5px; font-weight: 800; font-size: 12px; margin-left: 10px; }
         .qr-box { background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0; border: 2px dashed #bdc3c7; }
         .qr-image { width: 150px; height: 150px; border-radius: 8px; border: 3px solid #3498db; padding: 5px; background: white; margin-bottom: 10px; }
 
-        /* Dashboard Styles */
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #3498db; border-right: 1px solid #ddd; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
         .dashboard-header h3 { margin: 0; color: #2c3e50; text-align: left;}
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -91,12 +124,39 @@
         .dash-card h4 { margin-top: 0; color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; margin-bottom: 15px; }
         @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .dashboard-header { flex-direction: column; align-items: flex-start; gap: 10px;} }
 
+        /* PRINT FOOTER FOR CHANNEL LINK */
+        .print-footer { display: none; }
+
+        /* EXAM STYLE PRINT LAYOUT */
         @media print {
-            @page { margin: 1cm; size: A4 portrait; } 
-            body { background: #fff; padding: 0; }
+            @page { margin: 1.5cm; size: A4 portrait; } 
+            body { background: #fff; padding: 0; color: #000; }
             .no-print { display: none !important; }
             .container { box-shadow: none; padding: 0; margin: 0; max-width: 100%; border: none; }
-            pre { border: none !important; padding: 0 !important; overflow: visible !important; max-height: none !important; white-space: pre !important; font-size: 12px !important; font-weight: normal !important; width: 100%; }
+            pre { 
+                border: none !important; 
+                padding: 0 !important; 
+                overflow: visible !important; 
+                max-height: none !important; 
+                white-space: pre !important; 
+                font-family: 'Courier New', Courier, monospace !important; 
+                font-size: 14px !important; 
+                font-weight: bold !important; 
+                color: #000 !important;
+                line-height: 2 !important; 
+                width: 100%; 
+            }
+            .print-footer { 
+                display: block !important; 
+                text-align: center; 
+                margin-top: 40px; 
+                padding-top: 20px; 
+                border-top: 2px dashed #000; 
+                font-family: Arial, sans-serif; 
+                font-size: 16px; 
+                font-weight: bold; 
+            }
+            .print-footer a { color: #000; text-decoration: none; }
         }
     </style>
 </head>
@@ -183,6 +243,19 @@
         </div>
     </div>
 
+    <div id="instructionOverlay" class="pay-overlay">
+        <div class="pay-card" style="max-width: 550px; text-align: left;">
+            <h2 style="color:#2c3e50; margin-top: 0; text-align: center; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;">📜 Exam Rules</h2>
+            <ul style="font-size: 15px; line-height: 1.8; color: #444; padding-left: 20px; margin-top: 15px;">
+                <li><b>पैराग्राफ (Tab & Enter):</b> नया पैराग्राफ शुरू करने के लिए <b>Enter</b> दबाएं और फिर <b>Tab</b> दबाएं। सिस्टम खुद 5 स्पेस छोड़ देगा जो 5 स्ट्रोक्स गिने जाएंगे।</li>
+                <li><b style="color: #c0392b;">पैसेज रिपीट (Passage Repeat):</b> अगर आपका पैसेज समय से पहले खत्म हो जाता है, तो आपको <b>दो बार Enter</b> दबाना है और पैसेज को बिल्कुल शुरू से दोबारा टाइप करना है (DSSSB का अहम रूल)।</li>
+                <li><b>स्ट्रोक काउंट (Stroke Counting):</b> आपके द्वारा दबाया गया हर Space, Tab और Enter एक स्ट्रोक गिना जाता है। (5 Strokes = 1 Word).</li>
+                <li><b>ऑटो-सबमिट:</b> टाइमर 0:00 होते ही आपका टेस्ट खुद-ब-खुद सबमिट हो जाएगा।</li>
+            </ul>
+            <button onclick="hideInstructions()" style="background:#27ae60; margin-top:20px; font-size: 16px;">समझ आ गया (Got it!)</button>
+        </div>
+    </div>
+
     <div id="outputSection" style="display: none;">
         <button class="btn-dash no-print" onclick="backToDashboard()">⬅️ Back to My Dashboard</button>
         
@@ -194,64 +267,79 @@
             </div>
         </div>
         
-        <p id="readingHeader" class="no-print" style="margin-bottom: 5px;"><b>Reading Area (Original Passage):</b></p>
-        <pre id="outputText"></pre>
-        
-        <div class="no-print mt-4">
-            <hr>
-            <h3>Start Typing Test</h3>
-            <div class="test-settings">
-                <label>⏳ Timer: <input type="number" id="testTimeInput" value="10" min="1" max="60" onchange="updateTimerDisplay()"> Min</label>
-                <label><input type="checkbox" id="disableBackspaceCheck"> 🚫 Disable Backspace</label>
-                <label><input type="checkbox" id="paperModeCheck"> 📄 Paper to Screen Mode</label>
-                <label><input type="checkbox" id="examSoundCheck"> 🎧 Exam Hall Sound</label>
-            </div>
+        <div class="test-layout">
             
-            <div id="timerDisplay" class="timer-box">Time Left: 10:00</div>
-            <button id="btnStart" class="btn-start" onclick="startTest()">🚀 Start Test</button>
-            <textarea id="userTyping" placeholder="Click 'Start Test' to begin typing..." disabled spellcheck="false"></textarea>
-            
-            <p id="evaluatedTitle" style="display:none; font-weight:bold; margin-bottom: 5px;">Your Typed Output (Errors Highlighted):</p>
-            <div id="evaluatedTyping"></div>
-            
-            <div id="errorDetailsBox" class="error-log-box">
-                <h4>Error Analysis</h4>
-                <ul id="errorList"></ul>
-            </div>
-
-            <button id="btnSubmit" class="btn-submit" onclick="evaluateTest(false)" style="display:none;">Submit Test Early</button>
-            
-            <div id="results" class="result-box">
-                <h3 style="margin-top:0;">Your Result</h3>
-                <p>Status: <span id="resStatus">Pending</span></p>
-                <p>Gross Speed: <span id="resGrossSpeed">0</span> WPM</p>
-                <p>Net Speed: <span id="resNetSpeed">0</span> WPM</p>
-                <p>Accuracy: <span id="resAccuracy">0%</span></p>
-                <hr>
-                <p style="font-size: 14px; margin-bottom:0;">Time Taken: <span id="resTime">0:00</span> | Strokes: <span id="resStrokes">0</span> | Words: <span id="resWords">0</span> | Errors: <span id="resErrors">0</span></p>
+            <div class="test-main">
+                <p id="readingHeader" style="margin-bottom: 5px; margin-top: 0; color: #34495e;"><b>Reading Area (Original Passage):</b></p>
+                <pre id="outputText"></pre>
                 
-                <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:15px;">🏆 Download Score Card</button>
-            </div>
+                <textarea id="userTyping" class="no-print" placeholder="Click 'Start Test' to begin typing..." disabled spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" style="margin-top: 15px;"></textarea>
+                
+                <p id="evaluatedTitle" class="no-print" style="display:none; font-weight:bold; margin-bottom: 5px; margin-top: 20px; color: #34495e;">Your Typed Output (Errors Highlighted):</p>
+                <div id="evaluatedTyping" class="no-print"></div>
+                
+                <div id="errorDetailsBox" class="error-log-box no-print">
+                    <h4>Error Analysis</h4>
+                    <ul id="errorList"></ul>
+                </div>
 
-            <div id="leaderboardArea" class="leaderboard-section">
-                <h3>🏆 Live Leaderboard</h3>
-                <p style="text-align:center; font-size:12px; color:gray;">(Qualifying Criteria: 35+ WPM & 97%+ Accuracy)</p>
-                <table class="lb-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Name</th>
-                            <th>Net Speed</th>
-                            <th>Accuracy</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lbTableBody">
-                        <tr><td colspan="5">Loading Ranks...</td></tr>
-                    </tbody>
-                </table>
+                <div id="leaderboardArea" class="leaderboard-section no-print">
+                    <h3>🏆 Live Leaderboard</h3>
+                    <p style="text-align:center; font-size:12px; color:gray;">(Qualifying Criteria: 35+ WPM & 97%+ Accuracy)</p>
+                    <table class="lb-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Name</th>
+                                <th>Net Speed</th>
+                                <th>Accuracy</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lbTableBody">
+                            <tr><td colspan="5">Loading Ranks...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            
+            <div class="test-sidebar no-print">
+                <div id="timerDisplay" class="timer-box">Time Left: 10:00</div>
+                <button id="btnStart" class="btn-start" onclick="startTest()">🚀 Start Test</button>
+                <button id="btnSubmit" class="btn-submit" onclick="evaluateTest(false)" style="display:none;">Submit Test Early</button>
+                
+                <button class="btn-info" onclick="showInstructions()" style="margin-top: 15px; margin-bottom: 20px; width: 100%;">📜 Read Exam Rules</button>
+                
+                <div class="settings-panel">
+                    <h3 style="margin-top: 0; text-align: left; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 16px;">⚙️ Test Settings</h3>
+                    <div class="test-settings-vertical">
+                        <label>⏳ Timer: <input type="number" id="testTimeInput" value="10" min="1" max="60" onchange="updateTimerDisplay()"> Min</label>
+                        <label><input type="checkbox" id="disableBackspaceCheck"> 🚫 Disable Backspace</label>
+                        <label><input type="checkbox" id="paperModeCheck"> 📄 Paper to Screen Mode</label>
+                        <label><input type="checkbox" id="examSoundCheck"> 🎧 Exam Hall Sound</label>
+                    </div>
+                </div>
+
+                <div id="results" class="result-box" style="margin-top: 0;">
+                    <h3 style="margin-top:0; font-size: 20px;">Your Result</h3>
+                    <p style="font-size: 15px; margin: 5px 0;">Status: <span id="resStatus">Pending</span></p>
+                    <p style="font-size: 15px; margin: 5px 0;">Gross Speed: <span id="resGrossSpeed">0</span> WPM</p>
+                    <p style="font-size: 15px; margin: 5px 0;">Net Speed: <span id="resNetSpeed">0</span> WPM</p>
+                    <p style="font-size: 15px; margin: 5px 0;">Accuracy: <span id="resAccuracy">0%</span></p>
+                    <hr style="margin: 10px 0;">
+                    <p style="font-size: 13px; margin-bottom:0; line-height: 1.6;">Time: <span id="resTime">0:00</span> | Strokes: <span id="resStrokes">0</span><br>Words: <span id="resWords">0</span> | Errors: <span id="resErrors">0</span></p>
+                    
+                    <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:15px; font-size: 14px; padding: 10px;">🏆 Download Score Card</button>
+                </div>
+            </div>
+            
         </div>
+
+        <div class="print-footer">
+            For more updates & mock tests, join our Telegram Channel:<br>
+            <a href="https://t.me/DSSSB_PYQS">https://t.me/DSSSB_PYQS</a>
+        </div>
+
     </div>
 </div>
 
@@ -300,6 +388,18 @@
     if(typingBox) {
         typingBox.addEventListener('paste', e => e.preventDefault());
         typingBox.addEventListener('drop', e => e.preventDefault());
+        
+        // Tab Key Fix with 5 Spaces
+        typingBox.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault(); 
+                let start = this.selectionStart;
+                let end = this.selectionEnd;
+                let tabSpaces = "     "; 
+                this.value = this.value.substring(0, start) + tabSpaces + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + tabSpaces.length;
+            }
+        });
     }
 
     setInterval(function() { (function() { return false; }['constructor']('debugger')()); }, 1000);
@@ -323,12 +423,15 @@
     let currentPassageId = "";
     let isPro = false;
     
-    // Setup Audio for Background typing
     const examAudio = new Audio('https://upload.wikimedia.org/wikipedia/commons/4/4b/Keyboard_typing_sound.ogg');
     examAudio.loop = true;
     
-    // Global Chart Instance
     let progressChartInstance = null;
+
+    // Instructions popup handlers
+    function showInstructions() { document.getElementById('instructionOverlay').style.display = 'flex'; }
+    function hideInstructions() { document.getElementById('instructionOverlay').style.display = 'none'; }
+    function closePayment() { document.getElementById('paymentOverlay').style.display = 'none'; }
 
     // LOGIN & DASHBOARD LOGIC
     async function verifyAndFetch() {
@@ -342,7 +445,6 @@
         db.ref("dsssb_pro_users").once("value", (snapshot) => {
             snapshot.forEach(child => { if(child.val().id == mobile || child.key == mobile) { isPro = true; } });
 
-            // Setup Dashboard Info
             document.getElementById('dashName').innerText = name;
             document.getElementById('dashMobile').innerText = mobile;
 
@@ -384,7 +486,6 @@
                     opt.textContent = child.val().title + " 🔒 (PRO)";
                     opt.dataset.locked = "true";
                 }
-                
                 select.appendChild(opt);
                 isFirst = false;
             });
@@ -399,7 +500,6 @@
             if(snap.exists()) {
                 snap.forEach(child => { records.push(child.val()); });
                 
-                // For Graph (Ascending Order)
                 let chartLabels = [];
                 let chartData = [];
                 records.forEach(r => {
@@ -410,7 +510,6 @@
                 
                 renderChart(chartLabels, chartData);
 
-                // For Table (Descending Order)
                 records.reverse(); 
                 records.forEach(r => {
                     let dateObj = new Date(r.timestamp);
@@ -425,7 +524,6 @@
         });
     }
 
-    // UPDATED: Progress Chart Render
     function renderChart(labels, data) {
         const ctx = document.getElementById('progressChart').getContext('2d');
         if(progressChartInstance) { progressChartInstance.destroy(); }
@@ -448,13 +546,9 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, // Now behaves correctly due to the parent container
-                scales: {
-                    y: { beginAtZero: true, suggestedMax: 45 }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
+                maintainAspectRatio: false, 
+                scales: { y: { beginAtZero: true, suggestedMax: 45 } },
+                plugins: { legend: { display: false } }
             }
         });
     }
@@ -511,8 +605,6 @@
         document.getElementById('passageSelect').value = ""; 
     }
 
-    function closePayment() { document.getElementById('paymentOverlay').style.display = 'none'; }
-
     function loadLeaderboard(testId) {
         document.getElementById('leaderboardArea').style.display = 'block';
         db.ref("typing_leaderboard/" + testId).on("value", (snap) => {
@@ -558,10 +650,10 @@
     }
 
     function buildFormattedPassage(textToFormat, wordStatuses = null) {
-        const charsPerLine = 85; 
+        const charsPerLine = 75; 
         let customMins = document.getElementById('testTimeInput').value || 10;
         
-        const header = `DSSSB/TE-26/D17                                              TIME ${customMins} MINUTES
+        const header = `DSSSB/TE-26/D17                                                     TIME ${customMins} MINUTES
                        TYPEWRITING SPEED TEST: 35 w.p.m.
 
 Note: Type the following passage accurately using double line spacing. Start typing only on getting the
@@ -580,7 +672,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             if (!para) continue; 
             let words = para.split(/\s+/);
             let currentVisibleLine = "     "; 
-            let currentHtmlLine = "     ";    
+            let currentHtmlLine = "     ";   
 
             for (let j = 0; j < words.length; j++) {
                 let word = words[j];
@@ -629,7 +721,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         let typingArea = document.getElementById('userTyping');
         typingArea.value = ""; 
         typingArea.style.display = 'block'; 
-        typingArea.style.height = '150px';
+        typingArea.style.height = '250px'; 
         typingArea.disabled = true;
         
         document.getElementById('outputText').style.display = 'block';
@@ -640,7 +732,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('evaluatedTyping').style.display = 'none';
         document.getElementById('evaluatedTitle').style.display = 'none';
         document.getElementById('errorDetailsBox').style.display = 'none';
-        document.getElementById('btnStart').style.display = 'inline-block';
+        document.getElementById('btnStart').style.display = 'block';
         document.getElementById('btnSubmit').style.display = 'none';
         document.getElementById('results').style.display = 'none';
         document.getElementById('btnDownloadScore').style.display = 'none';
@@ -665,11 +757,11 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         if (document.getElementById('paperModeCheck').checked) {
             document.getElementById('outputText').style.display = 'none';
             document.getElementById('readingHeader').style.display = 'none';
-            typingArea.style.height = '350px'; 
+            typingArea.style.height = '500px'; 
         }
 
         document.getElementById('btnStart').style.display = 'none';
-        document.getElementById('btnSubmit').style.display = 'inline-block';
+        document.getElementById('btnSubmit').style.display = 'block';
 
         let disableBackspace = document.getElementById('disableBackspaceCheck').checked;
         if(disableBackspace) { document.getElementById('userTyping').addEventListener('keydown', function(e) { if (e.key === 'Backspace') { e.preventDefault(); } }); }
@@ -695,7 +787,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('btnSubmit').style.display = 'none';
         document.getElementById('outputText').style.display = 'block';
         document.getElementById('readingHeader').style.display = 'block';
-        typingArea.style.height = '150px';
+        typingArea.style.display = 'none';
 
         if(isAutoSubmit) { alert("Time's up! Test Auto-Submitted."); }
 
@@ -713,8 +805,16 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         let timeString = `${m}:${s} Minutes`;
 
         const totalStrokes = typingArea.value.length;
-        const originalWords = originalText.split(/\s+/);
+        
+        let originalTextDynamic = originalText;
         const typedWords = typedText === "" ? [] : typedText.split(/\s+/);
+        let baseOriginalText = originalTextDynamic;
+        
+        while (originalTextDynamic.split(/\s+/).length < typedWords.length) {
+            originalTextDynamic += "\n\n" + baseOriginalText; 
+        }
+        
+        const originalWords = originalTextDynamic.split(/\s+/);
 
         let errors = 0; 
         let evaluatedHTML = "";
@@ -757,10 +857,8 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             errors++; j++; 
         }
 
-        document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, originalWordStatus);
+        document.getElementById('outputText').innerHTML = buildFormattedPassage(originalTextDynamic, originalWordStatus);
 
-        typingArea.style.display = 'none';
-        
         document.getElementById('evaluatedTitle').style.display = 'block';
         evaluatedArea.innerHTML = evaluatedHTML.trim() === "" ? "<i>No text typed.</i>" : evaluatedHTML.trim();
         evaluatedArea.style.display = 'block';
@@ -782,7 +880,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         accuracy = parseFloat(accuracy.toFixed(2));
 
         let isQualified = netWPM >= 35 && accuracy >= 97;
-        let statusHtml = isQualified ? '<span style="color:#166534; background:#dcfce7; padding:2px 8px; border-radius:4px;">✅ Qualified (DSSSB Standard)</span>' : '<span style="color:#991b1b; background:#fee2e2; padding:2px 8px; border-radius:4px;">❌ Disqualified (Need 35+ WPM & 97%+ Acc)</span>';
+        let statusHtml = isQualified ? '<span style="color:#166534; background:#dcfce7; padding:2px 8px; border-radius:4px;">✅ Qualified (DSSSB Standard)</span>' : '<span style="color:#991b1b; background:#fee2e2; padding:2px 8px; border-radius:4px;">❌ Disqualified</span>';
 
         document.getElementById('resStatus').innerHTML = statusHtml;
         document.getElementById('resTime').textContent = timeString;
