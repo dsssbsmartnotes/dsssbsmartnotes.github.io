@@ -162,9 +162,20 @@
                 font-size: 16px; 
                 font-weight: bold; 
             }
-            .print-footer a { color: #000; text-decoration: none; }
-        }
-    </style>
+          .print-footer a { color: #000; text-decoration: none; }
+    }
+
+    /* WEAK WORDS DRILL GAME CSS */
+    .drill-overlay { display: none; background: rgba(15, 23, 42, 0.95); position: fixed; inset: 0; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white; font-family: 'Courier New', Courier, monospace; }
+    .drill-box { background: #1e293b; border: 4px solid #3b82f6; border-radius: 15px; padding: 40px; text-align: center; width: 100%; max-width: 500px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+    .drill-target-word { font-size: 48px; font-weight: bold; color: #fbbf24; margin-bottom: 20px; letter-spacing: 2px; }
+    .drill-input { width: 100%; padding: 15px; font-size: 24px; text-align: center; border-radius: 8px; border: none; outline: none; background: #334155; color: #fff; font-family: inherit; }
+    .drill-input:focus { box-shadow: 0 0 15px #3b82f6; }
+    .drill-stats { display: flex; justify-content: space-between; margin-top: 20px; font-size: 18px; color: #94a3b8; }
+    .drill-score { color: #22c55e; font-weight: bold; font-size: 24px; }
+    .word-flash { animation: flashGreen 0.3s ease-out; }
+    @keyframes flashGreen { 0% { transform: scale(1); color: #fbbf24; } 50% { transform: scale(1.2); color: #22c55e; } 100% { transform: scale(1); color: #fbbf24; } }
+</style>
 </head>
 <body>
 
@@ -261,9 +272,23 @@
         </div>
     </div>
 
+<div id="drillOverlay" class="drill-overlay">
+        <div class="drill-box">
+            <h2 style="margin-top:0; color:#3b82f6;">🎯 Weak Words Drill</h2>
+            <p style="color:#cbd5e1; margin-bottom: 30px;">Type the word correctly to destroy it!</p>
+            <div id="drillTargetWord" class="drill-target-word">Ready?</div>
+            <input type="text" id="drillInput" class="drill-input" placeholder="Type here..." autocomplete="off">
+            <div class="drill-stats">
+                <div>⏳ <span id="drillTimer">30</span>s</div>
+                <div>🔥 Score: <span id="drillScore" class="drill-score">0</span></div>
+            </div>
+            <button onclick="closeDrill()" style="background:#ef4444; margin-top:30px;">End Drill</button>
+        </div>
+    </div>
+
     <div id="outputSection" style="display: none;">
         <button class="btn-dash no-print" onclick="backToDashboard()">⬅️ Back to My Dashboard</button>
-        
+
         <div class="controls-bar no-print">
             <button class="btn-print" onclick="window.print()" style="flex-grow: 1;">📥 Download Passage as PDF</button>
             <div style="display: flex;">
@@ -357,10 +382,11 @@
                     <p style="font-size: 15px; margin: 5px 0;">Net Speed: <span id="resNetSpeed">0</span> WPM</p>
                     <hr style="margin: 10px 0;">
                     <p style="font-size: 13px; margin-bottom:0; line-height: 1.6;">Time: <span id="resTime">0:00</span> | Strokes: <span id="resStrokes">0</span><br>Words: <span id="resWords">0</span> | Errors: <span id="resErrors">0</span></p>
+            <div id="resWeakChars"></div>
+                    <button id="btnPracticeWeak" onclick="startWordDrill()" style="display:none; background-color:#d35400; margin-top:15px; font-size: 15px; padding: 12px; width:100%; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;">🎯 Practice Weak Words Mini-Game</button>
                     
-                    <div id="resWeakChars"></div>
+                    <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:15px; font-size: 14px; padding: 10px;">🏆 Download Score Card</button>        
                     
-                    <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:15px; font-size: 14px; padding: 10px;">🏆 Download Score Card</button>
                 </div>
             </div>
             
@@ -917,6 +943,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         let errorDetails = [];
         let originalWordStatus = new Array(originalWords.length).fill('untyped');
         let weakCharsMap = {}; 
+        globalWeakWords = []; 
         let i = 0; let j = 0; 
         
         while (j < typedWords.length && i < originalWords.length) {
@@ -927,10 +954,11 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                 for (let k = 1; k <= 4 && (i + k) < originalWords.length; k++) { if (originalWords[i + k] === typedWords[j]) { skippedInOrig = k; break; } }
                 for (let k = 1; k <= 4 && (j + k) < typedWords.length; k++) { if (originalWords[i] === typedWords[j + k]) { extraInTyped = k; break; } }
                 
-                if (skippedInOrig !== -1 && (extraInTyped === -1 || skippedInOrig <= extraInTyped)) {
+               if (skippedInOrig !== -1 && (extraInTyped === -1 || skippedInOrig <= extraInTyped)) {
                     for (let k = 0; k < skippedInOrig; k++) { 
                         evaluatedHTML += `<span class="missed-word">[Missed]</span> `; 
                         originalWordStatus[i] = 'missed'; 
+                        globalWeakWords.push(originalWords[i].replace(/[^a-zA-Z0-9]/g, ''));
                         errorDetails.push(`<li>Missed word: <b>${originalWords[i]}</b></li>`);
                         errors++; omissionsCount++; i++; 
                     }
@@ -940,9 +968,10 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                         errorDetails.push(`<li>Extra word typed: <b style="color:#c0392b;">${typedWords[j]}</b></li>`);
                         errors++; fullMistakesCount++; j++; 
                     }
-                } else {
+               } else {
                     evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
                     originalWordStatus[i] = 'wrong'; 
+                    globalWeakWords.push(originalWords[i].replace(/[^a-zA-Z0-9]/g, ''));
                     errorDetails.push(`<li>You typed: <b style="color:#c0392b;">${typedWords[j]}</b> &rarr; Real word: <b style="color:#27ae60;">${originalWords[i]}</b></li>`);
                     
                     let oW = originalWords[i] || "";
@@ -1023,10 +1052,18 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('resWords').textContent = typedWords.length;
         document.getElementById('resErrors').textContent = errors;
         document.getElementById('resGrossSpeed').textContent = Math.round(grossWPM);
-        document.getElementById('resNetSpeed').textContent = netWPM;
+       document.getElementById('resNetSpeed').textContent = netWPM;
         document.getElementById('results').style.display = 'block';
 
+        globalWeakWords = [...new Set(globalWeakWords.filter(w => w && w.length > 2))];
+        if(globalWeakWords.length > 0) {
+            document.getElementById('btnPracticeWeak').style.display = 'block';
+        } else {
+            document.getElementById('btnPracticeWeak').style.display = 'none';
+        }
+
         let sName = document.getElementById('studentNameInput').value.trim() || "Anonymous Student";
+
         let mobile = document.getElementById('userMobile').value.trim();
         let testTitle = passagesData[currentPassageId] ? passagesData[currentPassageId].title : "Typing Test";
         
@@ -1073,9 +1110,75 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             link.href = canvas.toDataURL("image/png");
             link.click();
             
-            card.style.left = '-9999px';
+           card.style.left = '-9999px';
             btn.innerText = originalText;
         });
+    }
+
+    // === WEAK WORDS DRILL LOGIC ===
+    let globalWeakWords = [];
+    let drillScore = 0;
+    let drillTime = 30;
+    let drillInterval = null;
+    let currentDrillWord = "";
+
+    function startWordDrill() {
+        if(globalWeakWords.length === 0) return;
+        document.getElementById('drillOverlay').style.display = 'flex';
+        document.getElementById('drillInput').value = "";
+        document.getElementById('drillInput').focus();
+        drillScore = 0;
+        drillTime = 30;
+        document.getElementById('drillScore').innerText = drillScore;
+        document.getElementById('drillTimer').innerText = drillTime;
+        
+        nextDrillWord();
+        
+        clearInterval(drillInterval);
+        drillInterval = setInterval(() => {
+            drillTime--;
+            document.getElementById('drillTimer').innerText = drillTime;
+            if(drillTime <= 0) {
+                endDrill();
+            }
+        }, 1000);
+    }
+
+    function nextDrillWord() {
+        let randomIndex = Math.floor(Math.random() * globalWeakWords.length);
+        currentDrillWord = globalWeakWords[randomIndex].toLowerCase();
+        let wordEl = document.getElementById('drillTargetWord');
+        wordEl.innerText = currentDrillWord;
+        wordEl.classList.remove('word-flash');
+        void wordEl.offsetWidth; 
+        wordEl.classList.add('word-flash');
+    }
+
+    document.getElementById('drillInput').addEventListener('input', function(e) {
+        let typed = this.value.trim().toLowerCase();
+        if(typed === currentDrillWord) {
+            drillScore += 10;
+            document.getElementById('drillScore').innerText = drillScore;
+            this.value = "";
+            
+            if(document.getElementById('examSoundCheck').checked) {
+                keyClickSound.currentTime = 0;
+                keyClickSound.play().catch(err => {});
+            }
+            
+            nextDrillWord();
+        }
+    });
+
+    function endDrill() {
+        clearInterval(drillInterval);
+        alert("⏰ Time's Up!\nYour Score: " + drillScore + "\nGreat Practice!");
+        closeDrill();
+    }
+
+    function closeDrill() {
+        clearInterval(drillInterval);
+        document.getElementById('drillOverlay').style.display = 'none';
     }
 </script>
 
