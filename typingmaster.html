@@ -83,7 +83,7 @@
             .test-sidebar { width: 100%; position: static; margin-bottom: 20px; }
         }
 
-        /* SCREEN READING AREA - Adjusted Font Size to prevent horizontal scroll */
+        /* SCREEN READING AREA */
         pre { 
             background: #fdfdfd; padding: 20px; border: 2px solid #7f8c8d; 
             overflow-x: auto; overflow-y: auto; max-height: 400px; 
@@ -123,6 +123,12 @@
         .dash-card { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .dash-card h4 { margin-top: 0; color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; margin-bottom: 15px; }
         @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .dashboard-header { flex-direction: column; align-items: flex-start; gap: 10px;} }
+
+        /* ADVANCED STATS GRID STYLES (NEW) */
+        .stat-box { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px 5px; text-align: center; border-radius: 6px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); }
+        .stat-title { font-size: 11px; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-val { font-size: 22px; font-weight: 900; color: #2c3e50; }
+        @media (max-width: 1200px) { .stat-box { padding: 8px 2px; } .stat-title { font-size: 9px; } .stat-val { font-size: 18px; } }
 
         /* PRINT FOOTER FOR CHANNEL LINK */
         .print-footer { display: none; }
@@ -201,11 +207,10 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Speed</th>
-                                    <th>Acc.</th>
-                                </tr>
+                                    </tr>
                             </thead>
                             <tbody id="userHistoryBody">
-                                <tr><td colspan="3">No tests attempted yet.</td></tr>
+                                <tr><td colspan="2">No tests attempted yet.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -274,6 +279,31 @@
                 <pre id="outputText"></pre>
                 
                 <textarea id="userTyping" class="no-print" placeholder="Click 'Start Test' to begin typing..." disabled spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" style="margin-top: 15px;"></textarea>
+
+                <div id="advancedStats" class="no-print" style="display:none; margin-top: 20px;">
+                    <div style="background: #fff; padding: 15px; border-radius: 8px; border: 2px solid #bdc3c7; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <h3 style="margin-top:0; color:#2c3e50; border-bottom:2px solid #3498db; padding-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📊 Detailed Performance Insights</span>
+                            <span id="advStatusBadge"></span>
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 10px;">
+                            <div class="stat-box" style="border-top:3px solid #3498db;"><div class="stat-title">GROSS SPEED (GWPM)</div><div class="stat-val" id="advGross">0</div></div>
+                            <div class="stat-box" style="border-top:3px solid #2ecc71;"><div class="stat-title">NET SPEED (NWPM)</div><div class="stat-val" id="advNet">0</div></div>
+                            <div class="stat-box" style="border-top:3px solid #f1c40f;"><div class="stat-title">MIN. NET SPEED (REQUIRED)</div><div class="stat-val" style="color:#2980b9;">35 WPM</div></div>
+                            <div class="stat-box" style="border-top:3px solid #e74c3c;"><div class="stat-title">ERROR %</div><div class="stat-val" id="advErrorPct">0%</div></div>
+                            <div class="stat-box" style="border-top:3px solid #95a5a6;"><div class="stat-title">GIVEN KEYSTROKES</div><div class="stat-val" id="advGivenKS">0</div></div>
+                            <div class="stat-box" style="border-top:3px solid #95a5a6;"><div class="stat-title">TYPED KEYSTROKES</div><div class="stat-val" id="advTypedKS">0</div></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+                            <div class="stat-box"><div class="stat-title">OMISSION WORDS</div><div class="stat-val" id="advOmission">0</div></div>
+                            <div class="stat-box"><div class="stat-title">FULL MISTAKES</div><div class="stat-val" id="advFullMistakes">0</div></div>
+                            <div class="stat-box"><div class="stat-title">HALF MISTAKES</div><div class="stat-val" id="advHalfMistakes">0</div></div>
+                            <div class="stat-box"><div class="stat-title">TOTAL ERROR UNITS</div><div class="stat-val" style="color:#e74c3c;" id="advTotalErrors">0</div></div>
+                            <div class="stat-box"><div class="stat-title">TIME TAKEN (MINUTES)</div><div class="stat-val" id="advTime">00:00</div></div>
+                            <div class="stat-box"><div class="stat-title">BACKSPACE USED</div><div class="stat-val" id="advBackspace">0</div></div>
+                        </div>
+                    </div>
+                </div>
                 
                 <p id="evaluatedTitle" class="no-print" style="display:none; font-weight:bold; margin-bottom: 5px; margin-top: 20px; color: #34495e;">Your Typed Output (Errors Highlighted):</p>
                 <div id="evaluatedTyping" class="no-print"></div>
@@ -292,12 +322,11 @@
                                 <th>Rank</th>
                                 <th>Name</th>
                                 <th>Net Speed</th>
-                                <th>Accuracy</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="lbTableBody">
-                            <tr><td colspan="5">Loading Ranks...</td></tr>
+                            <tr><td colspan="4">Loading Ranks...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -326,7 +355,6 @@
                     <p style="font-size: 15px; margin: 5px 0;">Status: <span id="resStatus">Pending</span></p>
                     <p style="font-size: 15px; margin: 5px 0;">Gross Speed: <span id="resGrossSpeed">0</span> WPM</p>
                     <p style="font-size: 15px; margin: 5px 0;">Net Speed: <span id="resNetSpeed">0</span> WPM</p>
-                    <p style="font-size: 15px; margin: 5px 0;">Accuracy: <span id="resAccuracy">0%</span></p>
                     <hr style="margin: 10px 0;">
                     <p style="font-size: 13px; margin-bottom:0; line-height: 1.6;">Time: <span id="resTime">0:00</span> | Strokes: <span id="resStrokes">0</span><br>Words: <span id="resWords">0</span> | Errors: <span id="resErrors">0</span></p>
                     
@@ -352,14 +380,10 @@
     <h2 id="scName" style="color:#2980b9; font-size:38px; margin:15px 0; text-transform:uppercase;">Student Name</h2>
     <p style="font-size:18px; color:#555;">for successfully Qualifying the DSSSB Typing Standard Test.</p>
     
-    <div style="display:flex; justify-content:space-around; background:#fff; padding:20px; border-radius:10px; margin:30px 0; box-shadow:0 6px 15px rgba(0,0,0,0.08); border:2px dashed #bdc3c7;">
+    <div style="display:flex; justify-content:center; background:#fff; padding:20px; border-radius:10px; margin:30px 0; box-shadow:0 6px 15px rgba(0,0,0,0.08); border:2px dashed #bdc3c7;">
         <div>
             <h3 style="margin:0; color:#c0392b; font-size:32px;" id="scWpm">35 WPM</h3>
             <p style="margin:5px 0 0 0; font-size:16px; color:gray; font-weight:bold;">Net Speed</p>
-        </div>
-        <div>
-            <h3 style="margin:0; color:#16a34a; font-size:32px;" id="scAcc">98%</h3>
-            <p style="margin:5px 0 0 0; font-size:16px; color:gray; font-weight:bold;">Accuracy</p>
         </div>
     </div>
     
@@ -388,11 +412,18 @@
     });
 
     const typingBox = document.getElementById('userTyping');
+    let backspaceCount = 0; // NEW GLOBAL TRACKER
+
     if(typingBox) {
         typingBox.addEventListener('paste', e => e.preventDefault());
         typingBox.addEventListener('drop', e => e.preventDefault());
         
         typingBox.addEventListener('keydown', function(e) {
+            // NEW FEATURE: Backspace counter
+            if (e.key === 'Backspace') {
+                backspaceCount++;
+            }
+
             if (e.key === 'Tab') {
                 e.preventDefault(); 
                 let start = this.selectionStart;
@@ -411,7 +442,7 @@
             }
         });
 
-        // NEW FEATURE 2 LOGIC: Live Practice Highlighting
+        // Live Practice Highlighting
         typingBox.addEventListener('input', function(e) {
             if (!testStarted) return;
             if (document.getElementById('highlightModeCheck').checked && !document.getElementById('paperModeCheck').checked) {
@@ -547,11 +578,11 @@
                 records.forEach(r => {
                     let dateObj = new Date(r.timestamp);
                     let dateStr = dateObj.toLocaleDateString('en-GB') + " " + dateObj.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-                    html += `<tr><td>${dateStr}</td><td style="color:#0284c7;">${r.wpm} WPM</td><td style="color:#16a34a;">${r.accuracy}%</td></tr>`;
+                    html += `<tr><td>${dateStr}</td><td style="color:#0284c7;">${r.wpm} WPM</td></tr>`;
                 });
                 document.getElementById('userHistoryBody').innerHTML = html;
             } else {
-                document.getElementById('userHistoryBody').innerHTML = "<tr><td colspan='3' style='color:grey; padding: 20px;'>No tests attempted yet.</td></tr>";
+                document.getElementById('userHistoryBody').innerHTML = "<tr><td colspan='2' style='color:grey; padding: 20px;'>No tests attempted yet.</td></tr>";
                 renderChart([], []);
             }
         });
@@ -634,7 +665,6 @@
         examAudio.pause(); 
         examAudio.currentTime = 0;
         
-        // NEW FEATURE 1 LOGIC: Exit Full Screen
         if (document.fullscreenElement) {
             document.exitFullscreen().catch(e => console.log(e));
         }
@@ -657,12 +687,12 @@
 
             let html = "";
             if (results.length === 0) {
-                html = "<tr><td colspan='5' style='color:grey;'>No one has attempted this test yet. Be the first!</td></tr>";
+                html = "<tr><td colspan='4' style='color:grey;'>No one has attempted this test yet. Be the first!</td></tr>";
             } else {
                 results.forEach((r, index) => {
                     let rankClass = index === 0 ? 'rank-1' : (index === 1 ? 'rank-2' : (index === 2 ? 'rank-3' : ''));
                     let statusHtml = r.qualified ? '<span class="qual-pass">✅ Qualified</span>' : '<span class="qual-fail">❌ Disqualified</span>';
-                    html += `<tr class="${rankClass}"><td>#${index + 1}</td><td style="text-align:left;">${r.name}</td><td style="color:#0284c7;">${r.netWPM} WPM</td><td style="color:#16a34a;">${r.accuracy}%</td><td>${statusHtml}</td></tr>`;
+                    html += `<tr class="${rankClass}"><td>#${index + 1}</td><td style="text-align:left;">${r.name}</td><td style="color:#0284c7;">${r.netWPM} WPM</td><td>${statusHtml}</td></tr>`;
                 });
             }
             document.getElementById('lbTableBody').innerHTML = html;
@@ -688,19 +718,18 @@
         }
     }
 
-    // MODIFIED FUNCTION: Added activeIndex for Live Highlighting (Feature 2)
     function buildFormattedPassage(textToFormat, wordStatuses = null, activeIndex = -1) {
         const charsPerLine = 75; 
         let customMins = document.getElementById('testTimeInput').value || 10;
         
-        const header = `DSSSB/TE-26/D17                                                              TIME ${customMins} MINUTES
+        const header = `DSSSB/TE-26/D17                                                             TIME ${customMins} MINUTES
                        TYPEWRITING SPEED TEST: 35 w.p.m.
 
 Note: Type the following passage accurately using double line spacing. Start typing only on getting the
 "Start" signal. If the whole passage is completed once, repeat it. However, typing must be stopped
 immediately at the "Stop" signal. Do not type strokes given in the right hand margin.
 ----------------------------------------------------------------------------------------------------
-                                                                                             Strokes`;
+                                                                                              Strokes`;
 
         let paragraphs = textToFormat.split('\n');
         let outputLines = [];
@@ -723,7 +752,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                     if (status === 'wrong') styledWord = `<span class="orig-wrong">${word}</span>`;
                     else if (status === 'missed') styledWord = `<span class="orig-missed">${word}</span>`;
                 } else if (globalWordIndex === activeIndex) {
-                    // NEW FEATURE 2: Apply Highlight style
                     styledWord = `<span style="background-color: #ffeb3b; color: #000; padding: 0 2px; border-radius: 2px;">${word}</span>`;
                 }
                 
@@ -744,6 +772,9 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                 outputLines.push(currentHtmlLine + " ".repeat(spacesToAdd > 0 ? spacesToAdd : 0) + cumulativeStrokes.toString().padStart(5, ' '));
             }
         }
+        
+        window.actualPassageStrokes = cumulativeStrokes; 
+        
         return header + "\n" + outputLines.join('\n');
     }
 
@@ -762,6 +793,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         timeRemaining = userMins * 60;
         testStarted = false;
         updateTimerDisplay();
+        backspaceCount = 0; // Reset Backspace
         
         let typingArea = document.getElementById('userTyping');
         typingArea.value = ""; 
@@ -777,6 +809,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('evaluatedTyping').style.display = 'none';
         document.getElementById('evaluatedTitle').style.display = 'none';
         document.getElementById('errorDetailsBox').style.display = 'none';
+        document.getElementById('advancedStats').style.display = 'none'; // Hide advanced stats
         document.getElementById('resWeakChars').innerHTML = ''; 
         document.getElementById('btnStart').style.display = 'block';
         document.getElementById('btnSubmit').style.display = 'none';
@@ -788,7 +821,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         if(testStarted) return;
         testStarted = true;
         
-        // NEW FEATURE 1 LOGIC: Auto Full-Screen Mode
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().catch(e => console.log("Fullscreen not permitted"));
         }
@@ -836,7 +868,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         clearInterval(timerInterval);
         examAudio.pause(); 
         
-        // NEW FEATURE 1 LOGIC: Exit Fullscreen when test is done
         if (document.fullscreenElement) {
             document.exitFullscreen().catch(e => console.log(e));
         }
@@ -879,10 +910,13 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         const originalWords = originalTextDynamic.split(/\s+/);
 
         let errors = 0; 
+        let omissionsCount = 0;
+        let fullMistakesCount = 0;
+
         let evaluatedHTML = "";
         let errorDetails = [];
         let originalWordStatus = new Array(originalWords.length).fill('untyped');
-        let weakCharsMap = {}; // NEW FEATURE 3: For Tracking Heatmap
+        let weakCharsMap = {}; 
         let i = 0; let j = 0; 
         
         while (j < typedWords.length && i < originalWords.length) {
@@ -898,20 +932,19 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                         evaluatedHTML += `<span class="missed-word">[Missed]</span> `; 
                         originalWordStatus[i] = 'missed'; 
                         errorDetails.push(`<li>Missed word: <b>${originalWords[i]}</b></li>`);
-                        errors++; i++; 
+                        errors++; omissionsCount++; i++; 
                     }
                 } else if (extraInTyped !== -1 && (skippedInOrig === -1 || extraInTyped < skippedInOrig)) {
                     for (let k = 0; k < extraInTyped; k++) { 
                         evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
                         errorDetails.push(`<li>Extra word typed: <b style="color:#c0392b;">${typedWords[j]}</b></li>`);
-                        errors++; j++; 
+                        errors++; fullMistakesCount++; j++; 
                     }
                 } else {
                     evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
                     originalWordStatus[i] = 'wrong'; 
                     errorDetails.push(`<li>You typed: <b style="color:#c0392b;">${typedWords[j]}</b> &rarr; Real word: <b style="color:#27ae60;">${originalWords[i]}</b></li>`);
                     
-                    // NEW FEATURE 3 LOGIC: Compare Char by Char for Heatmap
                     let oW = originalWords[i] || "";
                     let tW = typedWords[j] || "";
                     let maxL = Math.max(oW.length, tW.length);
@@ -922,14 +955,14 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                         }
                     }
                     
-                    errors++; i++; j++;
+                    errors++; fullMistakesCount++; i++; j++;
                 }
             }
         }
         while (j < typedWords.length) { 
             evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
             errorDetails.push(`<li>Extra word typed: <b style="color:#c0392b;">${typedWords[j]}</b></li>`);
-            errors++; j++; 
+            errors++; fullMistakesCount++; j++; 
         }
 
         document.getElementById('outputText').innerHTML = buildFormattedPassage(originalTextDynamic, originalWordStatus, -1);
@@ -945,7 +978,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             errorDetailsBox.style.display = 'none';
         }
 
-        // NEW FEATURE 3 RENDER: Weak Character Analysis display
         let sortedWeakChars = Object.keys(weakCharsMap).sort((a,b) => weakCharsMap[b] - weakCharsMap[a]).slice(0, 5);
         if(sortedWeakChars.length > 0) {
             let heatmapHtml = `<div style="margin-top:10px; padding:10px; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:5px; font-size:14px;">
@@ -963,14 +995,28 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         let netWPM = Math.round(totalNetWords / timeTakenMin);
         if (netWPM < 0) netWPM = 0; 
 
-        let totalWordsEvaluated = typedWords.length + errors; 
-        let accuracy = 0;
-        if (totalWordsEvaluated > 0) { accuracy = ((totalWordsEvaluated - errors) / totalWordsEvaluated) * 100; if(accuracy > 100) accuracy = 100; }
-        accuracy = parseFloat(accuracy.toFixed(2));
+        let totalErrorUnits = omissionsCount + fullMistakesCount;
+        let errorPct = (totalGrossWords > 0) ? ((totalErrorUnits / totalGrossWords) * 100).toFixed(2) : 0;
 
         let isQualified = netWPM >= 35;
         let statusHtml = isQualified ? '<span style="color:#166534; background:#dcfce7; padding:2px 8px; border-radius:4px;">✅ Qualified (DSSSB Standard)</span>' : '<span style="color:#991b1b; background:#fee2e2; padding:2px 8px; border-radius:4px;">❌ Disqualified</span>';
 
+        // SET ADVANCED DASHBOARD DATA
+        document.getElementById('advGross').innerText = Math.round(grossWPM).toFixed(2);
+        document.getElementById('advNet').innerText = netWPM.toFixed(2);
+        document.getElementById('advErrorPct').innerText = errorPct + "%";
+        document.getElementById('advGivenKS').innerText = window.actualPassageStrokes || 0;
+        document.getElementById('advTypedKS').innerText = totalStrokes;
+        document.getElementById('advOmission').innerText = omissionsCount;
+        document.getElementById('advFullMistakes').innerText = fullMistakesCount;
+        document.getElementById('advHalfMistakes').innerText = 0; // DSSSB uses full mistakes primarily
+        document.getElementById('advTotalErrors').innerText = totalErrorUnits.toFixed(1);
+        document.getElementById('advTime').innerText = `${m}:${s}`;
+        document.getElementById('advBackspace').innerText = backspaceCount;
+        document.getElementById('advStatusBadge').innerHTML = isQualified ? '<span style="background:#2ecc71; color:#fff; padding:5px 15px; border-radius:20px; font-size:14px;">QUALIFIED ✅</span>' : '<span style="background:#e74c3c; color:#fff; padding:5px 15px; border-radius:20px; font-size:14px;">NOT QUALIFIED ❌</span>';
+        document.getElementById('advancedStats').style.display = 'block';
+
+        // SET SIDEBAR RESULT DATA
         document.getElementById('resStatus').innerHTML = statusHtml;
         document.getElementById('resTime').textContent = timeString;
         document.getElementById('resStrokes').textContent = totalStrokes;
@@ -978,7 +1024,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('resErrors').textContent = errors;
         document.getElementById('resGrossSpeed').textContent = Math.round(grossWPM);
         document.getElementById('resNetSpeed').textContent = netWPM;
-        document.getElementById('resAccuracy').textContent = accuracy + "%";
         document.getElementById('results').style.display = 'block';
 
         let sName = document.getElementById('studentNameInput').value.trim() || "Anonymous Student";
@@ -988,7 +1033,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         if (isQualified) {
             document.getElementById('scName').innerText = sName;
             document.getElementById('scWpm').innerText = netWPM + " WPM";
-            document.getElementById('scAcc').innerText = accuracy + "%";
             document.getElementById('scDate').innerText = "Issued on: " + new Date().toLocaleDateString('en-GB');
             document.getElementById('btnDownloadScore').style.display = 'inline-block';
         } else {
@@ -999,7 +1043,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             db.ref("typing_leaderboard/" + currentPassageId).push({ 
                 name: sName, 
                 netWPM: netWPM, 
-                accuracy: accuracy, 
+                accuracy: 0, // Accuracy logic deactivated in DB push as well to prevent errors
                 qualified: isQualified, 
                 timestamp: firebase.database.ServerValue.TIMESTAMP 
             }); 
@@ -1008,7 +1052,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                 testId: currentPassageId,
                 testName: testTitle,
                 wpm: netWPM,
-                accuracy: accuracy,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
         }
