@@ -140,7 +140,7 @@
                 max-height: none !important; 
                 white-space: pre !important; 
                 font-family: 'Courier New', Courier, monospace !important; 
-                font-size: 18px !important; /* UPDATED: Changed from 14px to 18px for better readability */
+                font-size: 18px !important; 
                 font-weight: bold !important; 
                 color: #000 !important;
                 line-height: 2 !important; 
@@ -285,7 +285,7 @@
 
                 <div id="leaderboardArea" class="leaderboard-section no-print">
                     <h3>🏆 Live Leaderboard</h3>
-                    <p style="text-align:center; font-size:12px; color:gray;">(Qualifying Criteria: 35+ WPM & 97%+ Accuracy)</p>
+                    <p style="text-align:center; font-size:12px; color:gray;">(Qualifying Criteria: 35+ Net WPM)</p>
                     <table class="lb-table">
                         <thead>
                             <tr>
@@ -314,6 +314,7 @@
                     <h3 style="margin-top: 0; text-align: left; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 16px;">⚙️ Test Settings</h3>
                     <div class="test-settings-vertical">
                         <label>⏳ Timer: <input type="number" id="testTimeInput" value="10" min="1" max="60" onchange="updateTimerDisplay()"> Min</label>
+                        <label><input type="checkbox" id="highlightModeCheck"> 🔦 Practice Mode (Highlight Words)</label>
                         <label><input type="checkbox" id="disableBackspaceCheck"> 🚫 Disable Backspace</label>
                         <label><input type="checkbox" id="paperModeCheck"> 📄 Paper to Screen Mode</label>
                         <label><input type="checkbox" id="examSoundCheck"> 🎧 Exam Hall Sound</label>
@@ -328,6 +329,8 @@
                     <p style="font-size: 15px; margin: 5px 0;">Accuracy: <span id="resAccuracy">0%</span></p>
                     <hr style="margin: 10px 0;">
                     <p style="font-size: 13px; margin-bottom:0; line-height: 1.6;">Time: <span id="resTime">0:00</span> | Strokes: <span id="resStrokes">0</span><br>Words: <span id="resWords">0</span> | Errors: <span id="resErrors">0</span></p>
+                    
+                    <div id="resWeakChars"></div>
                     
                     <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:15px; font-size: 14px; padding: 10px;">🏆 Download Score Card</button>
                 </div>
@@ -389,7 +392,6 @@
         typingBox.addEventListener('paste', e => e.preventDefault());
         typingBox.addEventListener('drop', e => e.preventDefault());
         
-        // Tab Key Fix with 5 Spaces & SOUND FIX
         typingBox.addEventListener('keydown', function(e) {
             if (e.key === 'Tab') {
                 e.preventDefault(); 
@@ -400,13 +402,29 @@
                 this.selectionStart = this.selectionEnd = start + tabSpaces.length;
             }
 
-            // ADDED: KEYPRESS SOUND LOGIC
             if(document.getElementById('examSoundCheck') && document.getElementById('examSoundCheck').checked && e.key !== 'Tab' && e.key !== 'Backspace') {
                 keyClickSound.currentTime = 0;
                 let kpPromise = keyClickSound.play();
                 if(kpPromise !== undefined) {
                     kpPromise.catch(err => {});
                 }
+            }
+        });
+
+        // NEW FEATURE 2 LOGIC: Live Practice Highlighting
+        typingBox.addEventListener('input', function(e) {
+            if (!testStarted) return;
+            if (document.getElementById('highlightModeCheck').checked && !document.getElementById('paperModeCheck').checked) {
+                let typedText = this.value;
+                let activeIdx = 0;
+                if(typedText.length > 0) {
+                    let parts = typedText.split(/\s+/);
+                    activeIdx = parts.length - 1;
+                    if(typedText.endsWith(" ") || typedText.endsWith("\n") || typedText.endsWith("\t")) {
+                        // Adjust index if ended with space
+                    }
+                }
+                document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, null, activeIdx);
             }
         });
     }
@@ -432,7 +450,6 @@
     let currentPassageId = "";
     let isPro = false;
     
-    // SOUND FIX APPLIED HERE WITH USER'S CUSTOM GITHUB LINK
     const examAudio = new Audio('https://dsssbsmartnotes.github.io/dragon-studio-keyboard-typing-sound-effect-335503.mp3');
     examAudio.loop = true;
     examAudio.load();
@@ -441,12 +458,10 @@
     
     let progressChartInstance = null;
 
-    // Instructions popup handlers
     function showInstructions() { document.getElementById('instructionOverlay').style.display = 'flex'; }
     function hideInstructions() { document.getElementById('instructionOverlay').style.display = 'none'; }
     function closePayment() { document.getElementById('paymentOverlay').style.display = 'none'; }
 
-    // LOGIN & DASHBOARD LOGIC
     async function verifyAndFetch() {
         const mobile = document.getElementById('userMobile').value.trim();
         const name = document.getElementById('studentNameInput').value.trim();
@@ -618,6 +633,12 @@
         clearInterval(timerInterval);
         examAudio.pause(); 
         examAudio.currentTime = 0;
+        
+        // NEW FEATURE 1 LOGIC: Exit Full Screen
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(e => console.log(e));
+        }
+
         document.getElementById('outputSection').style.display = 'none';
         document.getElementById('dashboardArea').style.display = 'block';
         document.getElementById('passageSelect').value = ""; 
@@ -667,7 +688,8 @@
         }
     }
 
-    function buildFormattedPassage(textToFormat, wordStatuses = null) {
+    // MODIFIED FUNCTION: Added activeIndex for Live Highlighting (Feature 2)
+    function buildFormattedPassage(textToFormat, wordStatuses = null, activeIndex = -1) {
         const charsPerLine = 75; 
         let customMins = document.getElementById('testTimeInput').value || 10;
         
@@ -695,11 +717,16 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             for (let j = 0; j < words.length; j++) {
                 let word = words[j];
                 let styledWord = word;
+                
                 if (wordStatuses) {
                     let status = wordStatuses[globalWordIndex];
                     if (status === 'wrong') styledWord = `<span class="orig-wrong">${word}</span>`;
                     else if (status === 'missed') styledWord = `<span class="orig-missed">${word}</span>`;
+                } else if (globalWordIndex === activeIndex) {
+                    // NEW FEATURE 2: Apply Highlight style
+                    styledWord = `<span style="background-color: #ffeb3b; color: #000; padding: 0 2px; border-radius: 2px;">${word}</span>`;
                 }
+                
                 if (currentVisibleLine.length + word.length <= charsPerLine) {
                     if (currentVisibleLine === "     ") { currentVisibleLine += word; currentHtmlLine += styledWord; } 
                     else { currentVisibleLine += " " + word; currentHtmlLine += " " + styledWord; }
@@ -721,7 +748,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
     }
 
     function generateFormat(text) {
-        document.getElementById('outputText').innerHTML = buildFormattedPassage(text, null); 
+        document.getElementById('outputText').innerHTML = buildFormattedPassage(text, null, 0); 
         document.getElementById('outputText').style.fontSize = currentZoom + 'px'; 
         resetTestUI();
     }
@@ -745,11 +772,12 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('outputText').style.display = 'block';
         document.getElementById('readingHeader').style.display = 'block';
         
-        document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, null);
+        document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, null, -1);
         document.getElementById('testTimeInput').disabled = false;
         document.getElementById('evaluatedTyping').style.display = 'none';
         document.getElementById('evaluatedTitle').style.display = 'none';
         document.getElementById('errorDetailsBox').style.display = 'none';
+        document.getElementById('resWeakChars').innerHTML = ''; 
         document.getElementById('btnStart').style.display = 'block';
         document.getElementById('btnSubmit').style.display = 'none';
         document.getElementById('results').style.display = 'none';
@@ -760,7 +788,11 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         if(testStarted) return;
         testStarted = true;
         
-        // EXAM SOUND PROMISE FIX APPLIED HERE
+        // NEW FEATURE 1 LOGIC: Auto Full-Screen Mode
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(e => console.log("Fullscreen not permitted"));
+        }
+        
         if(document.getElementById('examSoundCheck').checked) {
             examAudio.currentTime = 0;
             let playPromise = examAudio.play();
@@ -781,6 +813,8 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             document.getElementById('outputText').style.display = 'none';
             document.getElementById('readingHeader').style.display = 'none';
             typingArea.style.height = '500px'; 
+        } else if (document.getElementById('highlightModeCheck').checked) {
+            document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, null, 0);
         }
 
         document.getElementById('btnStart').style.display = 'none';
@@ -801,6 +835,11 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
     function evaluateTest(isAutoSubmit) {
         clearInterval(timerInterval);
         examAudio.pause(); 
+        
+        // NEW FEATURE 1 LOGIC: Exit Fullscreen when test is done
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(e => console.log(e));
+        }
         
         const typingArea = document.getElementById('userTyping');
         const evaluatedArea = document.getElementById('evaluatedTyping');
@@ -843,6 +882,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         let evaluatedHTML = "";
         let errorDetails = [];
         let originalWordStatus = new Array(originalWords.length).fill('untyped');
+        let weakCharsMap = {}; // NEW FEATURE 3: For Tracking Heatmap
         let i = 0; let j = 0; 
         
         while (j < typedWords.length && i < originalWords.length) {
@@ -870,6 +910,18 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                     evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
                     originalWordStatus[i] = 'wrong'; 
                     errorDetails.push(`<li>You typed: <b style="color:#c0392b;">${typedWords[j]}</b> &rarr; Real word: <b style="color:#27ae60;">${originalWords[i]}</b></li>`);
+                    
+                    // NEW FEATURE 3 LOGIC: Compare Char by Char for Heatmap
+                    let oW = originalWords[i] || "";
+                    let tW = typedWords[j] || "";
+                    let maxL = Math.max(oW.length, tW.length);
+                    for (let c = 0; c < maxL; c++) {
+                        if (oW[c] && oW[c] !== tW[c]) {
+                            let ch = oW[c].toUpperCase();
+                            if(/[A-Z0-9.,]/.test(ch)) { weakCharsMap[ch] = (weakCharsMap[ch] || 0) + 1; }
+                        }
+                    }
+                    
                     errors++; i++; j++;
                 }
             }
@@ -880,7 +932,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             errors++; j++; 
         }
 
-        document.getElementById('outputText').innerHTML = buildFormattedPassage(originalTextDynamic, originalWordStatus);
+        document.getElementById('outputText').innerHTML = buildFormattedPassage(originalTextDynamic, originalWordStatus, -1);
 
         document.getElementById('evaluatedTitle').style.display = 'block';
         evaluatedArea.innerHTML = evaluatedHTML.trim() === "" ? "<i>No text typed.</i>" : evaluatedHTML.trim();
@@ -893,8 +945,22 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             errorDetailsBox.style.display = 'none';
         }
 
-        let grossWPM = (totalStrokes / 5) / timeTakenMin;
-        let netWPM = Math.round(grossWPM - (errors / timeTakenMin));
+        // NEW FEATURE 3 RENDER: Weak Character Analysis display
+        let sortedWeakChars = Object.keys(weakCharsMap).sort((a,b) => weakCharsMap[b] - weakCharsMap[a]).slice(0, 5);
+        if(sortedWeakChars.length > 0) {
+            let heatmapHtml = `<div style="margin-top:10px; padding:10px; background:#fdf2f8; border:1px solid #fbcfe8; border-radius:5px; font-size:14px;">
+                <strong style="color:#be185d;">⚠️ Weak Keys:</strong> ` + 
+                sortedWeakChars.map(c => `<span style="background:#be185d; color:white; padding:3px 8px; border-radius:4px; margin:0 3px; font-weight:bold;">${c}</span>`).join(' ') + 
+                `</div>`;
+            document.getElementById('resWeakChars').innerHTML = heatmapHtml;
+        }
+
+        let totalGrossWords = totalStrokes / 5;
+        let totalPenaltyWords = errors * 2;
+        let totalNetWords = totalGrossWords - totalPenaltyWords;
+        
+        let grossWPM = totalGrossWords / timeTakenMin;
+        let netWPM = Math.round(totalNetWords / timeTakenMin);
         if (netWPM < 0) netWPM = 0; 
 
         let totalWordsEvaluated = typedWords.length + errors; 
@@ -902,7 +968,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         if (totalWordsEvaluated > 0) { accuracy = ((totalWordsEvaluated - errors) / totalWordsEvaluated) * 100; if(accuracy > 100) accuracy = 100; }
         accuracy = parseFloat(accuracy.toFixed(2));
 
-        let isQualified = netWPM >= 35 && accuracy >= 97;
+        let isQualified = netWPM >= 35;
         let statusHtml = isQualified ? '<span style="color:#166534; background:#dcfce7; padding:2px 8px; border-radius:4px;">✅ Qualified (DSSSB Standard)</span>' : '<span style="color:#991b1b; background:#fee2e2; padding:2px 8px; border-radius:4px;">❌ Disqualified</span>';
 
         document.getElementById('resStatus').innerHTML = statusHtml;
