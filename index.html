@@ -1,15 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DSSSB PYQ - Mock Tests</title>
+<title>PYQ Notes - Mock Tests</title>
 
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#4f46e5">
 
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 
 <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -235,7 +236,27 @@ textarea { height: 120px; resize: none; }
 
 #toast { display: none; position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--text-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; z-index: 9999; font-size: 13px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadeInOut 2.5s forwards; white-space: nowrap; }
 @keyframes fadeInOut { 0% { opacity: 0; bottom: 80px; } 15% { opacity: 1; bottom: 90px; } 85% { opacity: 1; bottom: 90px; } 100% { opacity: 0; bottom: 80px; } }
+/* --- LEADERBOARD MODAL CSS --- */
+.lb-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; text-align: left;}
+.lb-table th { background: var(--primary-light); color: var(--primary-dark); padding: 12px 10px; font-weight: 800; border-radius: 8px 8px 0 0; }
+.lb-table td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text-main); }
+.lb-table tr:last-child td { border-bottom: none; }
+/* --- DESKTOP NETFLIX STYLE ARROWS --- */
+.desk-scroll-btn {
+    display: none; position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--primary); font-size: 18px;
+    cursor: pointer; z-index: 10; box-shadow: 0 6px 15px rgba(0,0,0,0.1); transition: 0.2s;
+}
+.desk-scroll-btn:hover { background: var(--primary); color: white; transform: translateY(-50%) scale(1.1); }
+.desk-scroll-btn.left-btn { left: -15px; }
+.desk-scroll-btn.right-btn { right: -15px; }
 
+@media (min-width: 1024px) {
+    .desk-scroll-btn { display: flex; align-items: center; justify-content: center; }
+    .horizontal-3d-scroll, .filter-scroll { cursor: grab; }
+    .horizontal-3d-scroll:active, .filter-scroll:active { cursor: grabbing; }
+}
 @media (min-width: 1024px) {
     body { padding-bottom: 0; display: flex; background: var(--bg-body); overflow-x: hidden; }
     
@@ -274,7 +295,7 @@ textarea { height: 120px; resize: none; }
 <div id="appLoginModal" class="full-overlay" style="display:none;">
     <div class="login-card">
         <div style="font-size:50px; margin-bottom:15px;">🎓</div>
-        <h2 style="margin:0 0 5px 0; color:var(--text-main); font-weight:800;">Welcome to DSSSB PYQ</h2>
+        <h2 style="margin:0 0 5px 0; color:var(--text-main); font-weight:800;">Welcome to PYQ Notes</h2>
         <p style="color:var(--text-muted); font-size:13px; margin-bottom:25px;">Create your quick profile to start giving mock tests & track your rank.</p>
         
         <div style="text-align:left; margin-bottom:5px; font-size:12px; font-weight:700; margin-left:5px; color:var(--text-muted);">Full Name</div>
@@ -296,7 +317,7 @@ textarea { height: 120px; resize: none; }
 <div id="toast"></div>
 
 <div class="news-container" id="newsSection" style="display:none;">
-    <span>📢</span> <marquee id="newsText" scrollamount="5">Welcome to DSSSB PYQ Portal!</marquee>
+    <span>📢</span> <marquee id="newsText" scrollamount="5">Welcome to PYQ Notes Portal!</marquee>
 </div>
 
 <div id="loader">
@@ -331,7 +352,7 @@ textarea { height: 120px; resize: none; }
             <div style="display:flex; align-items:center; gap:10px;">
                 <i class="fas fa-arrow-alt-circle-down" style="font-size:24px;"></i>
                 <div style="text-align:left;">
-                    <div style="font-weight:800; font-size:14px;" id="pwaBannerTitle">Install DSSSB PYQ</div>
+                    <div style="font-weight:800; font-size:14px;" id="pwaBannerTitle">Install PYQ Notes</div>
                     <div style="font-size:11px; opacity:0.9;" id="pwaBannerDesc">Fast access & better experience</div>
                 </div>
             </div>
@@ -351,9 +372,12 @@ textarea { height: 120px; resize: none; }
         </div>
 
         <div class="quick-actions">
+            <div class="action-item" onclick="window.location.href='battle.html'" style="border-bottom-color: #ef4444;">
+                <i class="fas fa-crosshairs" style="color: #ef4444;"></i>
+                <span style="color: #ef4444; font-weight: 800;">Arena</span>
+            </div>
             <div class="action-item" onclick="window.open('https://t.me/DSSSBRank')"><i class="fab fa-telegram-plane"></i><span>Channel</span></div>
             <div class="action-item" onclick="shareApp()"><i class="fas fa-share-alt"></i><span>Share</span></div>
-            <div class="action-item" onclick="document.getElementById('reportModal').style.display='flex'"><i class="fas fa-headset"></i><span>Support</span></div>
             <div class="action-item" onclick="switchTab('study', document.getElementById('nav-study'))"><i class="fas fa-book-open"></i><span>Library</span></div>
         </div>
 
@@ -374,47 +398,15 @@ textarea { height: 120px; resize: none; }
             <div class="nb-icon-box"><i class="fas fa-chevron-right"></i></div>
         </div>
 
-        <div class="section-title" style="margin: 25px 20px 10px;">📂 Explore Categories</div>
-        <div class="horizontal-3d-scroll">
-            <div class="folder-3d f-live" onclick="openExamFolder('Live')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">🔴</span><span class="f-name">Live Tests</span></div>
-            </div>
-            <div class="folder-3d f-saved" onclick="openExamFolder('Saved')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">⭐</span><span class="f-name">Saved</span></div>
-            </div>
-            <div class="folder-3d f-attempt" onclick="openExamFolder('Attempted')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">✅</span><span class="f-name">Attempted</span></div>
-            </div>
-            <div class="folder-3d f-full" onclick="openExamFolder('Full Mock')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">📦</span><span class="f-name">Full Mocks</span></div>
-            </div>
-            <div class="folder-3d f-math" onclick="openExamFolder('Maths')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">🧮</span><span class="f-name">Maths</span></div>
-            </div>
-            <div class="folder-3d f-reas" onclick="openExamFolder('Reasoning')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">🧠</span><span class="f-name">Reasoning</span></div>
-            </div>
-            <div class="folder-3d f-eng" onclick="openExamFolder('English')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">🅰️</span><span class="f-name">English</span></div>
-            </div>
-            <div class="folder-3d f-hin" onclick="openExamFolder('Hindi')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">अ</span><span class="f-name">Hindi</span></div>
-            </div>
-            <div class="folder-3d f-gk" onclick="openExamFolder('GK')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">🌍</span><span class="f-name">Gen. GK</span></div>
-            </div>
-            <div class="folder-3d f-comp" onclick="openExamFolder('Computer')">
-                <div class="f-tab"></div>
-                <div class="f-body"><span class="f-icon">💻</span><span class="f-name">Computer</span></div>
+       <div class="section-title" style="margin: 25px 20px 10px;">📂 Explore Categories</div>
+        <div style="position: relative; margin: 0 15px;">
+            <button class="desk-scroll-btn left-btn" onclick="document.getElementById('catBox').scrollBy({left: -350, behavior: 'smooth'})"><i class="fas fa-chevron-left"></i></button>
+            <button class="desk-scroll-btn right-btn" onclick="document.getElementById('catBox').scrollBy({left: 350, behavior: 'smooth'})"><i class="fas fa-chevron-right"></i></button>
+            
+           <div class="horizontal-3d-scroll" id="catBox" style="margin: 0 5px;">
+                <div style="text-align:center; padding: 20px; color:var(--text-muted); width: 100%;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i><br>Loading Folders...
+                </div>
             </div>
         </div>
 
@@ -479,18 +471,15 @@ textarea { height: 120px; resize: none; }
                 <i class="fas fa-search" style="color:var(--text-muted);"></i>
                 <input type="text" id="testSearch" placeholder="Search for Mocks or Subjects..." onkeyup="debouncedTestSearch(this.value)">
             </div>
-            <div class="filter-scroll" id="mockFiltersRow">
-                <div class="filter-pill active" onclick="filterTests('all', this)">All Tests</div>
-                <div class="filter-pill" style="color:#ef4444;" onclick="filterTests('Live', this)">Live 🔴</div>
-                <div class="filter-pill" style="color:#f59e0b;" onclick="filterTests('Saved', this)">Saved ⭐</div>
-                <div class="filter-pill" style="color:#10b981;" onclick="filterTests('Attempted', this)">Attempted ✅</div>
-                <div class="filter-pill" onclick="filterTests('Full Mock', this)">Full Mock</div>
-                <div class="filter-pill" onclick="filterTests('Reasoning', this)">Reasoning</div>
-                <div class="filter-pill" onclick="filterTests('Maths', this)">Maths</div>
-                <div class="filter-pill" onclick="filterTests('English', this)">English</div>
-                <div class="filter-pill" onclick="filterTests('Hindi', this)">Hindi</div>
-                <div class="filter-pill" onclick="filterTests('Computer', this)">Computer</div>
-                <div class="filter-pill" onclick="filterTests('GK', this)">GK</div>
+            <div style="position: relative; margin-bottom: 5px; margin-left: 15px; margin-right: 15px;">
+                <button class="desk-scroll-btn left-btn" style="top: 40%; width: 34px; height: 34px; font-size: 14px;" onclick="document.getElementById('mockFiltersRow').scrollBy({left: -200, behavior: 'smooth'})"><i class="fas fa-chevron-left"></i></button>
+                <button class="desk-scroll-btn right-btn" style="top: 40%; width: 34px; height: 34px; font-size: 14px;" onclick="document.getElementById('mockFiltersRow').scrollBy({left: 200, behavior: 'smooth'})"><i class="fas fa-chevron-right"></i></button>
+                
+              <div class="filter-scroll" id="mockFiltersRow" style="margin-bottom: 0;">
+                    <div class="filter-pill active" onclick="filterTests('all', this)">All Tests</div>
+                    <div class="filter-pill" style="color:#ef4444;" onclick="filterTests('Live', this)">Live 🔴</div>
+                    <div class="filter-pill" style="color:#f59e0b;" onclick="filterTests('Saved', this)">Saved ⭐</div>
+                </div>
             </div>
             <div id="testListContainer" style="margin-top: 15px;"></div>
         </div>
@@ -599,6 +588,15 @@ textarea { height: 120px; resize: none; }
                 <div class="segment-btn active" id="nbTab-bookmarks" onclick="switchNotebook('bookmarks')">🔖 Saved Qs</div>
                 <div class="segment-btn" id="nbTab-mistakes" onclick="switchNotebook('mistakes')">❌ Mistake Book</div>
             </div>
+            
+            <div id="notebookFilters" style="display:flex; gap:10px; margin-bottom: 20px;">
+                <select id="nbSecFilter" onchange="renderNotebook(currentNbType)" style="flex:1; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-main); font-size:13px; outline:none; font-weight: 600; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                    <option value="ALL">All Sections</option>
+                </select>
+                <select id="nbTopFilter" onchange="renderNotebook(currentNbType)" style="flex:1; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-main); font-size:13px; outline:none; font-weight: 600; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                    <option value="ALL">All Topics</option>
+                </select>
+            </div>
         </div>
         <div id="bookmarksListContainer" style="padding: 0 20px;"></div>
     </div>
@@ -617,14 +615,14 @@ textarea { height: 120px; resize: none; }
 <div id="paymentModal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <div style="font-size: 50px; margin-bottom: 10px;">👑</div>
-        <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900;">Upgrade to DSSSB PRO</h2>
+        <h2 style="color:var(--warning); margin-bottom:5px; font-weight:900;">Upgrade to PRO</h2>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px; font-weight:600;">Unlock All Premium Mock Tests, Video Classes & PDF Notes!</p>
         
         <div style="background:var(--primary-light); color:var(--primary-dark); padding:12px; border-radius:12px; margin-bottom:15px; font-size: 14px; font-weight: 700;">
             Special Offer: ₹99 <span style="font-size:12px; text-decoration:line-through; color:grey;">₹499</span>
         </div>
         
-        <p style="font-size:12px; color:var(--text-main); margin-bottom:10px; font-weight:600;">To upgrade, please contact Admin.</p>
+        <p style="font-size:12px; color:var(--text-main); margin-bottom:10px; font-weight:600;">To upgrade, please contact Admin Send Hi on Whatsapp 8587961053.</p>
         
         <div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:15px; font-size:12px;">
             Your App ID: <b id="displayUserId" style="color:var(--primary); font-size: 14px;">--</b><br>
@@ -648,7 +646,22 @@ textarea { height: 120px; resize: none; }
         </div>
     </div>
 </div>
-
+<div id="testRankModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; max-height: 80vh; display: flex; flex-direction: column; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="font-weight: 900; font-size: 16px; color: var(--text-main);" id="rankModalTitle">Leaderboard</h2>
+            <button onclick="document.getElementById('testRankModal').style.display='none'" style="background:none; border:none; font-size: 18px; cursor: pointer; color: var(--text-muted);">❌</button>
+        </div>
+        <div style="overflow-y: auto; flex: 1; margin-top: 10px;">
+            <table class="lb-table">
+                <thead><tr><th>Rank</th><th>Name</th><th>Score</th></tr></thead>
+                <tbody id="testRankBody">
+                    <tr><td colspan="3" style="text-align: center;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 <div class="nav-bar">
     <div class="nav-item active" onclick="switchTab('home', this)"><i class="fas fa-home"></i> <span>Home</span></div>
     <div class="nav-item" onclick="switchTab('tests', this)"><i class="fas fa-file-signature"></i> <span>Mocks</span></div>
@@ -701,6 +714,7 @@ let currentUser = "Student", currentUserId = "guest", isPro = false;
 let myScores = [], allTests = [], allNotes = [];
 let lastAlertTime = 0;
 let attemptedTestIds = new Set(); 
+let currentNbType = 'bookmarks'; // NEW: Track notebook type globally
 
 let fallbackQOD = { q: "Fetching today's challenge...", opt: ["-", "-", "-", "-"], ans: 0 };
 
@@ -869,7 +883,7 @@ function switchTab(tab, el) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
     if(el) el.classList.add('active'); 
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    if(tab === 'bookmarks') switchNotebook('bookmarks');
+    if(tab === 'bookmarks') switchNotebook('bookmarks', true);
 }
 
 function switchStudy(type, el) { 
@@ -946,7 +960,7 @@ function startCountdown() {
 }
 
 function shareApp() {
-    if (navigator.share) navigator.share({ title: 'DSSSB PYQ Portal', text: 'Best Exam Prep App!', url: window.location.href });
+    if (navigator.share) navigator.share({ title: 'PYQ Notes Portal', text: 'Best Exam Prep App!', url: window.location.href });
     else { navigator.clipboard.writeText(window.location.href); showToast("Link copied to clipboard!"); }
 }
 
@@ -959,7 +973,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     const banner = document.getElementById('pwaBanner');
     banner.style.display = 'flex';
     banner.style.background = 'var(--primary)';
-    document.getElementById('pwaBannerTitle').innerHTML = 'Install DSSSB PYQ';
+    document.getElementById('pwaBannerTitle').innerHTML = 'Install PYQ Notes';
     document.getElementById('pwaBannerDesc').innerHTML = 'Fast access & better experience';
     document.getElementById('pwaBannerBtn').innerHTML = 'Install Now';
     document.getElementById('pwaBannerBtn').style.color = 'var(--primary)';
@@ -1067,10 +1081,18 @@ function toggleSaveTest(testId, el, event) {
     setSafeData('savedTests', JSON.stringify(savedTests));
 }
 
-function switchNotebook(type) {
+// --- NEW NOTEBOOK LOGIC & PRACTICE MODE ---
+function switchNotebook(type, resetFilters = false) {
+    currentNbType = type;
     document.getElementById('nbTab-bookmarks').classList.remove('active');
     document.getElementById('nbTab-mistakes').classList.remove('active');
     document.getElementById('nbTab-' + type).classList.add('active');
+    
+    if(resetFilters) {
+        document.getElementById('nbSecFilter').value = 'ALL';
+        document.getElementById('nbTopFilter').value = 'ALL';
+    }
+    
     renderNotebook(type);
 }
 
@@ -1080,11 +1102,44 @@ function renderNotebook(type = 'bookmarks') {
     if(type === 'bookmarks') dataObj = JSON.parse(getSafeData('dsssb_bookmarks')) || {};
     else dataObj = JSON.parse(getSafeData('dsssb_mistakes')) || {};
 
+    let availableSections = new Set();
+    let availableTopics = new Set();
+
+    Object.values(dataObj).forEach(q => {
+        availableSections.add(q.section || "General");
+        if(q.topic) availableTopics.add(q.topic);
+    });
+
+    let secSelect = document.getElementById('nbSecFilter');
+    let topSelect = document.getElementById('nbTopFilter');
+    
+    let currSec = secSelect.value;
+    let currTop = topSelect.value;
+    
+    let secHtml = '<option value="ALL">All Sections</option>';
+    Array.from(availableSections).sort().forEach(s => secHtml += `<option value="${s}">${s}</option>`);
+    let topHtml = '<option value="ALL">All Topics</option>';
+    Array.from(availableTopics).sort().forEach(t => topHtml += `<option value="${t}">${t}</option>`);
+    
+    secSelect.innerHTML = secHtml;
+    topSelect.innerHTML = topHtml;
+    
+    if (availableSections.has(currSec)) secSelect.value = currSec;
+    if (availableTopics.has(currTop)) topSelect.value = currTop;
+
+    let secFilter = secSelect.value;
+    let topFilter = topSelect.value;
+
     let grouped = {};
     Object.keys(dataObj).forEach(k => {
         let q = dataObj[k];
         q._key = k;
         let sec = q.section || "General";
+        let top = q.topic || "";
+        
+        if (secFilter !== "ALL" && sec !== secFilter) return;
+        if (topFilter !== "ALL" && top !== topFilter) return;
+
         if(!grouped[sec]) grouped[sec] = [];
         grouped[sec].push(q);
     });
@@ -1093,7 +1148,7 @@ function renderNotebook(type = 'bookmarks') {
         container.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--text-muted);">
             <div style="font-size:40px; margin-bottom:10px;">${type === 'bookmarks' ? '🔖' : '❌'}</div>
             <h3 style="color:var(--text-main);">No questions found</h3>
-            <p style="font-size:13px; margin-top:8px;">${type === 'bookmarks' ? 'Click the bookmark icon during a test to save questions.' : 'Your incorrect attempts will be auto-saved here.'}</p>
+            <p style="font-size:13px; margin-top:8px;">Change your filters or attempt a mock to save questions.</p>
         </div>`;
         return;
     }
@@ -1107,18 +1162,40 @@ function renderNotebook(type = 'bookmarks') {
             let qText = q.q_hi || q.q_en;
             let optArr = q.op_hi || q.op_en;
             let correctAnsText = optArr && optArr[correctIdx] ? optArr[correctIdx] : "Not Specified";
+            
+            let topicHtml = q.topic ? `<span style="margin-left:8px; background:var(--primary-light); color:var(--primary-dark); padding:2px 6px; border-radius:4px; font-size:10px;">🏷️ ${q.topic}</span>` : '';
+            let solId = `sol_${type}_${q._key}`;
+
+            let optionsHTML = '<div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">';
+            if (optArr) {
+                optArr.forEach((opt, optIdx) => {
+                    optionsHTML += `<div style="padding:12px 15px; border:1px solid var(--border); border-radius:10px; font-size:14px; background:var(--bg-body); color:var(--text-main);"><b>${String.fromCharCode(65+optIdx)})</b> ${opt}</div>`;
+                });
+            }
+            optionsHTML += '</div>';
 
             html += `
             <div class="test-card" style="margin-bottom:15px; border-left:4px solid ${type==='bookmarks'?'var(--warning)':'var(--danger)'};">
-                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                    <span style="font-size:11px; background:${type==='bookmarks'?'var(--warning)':'var(--danger)'}; color:#fff; padding:3px 8px; border-radius:6px; font-weight:800;">${type==='bookmarks'?'Saved':'Mistake'}</span>
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:flex-start;">
+                    <div>
+                        <span style="font-size:11px; background:${type==='bookmarks'?'var(--warning)':'var(--danger)'}; color:#fff; padding:3px 8px; border-radius:6px; font-weight:800;">${type==='bookmarks'?'Saved':'Mistake'}</span>
+                        ${topicHtml}
+                    </div>
                     <button onclick="removeNotebookItem('${q._key}', '${type}')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:700;"><i class="fas fa-trash"></i></button>
                 </div>
-                <div style="font-weight:700; font-size:14px; margin-bottom:15px;">${qText}</div>
-                <div style="background:var(--bg-body); padding:12px; border-radius:10px; border:1px solid var(--border);">
-                    <div style="font-size:13px; font-weight:800; color:var(--success); margin-bottom:8px;">✅ Answer: ${String.fromCharCode(65+correctIdx)}) ${correctAnsText}</div>
+                
+                <div style="font-weight:700; font-size:15px; margin-bottom:10px; line-height:1.5;">${qText}</div>
+                
+                ${optionsHTML}
+
+                <button onclick="toggleNbSolution('${solId}', this)" style="margin-top:15px; width:100%; padding:12px; background:var(--primary-light); color:var(--primary-dark); border:1px solid var(--primary); border-radius:8px; font-weight:bold; cursor:pointer; font-size:13px; transition:0.3s;">
+                    👁️ Show Answer & Solution
+                </button>
+
+                <div id="${solId}" style="display:none; background:var(--bg-body); padding:15px; border-radius:10px; border:1px solid var(--border); margin-top:10px; animation: fadeIn 0.3s;">
+                    <div style="font-size:14px; font-weight:800; color:var(--success); margin-bottom:8px;">✅ Answer: ${String.fromCharCode(65+correctIdx)}) ${correctAnsText}</div>
                     <hr style="border:none; border-top:1px dashed var(--border); margin:10px 0;">
-                    <div style="font-size:12px; color:var(--text-muted); line-height:1.5;"><b>💡 Solution:</b><br>${q.solution || 'No detailed solution.'}</div>
+                    <div style="font-size:13px; color:var(--text-muted); line-height:1.5;"><b>💡 Detailed Solution:</b><br>${q.solution || 'No detailed solution.'}</div>
                 </div>
             </div>`;
         });
@@ -1126,6 +1203,17 @@ function renderNotebook(type = 'bookmarks') {
     
     container.innerHTML = html;
     if(window.MathJax) { MathJax.typesetPromise([container]); }
+}
+
+function toggleNbSolution(id, btn) {
+    const el = document.getElementById(id);
+    if(el.style.display === 'none' || el.style.display === '') {
+        el.style.display = 'block';
+        btn.innerHTML = '🙈 Hide Solution';
+    } else {
+        el.style.display = 'none';
+        btn.innerHTML = '👁️ Show Answer & Solution';
+    }
 }
 
 function removeNotebookItem(key, type) {
@@ -1138,6 +1226,7 @@ function removeNotebookItem(key, type) {
         renderNotebook(type);
     }
 }
+// ------------------------------------------
 
 function reattemptTest(testId, fullUrlQuery) {
     if(confirm("Re-attempting will clear your previous answers on this device. Continue?")) {
@@ -1199,9 +1288,12 @@ async function fetchData(user) {
         searchNotes(''); 
         renderVideos();
 
-        const testData = testsSnap.val() || {}; 
+       const testData = testsSnap.val() || {}; 
         allTests = Object.keys(testData).map(key => ({ dbKey: key, ...testData[key] }));
         filterTests('all', document.querySelector('.filter-pill.active'));
+
+        // 🔥 Dynamic Folder System Call
+        fetchDynamicFolders();
 
         if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none'; 
         document.getElementById('app').style.display = 'block'; 
@@ -1310,7 +1402,9 @@ function filterTests(cat, el, searchQuery = "") {
     }
     
     let html = "";
-    list.forEach(t => {
+
+    // Helper to generate Card HTML
+    const generateCardHTML = (t) => {
         let locked = t.type === 'pro' && !isPro;
         let isAttempted = attemptedTestIds.has(t.dbKey) || attemptedTestIds.has(t.id);
         let isSaved = savedTests.includes(t.dbKey);
@@ -1332,20 +1426,43 @@ function filterTests(cat, el, searchQuery = "") {
             </div>` : 
             `<button class="start-btn" onclick="window.location.href='cbt.html?${urlQuery}&mode=exam'">Start Mock Test ➔</button>`;
         
-        html += `<div class="test-card ${locked?'locked':''}">
+        // NEW LEADERBOARD BUTTON
+        let viewRankBtn = `<button class="start-btn" style="background:var(--primary-light); color:var(--primary-dark); border:1px solid var(--primary); padding: 8px; font-size:13px; margin-top:8px; width:100%; box-shadow:none;" onclick="openTestLeaderboard('${t.dbKey}', '${(t.title||'').replace(/'/g, "\\'")}')">🏆 View Leaderboard</button>`;
+
+        return `<div class="test-card ${locked?'locked':''}">
                     ${liveHTML}
                     <button class="save-btn ${isSaved?'saved':''}" onclick="toggleSaveTest('${t.dbKey}', this, event)">
                         ${isSaved?'<i class="fas fa-star"></i>':'<i class="far fa-star"></i>'}
                     </button>
-                    <div class="t-title">${t.title || 'DSSSB Mock Test'}</div>
+                    <div class="t-title">${t.title || 'PYQ Mock Test'}</div>
                     <div class="t-info">
                         <span><i class="fas fa-list-ol"></i> ${t.qs || '20'} Qs</span>
                         <span><i class="far fa-clock"></i> ${t.time || '15'} Mins</span>
                         <span><i class="fas fa-check-circle"></i> ${t.marks || t.qs || '20'} Marks</span>
                     </div>
                     ${buttonHTML}
+                    ${viewRankBtn}
                 </div>`;
-    });
+    };
+
+    // LOGIC TO DIVIDE INTO SECTIONS (If specific exam is searched)
+    if (searchQuery && list.length > 0) {
+        let fullMocks = list.filter(t => (t.category || "").toLowerCase().includes('full') || (t.title || "").toLowerCase().includes('full'));
+        let sectionalMocks = list.filter(t => !(t.category || "").toLowerCase().includes('full') && !(t.title || "").toLowerCase().includes('full'));
+        
+        if (fullMocks.length > 0) {
+            html += `<div class="section-title" style="margin-top:5px; color:var(--primary);">📑 Full Length Mocks</div>`;
+            fullMocks.forEach(t => html += generateCardHTML(t));
+        }
+        if (sectionalMocks.length > 0) {
+            html += `<div class="section-title" style="margin-top:20px; color:#ea580c;">🧩 Sectional Mocks</div>`;
+            sectionalMocks.forEach(t => html += generateCardHTML(t));
+        }
+    } else {
+        // Standard Flat List
+        list.forEach(t => html += generateCardHTML(t));
+    }
+
     document.getElementById('testListContainer').innerHTML = html || "<div style='text-align:center; color:var(--text-muted); padding:40px;'><i class='fas fa-box-open fa-3x' style='opacity:0.3; margin-bottom:10px;'></i><br>No tests found</div>";
 }
 
@@ -1463,7 +1580,271 @@ function renderLeaderboard(data) {
     });
     document.getElementById('leaderboardList').innerHTML = html || "<div style='text-align:center; color:grey; padding:20px;'>No ranks yet. Give a test!</div>";
 }
+// --- SPECIFIC TEST LEADERBOARD (TOP 5 + MY RANK) ---
+function openTestLeaderboard(testId, testTitle) {
+    document.getElementById('rankModalTitle').innerText = "🏆 " + testTitle;
+    document.getElementById('testRankModal').style.display = 'flex';
+    document.getElementById('testRankBody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Fetching Ranks... ⏳</td></tr>';
 
+    // Fetching from your live results database
+    db.ref("dsssb_results_live").once("value").then(snap => {
+        let userBest = {}; 
+        
+        if(snap.exists()) {
+            snap.forEach(child => {
+                let d = child.val();
+                if(d.testId === testId) {
+                    let uid = d.userId || d.name; // Unique ID taki name repeat na ho
+                    let score = parseFloat(d.score) || 0;
+                    
+                    if(!userBest[uid] || userBest[uid].score < score) {
+                        userBest[uid] = { 
+                            name: d.name || 'Student', 
+                            score: score, 
+                            isMe: (String(d.userId).trim() === String(currentUserId).trim() || d.name === currentUser)
+                        };
+                    }
+                }
+            });
+        }
+        
+        let ranks = Object.values(userBest);
+        
+        // Agar kisi ne test nahi diya hai
+        if(ranks.length === 0) {
+            document.getElementById('testRankBody').innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 25px 10px; color:var(--text-muted);"><i class="fas fa-rocket fa-2x" style="margin-bottom:10px;"></i><br>Be the first to attempt and rank #1! 🚀</td></tr>';
+            return;
+        }
+
+        // Highest se Lowest sort karein
+        ranks.sort((a,b) => b.score - a.score);
+        
+        let myRankIndex = -1;
+        let myData = null;
+        
+        ranks.forEach((r, index) => {
+            if(r.isMe) {
+                myRankIndex = index + 1; // 1-based ranking
+                myData = r;
+            }
+        });
+
+        let html = "";
+        let top5 = ranks.slice(0, 5); // Sirf Top 5 nikal rahe hain
+        let amIInTop5 = false;
+
+        // 1. Render Top 5 Students
+        top5.forEach((r, i) => {
+            let rankNum = i + 1;
+            if(r.isMe) amIInTop5 = true;
+            
+            let badge = rankNum === 1 ? '<span style="font-size:18px;">🥇</span>' : 
+                        rankNum === 2 ? '<span style="font-size:18px;">🥈</span>' : 
+                        rankNum === 3 ? '<span style="font-size:18px;">🥉</span>' : 
+                        `<div style="width:22px; height:22px; background:var(--border); border-radius:50%; display:grid; place-items:center; font-size:11px; margin:auto;">${rankNum}</div>`;
+            
+            let rowStyle = r.isMe ? 'background:var(--primary-light);' : '';
+            let nameText = r.isMe ? `${r.name} <b style="color:var(--primary); font-size:10px;">(You)</b>` : r.name;
+            
+            html += `<tr style="${rowStyle}">
+                        <td style="width: 50px; text-align:center;">${badge}</td>
+                        <td style="font-weight:700;">${nameText}</td>
+                        <td style="color:var(--primary); font-weight:900;">${r.score} Pts</td>
+                    </tr>`;
+        });
+
+        // 2. Render Current User (Agar Top 5 me nahi hai toh)
+        if (myData && !amIInTop5) {
+            html += `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:8px; font-size:18px; letter-spacing:3px;">•••</td></tr>`;
+            html += `<tr style="background:var(--primary-light); border-top:2px solid var(--primary);">
+                        <td style="width: 50px; text-align:center; font-weight:900;">#${myRankIndex}</td>
+                        <td style="font-weight:800;">${myData.name} <b style="color:var(--primary); font-size:10px;">(You)</b></td>
+                        <td style="color:var(--primary); font-weight:900;">${myData.score} Pts</td>
+                    </tr>`;
+        } 
+        // 3. Agar User ne Test attempt hi nahi kiya hai
+        else if (!myData) {
+            html += `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:8px; font-size:18px; letter-spacing:3px;">•••</td></tr>`;
+            html += `<tr>
+                        <td colspan="3" style="text-align:center; padding:15px 10px; font-size:12px; font-weight:700; color:#ea580c; background:#fff7ed; border-radius:0 0 8px 8px;">
+                            <i class="fas fa-lock" style="margin-right:5px;"></i> Aapne test nahi diya hai. Start Mock Test par click karein!
+                        </td>
+                    </tr>`;
+        }
+        
+        document.getElementById('testRankBody').innerHTML = html;
+    }).catch(e => {
+        console.error(e);
+        document.getElementById('testRankBody').innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error fetching rank. Please try again.</td></tr>';
+    });
+}
+// --- 🔥 NEW DYNAMIC 3D FOLDER ENGINE 🔥 ---
+let dynamicFolders = {};
+
+function fetchDynamicFolders() {
+    db.ref('dsssb_folders_tree').on('value', snap => {
+        if(snap.exists()) {
+            dynamicFolders = snap.val();
+            renderDynamicFolders();
+        } else {
+            console.log("No dynamic folders found in Firebase.");
+            document.getElementById('catBox').innerHTML = `<div style="text-align:center; padding: 20px; color:var(--text-muted); width: 100%;">No Folders Found</div>`;
+        }
+    });
+}
+
+function renderDynamicFolders() {
+    let html = `
+        <div class="folder-3d f-live" onclick="openExamFolder('Live')">
+            <div class="f-tab"></div>
+            <div class="f-body"><span class="f-icon">🔴</span><span class="f-name">Live Tests</span></div>
+        </div>
+        <div class="folder-3d f-saved" onclick="openExamFolder('Saved')">
+            <div class="f-tab"></div>
+            <div class="f-body"><span class="f-icon">⭐</span><span class="f-name">Saved</span></div>
+        </div>
+        <div class="folder-3d f-attempt" onclick="openExamFolder('Attempted')">
+            <div class="f-tab"></div>
+            <div class="f-body"><span class="f-icon">✅</span><span class="f-name">Attempted</span></div>
+        </div>
+    `;
+
+    let folders = Object.values(dynamicFolders).sort((a,b) => (a.order || 99) - (b.order || 99));
+
+    folders.forEach(f => {
+        let folderData = JSON.stringify(f).replace(/'/g, "&#39;"); 
+        html += `
+        <div class="folder-3d ${f.colorClass || 'f-blue'}" onclick='openTreeFolder(${folderData})'>
+            <div class="f-tab"></div>
+            <div class="f-body center">
+                <span class="f-icon">${f.icon || '📁'}</span>
+                <span class="f-name">${f.name || 'Folder'}</span>
+            </div>
+        </div>`;
+    });
+
+    document.getElementById('catBox').innerHTML = html;
+}
+
+function openTreeFolder(folderObj) {
+    const testTabIcon = document.querySelectorAll('.nav-item')[1];
+    switchTab('tests', testTabIcon);
+    document.getElementById('testSearch').value = ''; 
+
+    let filterHtml = `<div class="filter-pill active" onclick="filterDynamicTests('${folderObj.examKey}', 'all', this)">All ${folderObj.name}</div>`;
+    
+    if(folderObj.subCategories && folderObj.subCategories.length > 0) {
+        folderObj.subCategories.forEach(sub => {
+            filterHtml += `<div class="filter-pill" onclick="filterDynamicTests('${folderObj.examKey}', '${sub.filterKey}', this)">${sub.name}</div>`;
+        });
+    }
+
+    document.getElementById('mockFiltersRow').innerHTML = filterHtml;
+    filterDynamicTests(folderObj.examKey, 'all', document.querySelector('#mockFiltersRow .filter-pill.active'));
+    showToast(`Opened ${folderObj.name} 📂`);
+}
+
+function filterDynamicTests(examKey, subFilterKey, pillEl) {
+    if(pillEl) { 
+        document.querySelectorAll('#mockFiltersRow .filter-pill').forEach(p => p.classList.remove('active')); 
+        pillEl.classList.add('active'); 
+    }
+    
+    let list = [...allTests].reverse().filter(t => t.dbKey !== 'auto_qod');
+
+    if (examKey && examKey !== 'all') {
+        let targetExam = examKey.toLowerCase();
+        list = list.filter(t => (t.category||"").toLowerCase().includes(targetExam) || (t.title||"").toLowerCase().includes(targetExam));
+    }
+
+    if (subFilterKey && subFilterKey !== 'all') {
+        let targetSub = subFilterKey.toLowerCase();
+        list = list.filter(t => {
+            let cat = (t.category||"").toLowerCase();
+            let title = (t.title||"").toLowerCase();
+            if(targetSub === 'full') return cat.includes('full') || title.includes('full');
+            if(targetSub === 'sectional') return !(cat.includes('full') || title.includes('full'));
+            return cat.includes(targetSub) || title.includes(targetSub);
+        });
+    }
+
+    let html = "";
+    let savedTests = JSON.parse(getSafeData('savedTests') || '[]');
+
+    list.forEach(t => {
+        let locked = t.type === 'pro' && !isPro;
+        let isAttempted = attemptedTestIds.has(t.dbKey) || attemptedTestIds.has(t.id);
+        let isSaved = savedTests.includes(t.dbKey);
+        let liveHTML = ((t.isLive && t.isLive.toString() === 'true') || (t.scheduledTime && Date.now() >= t.scheduledTime)) ? '<div class="live-badge">🔴 LIVE NOW</div>' : '';
+        let pm = t.pm !== undefined ? parseFloat(t.pm) : 1;
+        let nm = t.nm !== undefined ? parseFloat(t.nm) : 0.25;
+        let isLocked = (t.lock === false || t.lock === "false") ? false : true;
+        let urlQuery = `testid=${t.dbKey}&title=${encodeURIComponent(t.title)}&time=${t.time||120}&pm=${pm}&nm=${nm}&lock=${isLocked}`;
+        
+        let buttonHTML = locked ? 
+            `<button class="start-btn locked" onclick="document.getElementById('paymentModal').style.display='flex'">Unlock Premium</button>` : 
+            isAttempted ? 
+            `<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:5px;">
+                <button class="start-btn" style="background:var(--bg-body); color:var(--text-main); border:1px solid var(--border); padding: 8px; font-size:12px;" onclick="reattemptTest('${t.dbKey}', '${urlQuery}&mode=exam')">🔄 Retake</button>
+                <button class="start-btn" style="background:var(--warning); color:#fff; border:none; padding: 8px; font-size:12px;" onclick="window.location.href='cbt.html?${urlQuery}&mode=quiz'">⚡ Quiz Mode</button>
+                <button class="start-btn" style="padding: 8px; background:#10b981; font-size:12px;" onclick="window.location.href='cbt.html?${urlQuery}&mode=solution'">👁️ Solutions</button>
+            </div>` : 
+            `<button class="start-btn" onclick="window.location.href='cbt.html?${urlQuery}&mode=exam'">Start Mock Test ➔</button>`;
+        
+        let viewRankBtn = `<button class="start-btn" style="background:var(--primary-light); color:var(--primary-dark); border:1px solid var(--primary); padding: 8px; font-size:13px; margin-top:8px; width:100%; box-shadow:none;" onclick="openTestLeaderboard('${t.dbKey}', '${(t.title||'').replace(/'/g, "\\'")}')">🏆 View Leaderboard</button>`;
+
+        html += `<div class="test-card ${locked?'locked':''}">
+                    ${liveHTML}
+                    <button class="save-btn ${isSaved?'saved':''}" onclick="toggleSaveTest('${t.dbKey}', this, event)">
+                        ${isSaved?'<i class="fas fa-star"></i>':'<i class="far fa-star"></i>'}
+                    </button>
+                    <div class="t-title">${t.title || 'PYQ Mock Test'}</div>
+                    <div class="t-info">
+                        <span><i class="fas fa-list-ol"></i> ${t.qs || '20'} Qs</span>
+                        <span><i class="far fa-clock"></i> ${t.time || '15'} Mins</span>
+                        <span><i class="fas fa-check-circle"></i> ${t.marks || t.qs || '20'} Marks</span>
+                    </div>
+                    ${buttonHTML}
+                    ${viewRankBtn}
+                </div>`;
+    });
+
+    document.getElementById('testListContainer').innerHTML = html || "<div style='text-align:center; color:var(--text-muted); padding:40px;'><i class='fas fa-box-open fa-3x' style='opacity:0.3; margin-bottom:10px;'></i><br>No tests found in this category.</div>";
+}
+// ------------------------------------------
+
+// 🔥 MOUSE DRAG TO SCROLL (LIKE MOBILE SWIPE ON PC FOR MULTIPLE SECTIONS) 🔥
+document.addEventListener('DOMContentLoaded', () => {
+    const sliders = [document.getElementById('catBox'), document.getElementById('mockFiltersRow')];
+    
+    sliders.forEach(slider => {
+        if(!slider) return;
+        
+        let isDown = false, startX, scrollLeft;
+        
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            slider.style.cursor = 'grabbing';
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave', () => { 
+            isDown = false; 
+            if (window.innerWidth >= 1024) slider.style.cursor = 'grab'; 
+        });
+        slider.addEventListener('mouseup', () => { 
+            isDown = false; 
+            if (window.innerWidth >= 1024) slider.style.cursor = 'grab'; 
+        });
+        slider.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2; // Scroll fast
+            slider.scrollLeft = scrollLeft - walk;
+        });
+    });
+});
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
@@ -1473,12 +1854,65 @@ document.addEventListener('keydown', function(e) {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('sw.js')
         .then(reg => console.log('Main Branch SW Registered! Scope:', reg.scope))
         .catch(err => console.error('Service Worker Error:', err));
     });
 }
   
+</script>
+
+  <script>
+(function() {
+    // Check if Firebase is loaded, otherwise init
+    const trackerConfig = { 
+        apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI", 
+        authDomain: "dsssbexamportal.firebaseapp.com", 
+        databaseURL: "https://dsssbexamportal-default-rtdb.asia-southeast1.firebasedatabase.app", 
+        projectId: "dsssbexamportal", 
+        storageBucket: "dsssbexamportal.firebasestorage.app", 
+        messagingSenderId: "853373171134", 
+        appId: "1:853373171134:web:77b967374e6f34311af5ef" 
+    };
+    if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) { firebase.initializeApp(trackerConfig); }
+        
+        const trackDb = firebase.database();
+        let trackUid = localStorage.getItem('dsssb_user_id');
+        let trackUname = localStorage.getItem('dsssb_user_name') || 'Student';
+        if(!trackUid) {
+            trackUid = 'user_' + Math.floor(Math.random() * 1000000);
+            localStorage.setItem('dsssb_user_id', trackUid);
+        }
+
+        // Determine current page activity
+        let loc = window.location.pathname.split('/').pop() || 'index.html';
+        if(loc.includes('cbt.html')) loc = 'Giving Mock Test 📝';
+        else if(loc.includes('index.html') || loc === '') loc = 'On Dashboard 🏠';
+        else loc = 'Exploring Portal 🔍';
+
+        // 1. Update Total/Weekly Users
+        trackDb.ref('dsssb_analytics/users/' + trackUid).update({
+            name: trackUname,
+            last_active: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        // 2. Update Live Presence
+        const connRef = trackDb.ref('.info/connected');
+        const presRef = trackDb.ref('dsssb_analytics/presence/' + trackUid);
+
+        connRef.on('value', (snap) => {
+            if (snap.val() === true) {
+                presRef.onDisconnect().remove(); // Tab close hote hi offline
+                presRef.set({ 
+                    name: trackUname, 
+                    activity: loc, 
+                    time: firebase.database.ServerValue.TIMESTAMP 
+                });
+            }
+        });
+    }
+})();
 </script>
 </body>
 </html>
