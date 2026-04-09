@@ -27,13 +27,14 @@
         select, input[type="text"], input[type="number"] { width: 100%; padding: 10px; font-size: 16px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;}
         textarea { width: 100%; padding: 12px; font-size: 18px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; resize: vertical; margin-bottom: 15px; transition: height 0.3s ease; }
         
-        /* NOTEPAD STYLE UPDATE FOR TYPING BOX - INCREASED HEIGHT */
+        /* NOTEPAD STYLE UPDATE FOR TYPING BOX */
         #userTyping { 
             height: 250px; 
             border: 2px solid #3498db; 
             background-color: #ffffff; 
             font-family: 'Courier New', Courier, monospace; 
             font-size: 18px;
+            font-weight: bold;
             line-height: 1.5;
             color: #000;
             white-space: pre-wrap;
@@ -68,7 +69,7 @@
         
         .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
-        /* PERFECT SIDEBAR LAYOUT STYLES - SIDEBAR SHIFTED TO LEFT */
+        /* PERFECT SIDEBAR LAYOUT STYLES */
         .test-layout { display: flex; gap: 30px; align-items: flex-start; margin-top: 15px; }
         .test-main { flex: 1; min-width: 0; }
         .test-sidebar { width: 320px; background: #f8fcfb; padding: 20px; border: 2px solid #bce8f1; border-radius: 8px; flex-shrink: 0; position: sticky; top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); order: -1; }
@@ -124,7 +125,7 @@
         .dash-card h4 { margin-top: 0; color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; margin-bottom: 15px; }
         @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .dashboard-header { flex-direction: column; align-items: flex-start; gap: 10px;} }
 
-        /* ADVANCED STATS GRID STYLES (NEW) */
+        /* ADVANCED STATS GRID STYLES */
         .stat-box { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px 5px; text-align: center; border-radius: 6px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); }
         .stat-title { font-size: 11px; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-val { font-size: 22px; font-weight: 900; color: #2c3e50; }
@@ -133,9 +134,9 @@
         /* PRINT FOOTER FOR CHANNEL LINK */
         .print-footer { display: none; }
 
-        /* EXAM STYLE PRINT LAYOUT */
+        /* EXAM STYLE PRINT LAYOUT - FIXED CLIPPING ISSUE */
         @media print {
-            @page { margin: 1.5cm; size: A4 portrait; } 
+            @page { margin: 10mm; size: A4 portrait; } 
             body { background: #fff; padding: 0; color: #000; }
             .no-print { display: none !important; }
             .container { box-shadow: none; padding: 0; margin: 0; max-width: 100%; border: none; }
@@ -146,8 +147,8 @@
                 max-height: none !important; 
                 white-space: pre !important; 
                 font-family: 'Courier New', Courier, monospace !important; 
-                font-size: 18px !important; 
-                font-weight: bold !important; 
+                font-size: 15px !important; 
+                font-weight: 900 !important; 
                 color: #000 !important;
                 line-height: 2 !important; 
                 width: 100%; 
@@ -162,20 +163,9 @@
                 font-size: 16px; 
                 font-weight: bold; 
             }
-          .print-footer a { color: #000; text-decoration: none; }
-    }
-
-    /* WEAK WORDS DRILL GAME CSS */
-    .drill-overlay { display: none; background: rgba(15, 23, 42, 0.95); position: fixed; inset: 0; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white; font-family: 'Courier New', Courier, monospace; }
-    .drill-box { background: #1e293b; border: 4px solid #3b82f6; border-radius: 15px; padding: 40px; text-align: center; width: 100%; max-width: 500px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
-    .drill-target-word { font-size: 48px; font-weight: bold; color: #fbbf24; margin-bottom: 20px; letter-spacing: 2px; }
-    .drill-input { width: 100%; padding: 15px; font-size: 24px; text-align: center; border-radius: 8px; border: none; outline: none; background: #334155; color: #fff; font-family: inherit; }
-    .drill-input:focus { box-shadow: 0 0 15px #3b82f6; }
-    .drill-stats { display: flex; justify-content: space-between; margin-top: 20px; font-size: 18px; color: #94a3b8; }
-    .drill-score { color: #22c55e; font-weight: bold; font-size: 24px; }
-    .word-flash { animation: flashGreen 0.3s ease-out; }
-    @keyframes flashGreen { 0% { transform: scale(1); color: #fbbf24; } 50% { transform: scale(1.2); color: #22c55e; } 100% { transform: scale(1); color: #fbbf24; } }
-</style>
+            .print-footer a { color: #000; text-decoration: none; }
+        }
+    </style>
 </head>
 <body>
 
@@ -272,23 +262,23 @@
         </div>
     </div>
 
-<div id="drillOverlay" class="drill-overlay">
-        <div class="drill-box">
-            <h2 style="margin-top:0; color:#3b82f6;">🎯 Weak Words Drill</h2>
-            <p style="color:#cbd5e1; margin-bottom: 30px;">Type the word correctly to destroy it!</p>
-            <div id="drillTargetWord" class="drill-target-word">Ready?</div>
-            <input type="text" id="drillInput" class="drill-input" placeholder="Type here..." autocomplete="off">
-            <div class="drill-stats">
-                <div>⏳ <span id="drillTimer">30</span>s</div>
-                <div>🔥 Score: <span id="drillScore" class="drill-score">0</span></div>
-            </div>
-            <button onclick="closeDrill()" style="background:#ef4444; margin-top:30px;">End Drill</button>
+    <div id="drillOverlay" class="pay-overlay" style="z-index: 2000;">
+        <div class="pay-card" style="max-width: 550px; text-align: center; border: 4px solid #3498db; background: #fff;">
+            <h2 style="color:#e67e22; margin-top:0; font-size: 26px;">🎯 Weak Words Drill</h2>
+            <p style="font-size: 15px; color: #555;">टेस्ट में गलत हुए शब्दों को सही टाइप करके अपनी Muscle Memory सुधारें। (शब्द पूरा करके Space दबाएं)</p>
+            
+            <div style="font-size: 34px; font-family: 'Courier New', monospace; font-weight: bold; background: #fdfdfd; padding: 25px; border: 2px dashed #bdc3c7; border-radius: 8px; margin: 20px 0; letter-spacing: 2px; color: #2c3e50;" id="drillWordDisplay">Word</div>
+            
+            <input type="text" id="drillInput" style="font-size: 26px; text-align: center; padding: 15px; width: 80%; font-family: 'Courier New', monospace; border: 2px solid #34495e; border-radius: 8px; outline: none; transition: background 0.2s;" autocomplete="off" spellcheck="false" placeholder="Type here...">
+            
+            <p style="font-size: 18px; font-weight: bold; color: #2980b9; margin-top: 20px;" id="drillProgress"></p>
+            <button onclick="closeDrill()" style="background:#7f8c8d; margin-top:10px; width: 50%; padding: 10px;">Exit Drill</button>
         </div>
     </div>
 
     <div id="outputSection" style="display: none;">
         <button class="btn-dash no-print" onclick="backToDashboard()">⬅️ Back to My Dashboard</button>
-
+        
         <div class="controls-bar no-print">
             <button class="btn-print" onclick="window.print()" style="flex-grow: 1;">📥 Download Passage as PDF</button>
             <div style="display: flex;">
@@ -300,6 +290,14 @@
         <div class="test-layout">
             
             <div class="test-main">
+                
+                <div id="liveCompetitionArea" class="no-print" style="display:none; background: #fff3e0; border-left: 5px solid #e67e22; padding: 15px; border-radius: 5px; margin-bottom: 15px; height: 80px; box-sizing: border-box; overflow: hidden;">
+                    <h4 style="margin-top:0; color: #d35400; font-size: 16px; margin-bottom: 8px;">🔥 Live Competition (Top Players)</h4>
+                    <div id="liveRanks" style="display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: hidden;">
+                        <span style="color:gray; font-size:14px;">Waiting for other players...</span>
+                    </div>
+                </div>
+
                 <p id="readingHeader" style="margin-bottom: 5px; margin-top: 0; color: #34495e;"><b>Reading Area (Original Passage):</b></p>
                 <pre id="outputText"></pre>
                 
@@ -382,11 +380,12 @@
                     <p style="font-size: 15px; margin: 5px 0;">Net Speed: <span id="resNetSpeed">0</span> WPM</p>
                     <hr style="margin: 10px 0;">
                     <p style="font-size: 13px; margin-bottom:0; line-height: 1.6;">Time: <span id="resTime">0:00</span> | Strokes: <span id="resStrokes">0</span><br>Words: <span id="resWords">0</span> | Errors: <span id="resErrors">0</span></p>
-            <div id="resWeakChars"></div>
-                    <button id="btnPracticeWeak" onclick="startWordDrill()" style="display:none; background-color:#d35400; margin-top:15px; font-size: 15px; padding: 12px; width:100%; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;">🎯 Practice Weak Words Mini-Game</button>
                     
-                    <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:15px; font-size: 14px; padding: 10px;">🏆 Download Score Card</button>        
+                    <div id="resWeakChars"></div>
                     
+                    <button id="btnStartDrill" onclick="startWordDrill()" style="display:none; background-color:#d35400; margin-top:15px; font-size: 15px; padding: 12px;"><i class="fas fa-bullseye"></i> 🎯 Start Weak Words Drill</button>
+
+                    <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:10px; font-size: 14px; padding: 12px;">🏆 Download Score Card</button>
                 </div>
             </div>
             
@@ -438,14 +437,13 @@
     });
 
     const typingBox = document.getElementById('userTyping');
-    let backspaceCount = 0; // NEW GLOBAL TRACKER
+    let backspaceCount = 0; 
 
     if(typingBox) {
         typingBox.addEventListener('paste', e => e.preventDefault());
         typingBox.addEventListener('drop', e => e.preventDefault());
         
         typingBox.addEventListener('keydown', function(e) {
-            // NEW FEATURE: Backspace counter
             if (e.key === 'Backspace') {
                 backspaceCount++;
             }
@@ -468,7 +466,6 @@
             }
         });
 
-        // Live Practice Highlighting
         typingBox.addEventListener('input', function(e) {
             if (!testStarted) return;
             if (document.getElementById('highlightModeCheck').checked && !document.getElementById('paperModeCheck').checked) {
@@ -477,9 +474,6 @@
                 if(typedText.length > 0) {
                     let parts = typedText.split(/\s+/);
                     activeIdx = parts.length - 1;
-                    if(typedText.endsWith(" ") || typedText.endsWith("\n") || typedText.endsWith("\t")) {
-                        // Adjust index if ended with space
-                    }
                 }
                 document.getElementById('outputText').innerHTML = buildFormattedPassage(currentLoadedPassageText, null, activeIdx);
             }
@@ -488,7 +482,6 @@
 
     setInterval(function() { (function() { return false; }['constructor']('debugger')()); }, 1000);
 
-    // CORE APPLICATION LOGIC
     const firebaseConfig = {
         apiKey: "AIzaSyDGolcXv0efZxRdOvBthfeT72mkNLLbAwI",
         authDomain: "dsssbexamportal.firebaseapp.com",
@@ -506,6 +499,7 @@
     let currentLoadedPassageText = "";
     let currentPassageId = "";
     let isPro = false;
+    let liveUpdateInterval = null;
     
     const examAudio = new Audio('https://dsssbsmartnotes.github.io/dragon-studio-keyboard-typing-sound-effect-335503.mp3');
     examAudio.loop = true;
@@ -688,6 +682,9 @@
 
     function backToDashboard() {
         clearInterval(timerInterval);
+        clearInterval(liveUpdateInterval);
+        document.getElementById('liveCompetitionArea').style.display = 'none';
+
         examAudio.pause(); 
         examAudio.currentTime = 0;
         
@@ -725,6 +722,28 @@
         });
     }
 
+    function listenToLiveCompetition() {
+        if(!currentPassageId) return;
+        
+        db.ref("live_competition/" + currentPassageId).on("value", (snap) => {
+            let liveUsers = [];
+            snap.forEach(child => { liveUsers.push(child.val()); });
+            
+            liveUsers.sort((a,b) => b.wpm - a.wpm); 
+            
+            let html = "";
+            // FIX 1: Max 5 users shown so the layout NEVER wraps/pushes down the typing box
+            liveUsers.slice(0, 5).forEach((u, i) => { 
+                let medal = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : ""));
+                html += `<span style="background: #fff; padding: 6px 12px; border-radius: 20px; border: 1px solid #e67e22; font-size: 14px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
+                            ${medal} #${i+1} ${u.name}: <span style="color:#27ae60;">${Math.round(u.wpm)} WPM</span>
+                         </span>`;
+            });
+            
+            document.getElementById('liveRanks').innerHTML = html || '<span style="color:gray; font-size:14px;">Waiting for other players...</span>';
+        });
+    }
+
     let timerInterval = null;
     let timeRemaining = 600; 
     let testStarted = false;
@@ -748,14 +767,20 @@
         const charsPerLine = 75; 
         let customMins = document.getElementById('testTimeInput').value || 10;
         
-        const header = `DSSSB/TE-26/D17                                                             TIME ${customMins} MINUTES
-                       TYPEWRITING SPEED TEST: 35 w.p.m.
+        let minsStr = `TIME ${customMins} MINUTES`;
+        let headerSpaces = 85 - 15 - minsStr.length;
+        let headerLine = "DSSSB/TE-26/D17" + " ".repeat(headerSpaces > 0 ? headerSpaces : 1) + minsStr;
+        let titleLine = " ".repeat(26) + "TYPEWRITING SPEED TEST: 35 w.p.m.";
+        
+        let noteText = `Note: Type the following passage accurately using double line spacing. Start
+typing only on getting the "Start" signal. If the whole passage is completed
+once, repeat it. However, typing must be stopped immediately at the "Stop"
+signal. Do not type strokes given in the right hand margin.`;
 
-Note: Type the following passage accurately using double line spacing. Start typing only on getting the
-"Start" signal. If the whole passage is completed once, repeat it. However, typing must be stopped
-immediately at the "Stop" signal. Do not type strokes given in the right hand margin.
-----------------------------------------------------------------------------------------------------
-                                                                                              Strokes`;
+        let dashedLine = "-".repeat(85);
+        let strokesLine = " ".repeat(78) + "Strokes";
+        
+        const header = `${headerLine}\n\n${titleLine}\n\n${noteText}\n${dashedLine}\n${strokesLine}`;
 
         let paragraphs = textToFormat.split('\n');
         let outputLines = [];
@@ -801,7 +826,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         
         window.actualPassageStrokes = cumulativeStrokes; 
         
-        return header + "\n" + outputLines.join('\n');
+        return header + "\n" + outputLines.join('\n'); 
     }
 
     function generateFormat(text) {
@@ -812,6 +837,8 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
 
     function resetTestUI() {
         clearInterval(timerInterval);
+        clearInterval(liveUpdateInterval);
+        
         examAudio.pause(); 
         examAudio.currentTime = 0;
         
@@ -819,7 +846,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         timeRemaining = userMins * 60;
         testStarted = false;
         updateTimerDisplay();
-        backspaceCount = 0; // Reset Backspace
+        backspaceCount = 0; 
         
         let typingArea = document.getElementById('userTyping');
         typingArea.value = ""; 
@@ -835,12 +862,17 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('evaluatedTyping').style.display = 'none';
         document.getElementById('evaluatedTitle').style.display = 'none';
         document.getElementById('errorDetailsBox').style.display = 'none';
-        document.getElementById('advancedStats').style.display = 'none'; // Hide advanced stats
+        document.getElementById('advancedStats').style.display = 'none'; 
+        document.getElementById('liveCompetitionArea').style.display = 'none'; 
         document.getElementById('resWeakChars').innerHTML = ''; 
         document.getElementById('btnStart').style.display = 'block';
         document.getElementById('btnSubmit').style.display = 'none';
         document.getElementById('results').style.display = 'none';
         document.getElementById('btnDownloadScore').style.display = 'none';
+        
+        // Hide drill button on reset
+        document.getElementById('btnStartDrill').style.display = 'none';
+        window.drillWordsList = [];
     }
 
     function startTest() {
@@ -861,6 +893,8 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         
         let userMins = parseInt(document.getElementById('testTimeInput').value) || 10;
         timeRemaining = userMins * 60;
+        let totalTestTimeSec = timeRemaining;
+        
         document.getElementById('testTimeInput').disabled = true; 
 
         let typingArea = document.getElementById('userTyping');
@@ -878,6 +912,9 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('btnStart').style.display = 'none';
         document.getElementById('btnSubmit').style.display = 'block';
 
+        document.getElementById('liveCompetitionArea').style.display = 'block';
+        listenToLiveCompetition();
+
         let disableBackspace = document.getElementById('disableBackspaceCheck').checked;
         if(disableBackspace) { document.getElementById('userTyping').addEventListener('keydown', function(e) { if (e.key === 'Backspace') { e.preventDefault(); } }); }
 
@@ -888,10 +925,34 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             document.getElementById('timerDisplay').innerText = `Time Left: ${m}:${s}`;
             if(timeRemaining <= 0) { clearInterval(timerInterval); evaluateTest(true); }
         }, 1000);
+        
+        liveUpdateInterval = setInterval(() => {
+            let currentTyped = typingArea.value;
+            let sName = document.getElementById('studentNameInput').value.trim() || "Anonymous";
+            let mobile = document.getElementById('userMobile').value.trim();
+            
+            let timeTakenSoFar = timeRemaining === 0 ? totalTestTimeSec : (totalTestTimeSec - timeRemaining);
+            let currentMins = timeTakenSoFar / 60;
+            if (currentMins <= 0) currentMins = 0.05; 
+            
+            let currentGrossWpm = (currentTyped.length / 5) / currentMins;
+
+            if (currentPassageId && mobile && currentTyped.length > 5) {
+                db.ref("live_competition/" + currentPassageId + "/" + mobile).set({
+                    name: sName,
+                    wpm: currentGrossWpm,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+        }, 3000);
     }
 
     function evaluateTest(isAutoSubmit) {
         clearInterval(timerInterval);
+        
+        clearInterval(liveUpdateInterval);
+        document.getElementById('liveCompetitionArea').style.display = 'none';
+
         examAudio.pause(); 
         
         if (document.fullscreenElement) {
@@ -943,7 +1004,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         let errorDetails = [];
         let originalWordStatus = new Array(originalWords.length).fill('untyped');
         let weakCharsMap = {}; 
-        globalWeakWords = []; 
+        let weakWordsSet = new Set(); // NEW: Tracking words for Drill
         let i = 0; let j = 0; 
         
         while (j < typedWords.length && i < originalWords.length) {
@@ -954,12 +1015,12 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                 for (let k = 1; k <= 4 && (i + k) < originalWords.length; k++) { if (originalWords[i + k] === typedWords[j]) { skippedInOrig = k; break; } }
                 for (let k = 1; k <= 4 && (j + k) < typedWords.length; k++) { if (originalWords[i] === typedWords[j + k]) { extraInTyped = k; break; } }
                 
-               if (skippedInOrig !== -1 && (extraInTyped === -1 || skippedInOrig <= extraInTyped)) {
+                if (skippedInOrig !== -1 && (extraInTyped === -1 || skippedInOrig <= extraInTyped)) {
                     for (let k = 0; k < skippedInOrig; k++) { 
                         evaluatedHTML += `<span class="missed-word">[Missed]</span> `; 
                         originalWordStatus[i] = 'missed'; 
-                        globalWeakWords.push(originalWords[i].replace(/[^a-zA-Z0-9]/g, ''));
                         errorDetails.push(`<li>Missed word: <b>${originalWords[i]}</b></li>`);
+                        weakWordsSet.add(originalWords[i]); // Record for drill
                         errors++; omissionsCount++; i++; 
                     }
                 } else if (extraInTyped !== -1 && (skippedInOrig === -1 || extraInTyped < skippedInOrig)) {
@@ -968,11 +1029,11 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                         errorDetails.push(`<li>Extra word typed: <b style="color:#c0392b;">${typedWords[j]}</b></li>`);
                         errors++; fullMistakesCount++; j++; 
                     }
-               } else {
+                } else {
                     evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
                     originalWordStatus[i] = 'wrong'; 
-                    globalWeakWords.push(originalWords[i].replace(/[^a-zA-Z0-9]/g, ''));
                     errorDetails.push(`<li>You typed: <b style="color:#c0392b;">${typedWords[j]}</b> &rarr; Real word: <b style="color:#27ae60;">${originalWords[i]}</b></li>`);
+                    weakWordsSet.add(originalWords[i]); // Record for drill
                     
                     let oW = originalWords[i] || "";
                     let tW = typedWords[j] || "";
@@ -1016,6 +1077,12 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             document.getElementById('resWeakChars').innerHTML = heatmapHtml;
         }
 
+        // INIT DRILL ARRAY
+        window.drillWordsList = Array.from(weakWordsSet).filter(w => w && w.length > 1).slice(0, 15); // Max 15 words
+        if (window.drillWordsList.length > 0) {
+            document.getElementById('btnStartDrill').style.display = 'inline-block';
+        }
+
         let totalGrossWords = totalStrokes / 5;
         let totalPenaltyWords = errors * 2;
         let totalNetWords = totalGrossWords - totalPenaltyWords;
@@ -1030,7 +1097,6 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         let isQualified = netWPM >= 35;
         let statusHtml = isQualified ? '<span style="color:#166534; background:#dcfce7; padding:2px 8px; border-radius:4px;">✅ Qualified (DSSSB Standard)</span>' : '<span style="color:#991b1b; background:#fee2e2; padding:2px 8px; border-radius:4px;">❌ Disqualified</span>';
 
-        // SET ADVANCED DASHBOARD DATA
         document.getElementById('advGross').innerText = Math.round(grossWPM).toFixed(2);
         document.getElementById('advNet').innerText = netWPM.toFixed(2);
         document.getElementById('advErrorPct').innerText = errorPct + "%";
@@ -1038,32 +1104,23 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
         document.getElementById('advTypedKS').innerText = totalStrokes;
         document.getElementById('advOmission').innerText = omissionsCount;
         document.getElementById('advFullMistakes').innerText = fullMistakesCount;
-        document.getElementById('advHalfMistakes').innerText = 0; // DSSSB uses full mistakes primarily
+        document.getElementById('advHalfMistakes').innerText = 0; 
         document.getElementById('advTotalErrors').innerText = totalErrorUnits.toFixed(1);
         document.getElementById('advTime').innerText = `${m}:${s}`;
         document.getElementById('advBackspace').innerText = backspaceCount;
         document.getElementById('advStatusBadge').innerHTML = isQualified ? '<span style="background:#2ecc71; color:#fff; padding:5px 15px; border-radius:20px; font-size:14px;">QUALIFIED ✅</span>' : '<span style="background:#e74c3c; color:#fff; padding:5px 15px; border-radius:20px; font-size:14px;">NOT QUALIFIED ❌</span>';
         document.getElementById('advancedStats').style.display = 'block';
 
-        // SET SIDEBAR RESULT DATA
         document.getElementById('resStatus').innerHTML = statusHtml;
         document.getElementById('resTime').textContent = timeString;
         document.getElementById('resStrokes').textContent = totalStrokes;
         document.getElementById('resWords').textContent = typedWords.length;
         document.getElementById('resErrors').textContent = errors;
         document.getElementById('resGrossSpeed').textContent = Math.round(grossWPM);
-       document.getElementById('resNetSpeed').textContent = netWPM;
+        document.getElementById('resNetSpeed').textContent = netWPM;
         document.getElementById('results').style.display = 'block';
 
-        globalWeakWords = [...new Set(globalWeakWords.filter(w => w && w.length > 2))];
-        if(globalWeakWords.length > 0) {
-            document.getElementById('btnPracticeWeak').style.display = 'block';
-        } else {
-            document.getElementById('btnPracticeWeak').style.display = 'none';
-        }
-
         let sName = document.getElementById('studentNameInput').value.trim() || "Anonymous Student";
-
         let mobile = document.getElementById('userMobile').value.trim();
         let testTitle = passagesData[currentPassageId] ? passagesData[currentPassageId].title : "Typing Test";
         
@@ -1080,7 +1137,7 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             db.ref("typing_leaderboard/" + currentPassageId).push({ 
                 name: sName, 
                 netWPM: netWPM, 
-                accuracy: 0, // Accuracy logic deactivated in DB push as well to prevent errors
+                accuracy: 0, 
                 qualified: isQualified, 
                 timestamp: firebase.database.ServerValue.TIMESTAMP 
             }); 
@@ -1092,6 +1149,54 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
         }
+    }
+
+    // NEW FIX 2: GAME DRILL JAVASCRIPT FUNCTIONS
+    function startWordDrill() {
+        if(!window.drillWordsList || window.drillWordsList.length === 0) return;
+        window.activeDrillQueue = [...window.drillWordsList];
+        document.getElementById('drillOverlay').style.display = 'flex';
+        document.getElementById('drillInput').style.display = 'inline-block';
+        document.getElementById('drillInput').value = "";
+        document.getElementById('drillInput').style.backgroundColor = "#fff";
+        document.getElementById('drillInput').focus();
+        updateDrillUI();
+    }
+
+    document.getElementById('drillInput').addEventListener('input', function(e) {
+        if (!window.activeDrillQueue || window.activeDrillQueue.length === 0) return;
+        let targetWord = window.activeDrillQueue[0];
+        let typed = this.value;
+        
+        // Exact match with space, or exact word followed by hitting spacebar
+        if (typed === targetWord + " " || (typed === targetWord && e.data === " ")) {
+            window.activeDrillQueue.shift(); // Remove cleared word
+            this.value = "";
+            this.style.backgroundColor = "#dcfce7"; // Green flash
+            setTimeout(() => { this.style.backgroundColor = "#fff"; }, 150);
+            
+            if(window.activeDrillQueue.length > 0) {
+                updateDrillUI();
+            } else {
+                document.getElementById('drillWordDisplay').innerHTML = "🎉 Excellent!<br>All words cleared.";
+                document.getElementById('drillProgress').innerText = "Muscle Memory Upgraded! 💪";
+                this.style.display = 'none';
+                setTimeout(closeDrill, 3000);
+            }
+        } else if (targetWord.startsWith(typed.trim())) {
+            this.style.backgroundColor = "#fff"; // Normal while typing correctly
+        } else {
+            this.style.backgroundColor = "#fee2e2"; // Red background on typo
+        }
+    });
+
+    function updateDrillUI() {
+        document.getElementById('drillWordDisplay').innerText = window.activeDrillQueue[0];
+        document.getElementById('drillProgress').innerText = `Words Remaining: ${window.activeDrillQueue.length}`;
+    }
+
+    function closeDrill() {
+        document.getElementById('drillOverlay').style.display = 'none';
     }
 
     function downloadScoreCard() {
@@ -1110,75 +1215,9 @@ immediately at the "Stop" signal. Do not type strokes given in the right hand ma
             link.href = canvas.toDataURL("image/png");
             link.click();
             
-           card.style.left = '-9999px';
+            card.style.left = '-9999px';
             btn.innerText = originalText;
         });
-    }
-
-    // === WEAK WORDS DRILL LOGIC ===
-    let globalWeakWords = [];
-    let drillScore = 0;
-    let drillTime = 30;
-    let drillInterval = null;
-    let currentDrillWord = "";
-
-    function startWordDrill() {
-        if(globalWeakWords.length === 0) return;
-        document.getElementById('drillOverlay').style.display = 'flex';
-        document.getElementById('drillInput').value = "";
-        document.getElementById('drillInput').focus();
-        drillScore = 0;
-        drillTime = 30;
-        document.getElementById('drillScore').innerText = drillScore;
-        document.getElementById('drillTimer').innerText = drillTime;
-        
-        nextDrillWord();
-        
-        clearInterval(drillInterval);
-        drillInterval = setInterval(() => {
-            drillTime--;
-            document.getElementById('drillTimer').innerText = drillTime;
-            if(drillTime <= 0) {
-                endDrill();
-            }
-        }, 1000);
-    }
-
-    function nextDrillWord() {
-        let randomIndex = Math.floor(Math.random() * globalWeakWords.length);
-        currentDrillWord = globalWeakWords[randomIndex].toLowerCase();
-        let wordEl = document.getElementById('drillTargetWord');
-        wordEl.innerText = currentDrillWord;
-        wordEl.classList.remove('word-flash');
-        void wordEl.offsetWidth; 
-        wordEl.classList.add('word-flash');
-    }
-
-    document.getElementById('drillInput').addEventListener('input', function(e) {
-        let typed = this.value.trim().toLowerCase();
-        if(typed === currentDrillWord) {
-            drillScore += 10;
-            document.getElementById('drillScore').innerText = drillScore;
-            this.value = "";
-            
-            if(document.getElementById('examSoundCheck').checked) {
-                keyClickSound.currentTime = 0;
-                keyClickSound.play().catch(err => {});
-            }
-            
-            nextDrillWord();
-        }
-    });
-
-    function endDrill() {
-        clearInterval(drillInterval);
-        alert("⏰ Time's Up!\nYour Score: " + drillScore + "\nGreat Practice!");
-        closeDrill();
-    }
-
-    function closeDrill() {
-        clearInterval(drillInterval);
-        document.getElementById('drillOverlay').style.display = 'none';
     }
 </script>
 
