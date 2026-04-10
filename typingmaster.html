@@ -242,7 +242,7 @@
                 <div id="arenaPassageName" style="font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 10px;">Test Name</div>
                 
                 <div style="font-size: 14px; color: grey; font-weight: bold; text-transform:uppercase;">Match Starts In</div>
-                <div id="arenaDashTimer" style="font-size: 40px; font-weight: 900; color: #ef4444;">00:30</div>
+                <div id="arenaDashTimer" style="font-size: 40px; font-weight: 900; color: #ef4444;">01:00</div>
             </div>
 
             <button onclick="joinGlobalArena()" style="background:#8b5cf6; font-size: 20px; padding: 15px; box-shadow: 0 4px 15px rgba(139,92,246,0.4); border-radius:8px;"><i class="fas fa-bolt"></i> ACCEPT CHALLENGE</button>
@@ -515,6 +515,13 @@
     
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
+    
+    // 🔥 NEW: FIREBASE SERVER TIME SYNC 🔥
+    let serverTimeOffset = 0;
+    db.ref(".info/serverTimeOffset").on("value", function(snap) {
+        serverTimeOffset = snap.val() || 0;
+    });
+    function getSyncedTime() { return Date.now() + serverTimeOffset; }
 
     let passagesData = {}; 
     let currentLoadedPassageText = "";
@@ -595,12 +602,14 @@
                 
                 clearInterval(arenaDashInterval);
                 arenaDashInterval = setInterval(() => {
-                    let tl = Math.ceil((currentArenaData.startTime - Date.now()) / 1000);
+                    let tl = Math.ceil((currentArenaData.startTime - getSyncedTime()) / 1000);
                     if(tl <= 0) { 
                         document.getElementById('arenaDashTimer').innerText = "Starting!"; 
                         clearInterval(arenaDashInterval);
                     } else {
-                        document.getElementById('arenaDashTimer').innerText = "00:" + (tl < 10 ? "0" + tl : tl);
+                        let m = Math.floor(tl / 60).toString().padStart(2, '0');
+                        let s = (tl % 60).toString().padStart(2, '0');
+                        document.getElementById('arenaDashTimer').innerText = m + ":" + s;
                     }
                 }, 1000);
             } else if (currentArenaData.status !== 'waiting' && !isArenaMode) {
@@ -662,7 +671,7 @@
         // Arena Pre-Match Countdown Timer
         clearInterval(arenaWaitInterval);
         arenaWaitInterval = setInterval(() => {
-            let tl = Math.ceil((currentArenaData.startTime - Date.now()) / 1000);
+            let tl = Math.ceil((currentArenaData.startTime - getSyncedTime()) / 1000);
             
             if(tl <= 0 || currentArenaData.status === 'live') {
                 clearInterval(arenaWaitInterval);
@@ -670,8 +679,10 @@
                 typingArea.placeholder = "Arena match is LIVE! Start typing...";
                 startTest(); // 🔥 AUTO START TRIGGER
             } else {
-                document.getElementById('timerDisplay').innerText = `Match Starts In: ${tl}s`;
-                typingArea.placeholder = `Please wait... Global Match starts in ${tl} seconds!`;
+                let m = Math.floor(tl / 60).toString().padStart(2, '0');
+                let s = (tl % 60).toString().padStart(2, '0');
+                document.getElementById('timerDisplay').innerText = `Match Starts In: ${m}:${s}`;
+                typingArea.placeholder = `Please wait... Global Match starts in ${m}:${s}!`;
             }
         }, 1000);
     }
@@ -1409,4 +1420,4 @@ signal. Do not type strokes given in the right hand margin.`;
 </script>
 
 </body>
-</html>
+</html> 
