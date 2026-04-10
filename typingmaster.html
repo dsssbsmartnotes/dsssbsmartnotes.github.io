@@ -314,9 +314,9 @@
             
             <div class="test-main">
                 
-                <div id="liveCompetitionArea" class="no-print" style="display:none; background: #fff3e0; border-left: 5px solid #e67e22; padding: 15px; border-radius: 5px; margin-bottom: 15px; min-height: 80px; box-sizing: border-box; overflow: hidden;">
-                    <h4 id="liveCompTitle" style="margin-top:0; color: #d35400; font-size: 16px; margin-bottom: 8px;">🔥 Live Competition (Top Players)</h4>
-                    <div id="liveRanks" style="display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px;">
+                <div id="liveCompetitionArea" class="no-print" style="display:none; background: #fff3e0; border-left: 5px solid #e67e22; padding: 15px; border-radius: 5px; margin-bottom: 15px; min-height: 80px; box-sizing: border-box;">
+                    <h4 id="liveCompTitle" style="margin-top:0; color: #d35400; font-size: 16px; margin-bottom: 8px;">🔥 Live Competition (All Players)</h4>
+                    <div id="liveRanks" style="display: flex; gap: 10px; flex-wrap: wrap; overflow-y: auto; max-height: 150px; padding-bottom: 5px;">
                         <span style="color:gray; font-size:14px;">Waiting for other players...</span>
                     </div>
                 </div>
@@ -687,18 +687,19 @@
         }, 1000);
     }
 
-    // 🔥 MODIFIED FUNCTION: RENDER LEADERBOARD FOR ARENA 🔥
+    // 🔥 MODIFIED FUNCTION: RENDER LEADERBOARD FOR ARENA (All Users) 🔥
     function renderArenaLeaderboard(participants) {
         if(!participants) return;
         
         let arr = Object.values(participants).sort((a,b) => b.progress - a.progress);
         let html = "";
         
-        arr.slice(0, 5).forEach((u, i) => { 
-            let medal = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : ""));
+        arr.forEach((u, i) => { 
+            let rank = i + 1;
+            let medal = rank === 1 ? "🥇" : (rank === 2 ? "🥈" : (rank === 3 ? "🥉" : `[#${rank}]`));
             let progColor = u.progress >= 100 ? "#10b981" : "#3b82f6";
             
-            html += `<div style="background: #fff; padding: 6px 12px; border-radius: 8px; border: 1px solid #8b5cf6; font-size: 13px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-right: 10px; flex-shrink: 0; min-width: 150px;">
+            html += `<div style="background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #8b5cf6; font-size: 12px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex-grow: 1; min-width: 130px; max-width: 200px;">
                         ${medal} ${u.name}<br>
                         <span style="color:#f59e0b;">${u.wpm} WPM</span> | <span style="color:${progColor};">${Math.floor(u.progress || 0)}%</span>
                      </div>`;
@@ -712,22 +713,27 @@
             const select = document.getElementById('passageSelect');
             select.innerHTML = '<option value="">-- Select a Test Passage --</option>';
             passagesData = {};
-            let isFirst = true;
             
             snap.forEach(child => {
-                passagesData[child.key] = { content: child.val().content, title: child.val().title };
+                let val = child.val();
+                let pType = val.type || "free"; // Fallback to free if type is not set
+                
+                passagesData[child.key] = { content: val.content, title: val.title, type: pType };
+                
                 let opt = document.createElement('option');
                 opt.value = child.key;
                 
-                if (isFirst || isPro) {
-                    opt.textContent = child.val().title + (isFirst && !isPro ? " 🎁 (FREE)" : "");
+                // Keep passage open if it is free OR if the user is PRO
+                if (pType === "free" || isPro) {
+                    opt.textContent = val.title + (pType === "free" && !isPro ? " 🟢 (FREE)" : "");
                     opt.dataset.locked = "false";
                 } else {
-                    opt.textContent = child.val().title + " 🔒 (PRO)";
+                    // Lock passage if it is PRO and the user is free
+                    opt.textContent = val.title + " 🔒 (PRO)";
                     opt.dataset.locked = "true";
                 }
+                
                 select.appendChild(opt);
-                isFirst = false;
             });
             localStorage.setItem('cached_passages', JSON.stringify(passagesData));
         });
@@ -853,7 +859,7 @@
         // Reset Custom Arena styles to Default Orange Normal Mode styles
         document.getElementById('liveCompetitionArea').style.borderColor = '#e67e22';
         document.getElementById('liveCompetitionArea').style.backgroundColor = '#fff3e0';
-        document.getElementById('liveCompTitle').innerText = "🔥 Live Competition (Top Players)";
+        document.getElementById('liveCompTitle').innerText = "🔥 Live Competition (All Players)";
         document.getElementById('liveCompTitle').style.color = '#d35400';
 
         examAudio.pause(); 
@@ -902,11 +908,12 @@
             liveUsers.sort((a,b) => b.wpm - a.wpm); 
             
             let html = "";
-            liveUsers.slice(0, 5).forEach((u, i) => { 
-                let medal = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : ""));
-                html += `<span style="background: #fff; padding: 6px 12px; border-radius: 20px; border: 1px solid #e67e22; font-size: 14px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
-                            ${medal} #${i+1} ${u.name}: <span style="color:#27ae60;">${Math.round(u.wpm)} WPM</span>
-                         </span>`;
+            liveUsers.forEach((u, i) => { // Removed .slice(0,5)
+                let rank = i + 1;
+                let medal = rank === 1 ? "🥇" : (rank === 2 ? "🥈" : (rank === 3 ? "🥉" : `[#${rank}]`));
+                html += `<div style="background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #e67e22; font-size: 12px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex-grow: 1; min-width: 130px; max-width: 200px;">
+                            ${medal} ${u.name}<br><span style="color:#27ae60;">${Math.round(u.wpm)} WPM</span>
+                         </div>`;
             });
             
             document.getElementById('liveRanks').innerHTML = html || '<span style="color:gray; font-size:14px;">Waiting for other players...</span>';
@@ -1035,12 +1042,10 @@ signal. Do not type strokes given in the right hand margin.`;
         document.getElementById('errorDetailsBox').style.display = 'none';
         document.getElementById('advancedStats').style.display = 'none'; 
         
-        // Hide Live Competition if it's not Arena mode. If arena, keep it block but let start logic handle it.
         if(!isArenaMode) document.getElementById('liveCompetitionArea').style.display = 'none'; 
         
         document.getElementById('resWeakChars').innerHTML = ''; 
         
-        // Button Logic
         document.getElementById('btnStart').style.display = isArenaMode ? 'none' : 'block';
         document.getElementById('btnSubmit').style.display = 'none';
         document.getElementById('results').style.display = 'none';
@@ -1050,7 +1055,7 @@ signal. Do not type strokes given in the right hand margin.`;
         window.drillWordsList = [];
     }
 
-    function startTest() {
+  function startTest() {
         if(testStarted) return;
         testStarted = true;
         
@@ -1073,9 +1078,17 @@ signal. Do not type strokes given in the right hand margin.`;
         }
         
         let userMins = parseInt(document.getElementById('testTimeInput').value) || 10;
-        timeRemaining = userMins * 60;
-        let totalTestTimeSec = timeRemaining;
+        let totalTestTimeSec = userMins * 60;
         
+        // 🔥 NEW FIX: ABSOLUTE SYNCED END TIME 🔥
+        // Ab time browser ke bharose nahi, server clock par chalega!
+        let exactEndTime;
+        if(isArenaMode && currentArenaData && currentArenaData.startTime) {
+            exactEndTime = currentArenaData.startTime + (totalTestTimeSec * 1000);
+        } else {
+            exactEndTime = getSyncedTime() + (totalTestTimeSec * 1000);
+        }
+
         document.getElementById('testTimeInput').disabled = true; 
 
         let typingArea = document.getElementById('userTyping');
@@ -1103,12 +1116,19 @@ signal. Do not type strokes given in the right hand margin.`;
         let disableBackspace = document.getElementById('disableBackspaceCheck').checked;
         if(disableBackspace) { document.getElementById('userTyping').addEventListener('keydown', function(e) { if (e.key === 'Backspace') { e.preventDefault(); } }); }
 
+        // 🔥 NEW FIX: ADVANCED TIMER CALCULATION 🔥
         timerInterval = setInterval(() => {
-            timeRemaining--;
+            // Har second absolute bacha hua time nikalenge
+            timeRemaining = Math.max(0, Math.ceil((exactEndTime - getSyncedTime()) / 1000));
+            
             let m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
             let s = (timeRemaining % 60).toString().padStart(2, '0');
             document.getElementById('timerDisplay').innerText = `Time Left: ${m}:${s}`;
-            if(timeRemaining <= 0) { clearInterval(timerInterval); evaluateTest(true); }
+            
+            if(timeRemaining <= 0) { 
+                clearInterval(timerInterval); 
+                evaluateTest(true); 
+            }
         }, 1000);
         
         // 🔥 UPDATED LIVE SYNC (Handles BOTH Normal and Arena Modes) 🔥
@@ -1139,13 +1159,12 @@ signal. Do not type strokes given in the right hand margin.`;
                 });
             }
         }, 3000);
-    }
+    } 
 
     function evaluateTest(isAutoSubmit) {
         clearInterval(timerInterval);
         clearInterval(liveUpdateInterval);
         
-        // 🔥 FINISH IN ARENA DB
         if(isArenaMode) {
             const mobile = document.getElementById('userMobile').value;
             db.ref('dsssb_global_arena/participants/' + mobile).update({ status: 'finished' });
@@ -1420,4 +1439,4 @@ signal. Do not type strokes given in the right hand margin.`;
 </script>
 
 </body>
-</html> 
+</html>
