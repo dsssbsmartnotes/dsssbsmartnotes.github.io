@@ -123,6 +123,7 @@
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .dash-card { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .dash-card h4 { margin-top: 0; color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; margin-bottom: 15px; }
+
         @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .dashboard-header { flex-direction: column; align-items: flex-start; gap: 10px;} }
 
         /* ADVANCED STATS GRID STYLES */
@@ -134,7 +135,7 @@
         /* PRINT FOOTER FOR CHANNEL LINK */
         .print-footer { display: none; }
 
-        /* EXAM STYLE PRINT LAYOUT - FIXED CLIPPING ISSUE */
+        /* EXAM STYLE PRINT LAYOUT */
         @media print {
             @page { margin: 10mm; size: A4 portrait; } 
             body { background: #fff; padding: 0; color: #000; }
@@ -165,6 +166,9 @@
             }
             .print-footer a { color: #000; text-decoration: none; }
         }
+        
+        /* PULSE ANIMATION */
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -189,10 +193,10 @@
                 </div>
                 <button id="btnUpgradeDash" onclick="document.getElementById('paymentOverlay').style.display='flex'" style="display:none; width:auto; background:#f39c12; margin:0; padding:8px 15px;">👑 Unlock PRO Tests</button>
             </div>
-            
+
             <div class="dashboard-grid">
                 <div class="dash-card">
-                    <h4>🚀 Start a Typing Test</h4>
+                    <h4>🚀 Start a Typing Test (Manual Mode)</h4>
                     <p style="font-size:14px; color:#555; margin-bottom:10px;">Select a passage to begin your practice. Pro users have access to all DSSSB passages.</p>
                     <select id="passageSelect" style="border: 2px solid #3498db; padding: 12px;">
                         <option value="">-- Loading Passages... --</option>
@@ -224,6 +228,25 @@
                     <canvas id="progressChart"></canvas>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="arenaOverlay" class="pay-overlay" style="z-index: 3000;">
+        <div class="pay-card" style="border: 4px solid #8b5cf6; background: #faf5ff; max-width: 450px;">
+            <div style="font-size: 60px; margin-bottom: 10px; animation: pulse 1s infinite;">🌍</div>
+            <h2 style="color:#8b5cf6; margin-top: 0; font-size: 28px;">GLOBAL ARENA LIVE!</h2>
+            <p style="font-size: 16px; color: #555; margin-bottom:20px;">Admin has started a multiplayer battle. Connect now to compete with others!</p>
+            
+            <div style="background: #fff; padding: 15px; border-radius: 10px; margin: 15px 0; border: 2px dashed #8b5cf6;">
+                <div style="font-size: 14px; color: grey; font-weight: bold; text-transform:uppercase;">Test Name</div>
+                <div id="arenaPassageName" style="font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 10px;">Test Name</div>
+                
+                <div style="font-size: 14px; color: grey; font-weight: bold; text-transform:uppercase;">Match Starts In</div>
+                <div id="arenaDashTimer" style="font-size: 40px; font-weight: 900; color: #ef4444;">00:30</div>
+            </div>
+
+            <button onclick="joinGlobalArena()" style="background:#8b5cf6; font-size: 20px; padding: 15px; box-shadow: 0 4px 15px rgba(139,92,246,0.4); border-radius:8px;"><i class="fas fa-bolt"></i> ACCEPT CHALLENGE</button>
+            <button onclick="document.getElementById('arenaOverlay').style.display='none'" style="background:transparent; color:#8b5cf6; margin-top:10px; font-weight:bold;">Skip this match</button>
         </div>
     </div>
 
@@ -291,9 +314,9 @@
             
             <div class="test-main">
                 
-                <div id="liveCompetitionArea" class="no-print" style="display:none; background: #fff3e0; border-left: 5px solid #e67e22; padding: 15px; border-radius: 5px; margin-bottom: 15px; height: 80px; box-sizing: border-box; overflow: hidden;">
-                    <h4 style="margin-top:0; color: #d35400; font-size: 16px; margin-bottom: 8px;">🔥 Live Competition (Top Players)</h4>
-                    <div id="liveRanks" style="display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: hidden;">
+                <div id="liveCompetitionArea" class="no-print" style="display:none; background: #fff3e0; border-left: 5px solid #e67e22; padding: 15px; border-radius: 5px; margin-bottom: 15px; min-height: 80px; box-sizing: border-box; overflow: hidden;">
+                    <h4 id="liveCompTitle" style="margin-top:0; color: #d35400; font-size: 16px; margin-bottom: 8px;">🔥 Live Competition (Top Players)</h4>
+                    <div id="liveRanks" style="display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px;">
                         <span style="color:gray; font-size:14px;">Waiting for other players...</span>
                     </div>
                 </div>
@@ -384,7 +407,6 @@
                     <div id="resWeakChars"></div>
                     
                     <button id="btnStartDrill" onclick="startWordDrill()" style="display:none; background-color:#d35400; margin-top:15px; font-size: 15px; padding: 12px;"><i class="fas fa-bullseye"></i> 🎯 Start Weak Words Drill</button>
-
                     <button id="btnDownloadScore" onclick="downloadScoreCard()" style="display:none; background-color:#8e44ad; margin-top:10px; font-size: 14px; padding: 12px;">🏆 Download Score Card</button>
                 </div>
             </div>
@@ -395,7 +417,6 @@
             For more updates & mock tests, join our Telegram Channel:<br>
             <a href="https://t.me/DSSSB_PYQS">https://t.me/DSSSB_PYQS</a>
         </div>
-
     </div>
 </div>
 
@@ -501,6 +522,12 @@
     let isPro = false;
     let liveUpdateInterval = null;
     
+    // 🔥 NEW VARIABLES FOR GLOBAL ARENA 🔥
+    let isArenaMode = false;
+    let currentArenaData = null;
+    let arenaDashInterval = null;
+    let arenaWaitInterval = null;
+    
     const examAudio = new Audio('https://dsssbsmartnotes.github.io/dragon-studio-keyboard-typing-sound-effect-335503.mp3');
     examAudio.loop = true;
     examAudio.load();
@@ -544,11 +571,129 @@
             
             loadAllPassages(); 
             loadUserHistory(mobile); 
+            initArenaListener(); // 🚀 INIT GLOBAL ARENA LISTENER
             
             document.getElementById('btnVerify').innerText = "Login / Register";
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('dashboardArea').style.display = 'block';
         });
+    }
+
+    // 🔥 NEW FUNCTION: GLOBAL ARENA LISTENER (FULL SCREEN POPUP) 🔥
+    function initArenaListener() {
+        db.ref('dsssb_global_arena').on('value', snap => {
+            if(!snap.exists()) {
+                document.getElementById('arenaOverlay').style.display = 'none';
+                return;
+            }
+            currentArenaData = snap.val();
+            
+            // Show Full-Screen Popup when status is waiting
+            if(currentArenaData.status === 'waiting' && !isArenaMode) {
+                document.getElementById('arenaOverlay').style.display = 'flex';
+                document.getElementById('arenaPassageName').innerText = currentArenaData.title || "Live Mega Battle";
+                
+                clearInterval(arenaDashInterval);
+                arenaDashInterval = setInterval(() => {
+                    let tl = Math.ceil((currentArenaData.startTime - Date.now()) / 1000);
+                    if(tl <= 0) { 
+                        document.getElementById('arenaDashTimer').innerText = "Starting!"; 
+                        clearInterval(arenaDashInterval);
+                    } else {
+                        document.getElementById('arenaDashTimer').innerText = "00:" + (tl < 10 ? "0" + tl : tl);
+                    }
+                }, 1000);
+            } else if (currentArenaData.status !== 'waiting' && !isArenaMode) {
+                document.getElementById('arenaOverlay').style.display = 'none';
+                clearInterval(arenaDashInterval);
+            }
+
+            // Sync Arena Real-Time Leaderboard for Joined Students
+            if(isArenaMode) {
+                renderArenaLeaderboard(currentArenaData.participants);
+            }
+        });
+    }
+
+    // 🔥 NEW FUNCTION: JOIN GLOBAL ARENA 🔥
+    function joinGlobalArena() {
+        const mobile = document.getElementById('userMobile').value.trim();
+        const sName = document.getElementById('studentNameInput').value.trim();
+        if(!mobile) return;
+        
+        isArenaMode = true;
+        document.getElementById('arenaOverlay').style.display = 'none'; // HIDE POPUP ON JOIN
+        
+        currentPassageId = currentArenaData.passageId;
+        
+        // Register in DB
+        db.ref('dsssb_global_arena/participants/' + mobile).set({
+            name: sName,
+            status: 'waiting',
+            wpm: 0,
+            progress: 0
+        });
+
+        // Load passage
+        let passageObj = passagesData[currentPassageId] || JSON.parse(localStorage.getItem('cached_passages') || '{}')[currentPassageId];
+        if(!passageObj) return alert("Error: Arena passage data not found.");
+        
+        currentLoadedPassageText = passageObj.content.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+        
+        // Transition UI to Output Area
+        document.getElementById('dashboardArea').style.display = 'none';
+        document.getElementById('outputSection').style.display = 'block';
+        
+        generateFormat(currentLoadedPassageText);
+        
+        // Custom Arena UI State
+        document.getElementById('btnStart').style.display = 'none';
+        document.getElementById('testTimeInput').disabled = true;
+        
+        // Activate Arena UI in Leaderboard Area
+        document.getElementById('liveCompetitionArea').style.display = 'block';
+        document.getElementById('liveCompetitionArea').style.borderColor = '#8b5cf6';
+        document.getElementById('liveCompetitionArea').style.backgroundColor = '#faf5ff';
+        document.getElementById('liveCompTitle').innerText = "🌍 Global Arena Live Rankings";
+        document.getElementById('liveCompTitle').style.color = '#8b5cf6';
+        
+        const typingArea = document.getElementById('userTyping');
+        
+        // Arena Pre-Match Countdown Timer
+        clearInterval(arenaWaitInterval);
+        arenaWaitInterval = setInterval(() => {
+            let tl = Math.ceil((currentArenaData.startTime - Date.now()) / 1000);
+            
+            if(tl <= 0 || currentArenaData.status === 'live') {
+                clearInterval(arenaWaitInterval);
+                document.getElementById('timerDisplay').innerText = `🔥 ARENA LIVE 🔥`;
+                typingArea.placeholder = "Arena match is LIVE! Start typing...";
+                startTest(); // 🔥 AUTO START TRIGGER
+            } else {
+                document.getElementById('timerDisplay').innerText = `Match Starts In: ${tl}s`;
+                typingArea.placeholder = `Please wait... Global Match starts in ${tl} seconds!`;
+            }
+        }, 1000);
+    }
+
+    // 🔥 MODIFIED FUNCTION: RENDER LEADERBOARD FOR ARENA 🔥
+    function renderArenaLeaderboard(participants) {
+        if(!participants) return;
+        
+        let arr = Object.values(participants).sort((a,b) => b.progress - a.progress);
+        let html = "";
+        
+        arr.slice(0, 5).forEach((u, i) => { 
+            let medal = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : ""));
+            let progColor = u.progress >= 100 ? "#10b981" : "#3b82f6";
+            
+            html += `<div style="background: #fff; padding: 6px 12px; border-radius: 8px; border: 1px solid #8b5cf6; font-size: 13px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-right: 10px; flex-shrink: 0; min-width: 150px;">
+                        ${medal} ${u.name}<br>
+                        <span style="color:#f59e0b;">${u.wpm} WPM</span> | <span style="color:${progColor};">${Math.floor(u.progress || 0)}%</span>
+                     </div>`;
+        });
+        
+        document.getElementById('liveRanks').innerHTML = html;
     }
 
     function loadAllPassages() {
@@ -683,7 +828,22 @@
     function backToDashboard() {
         clearInterval(timerInterval);
         clearInterval(liveUpdateInterval);
+        clearInterval(arenaWaitInterval);
+        
+        // 🔥 ARENA ABANDON LOGIC
+        if(isArenaMode) {
+            const mobile = document.getElementById('userMobile').value;
+            db.ref('dsssb_global_arena/participants/' + mobile).update({ status: 'finished' });
+            isArenaMode = false;
+        }
+        
         document.getElementById('liveCompetitionArea').style.display = 'none';
+        
+        // Reset Custom Arena styles to Default Orange Normal Mode styles
+        document.getElementById('liveCompetitionArea').style.borderColor = '#e67e22';
+        document.getElementById('liveCompetitionArea').style.backgroundColor = '#fff3e0';
+        document.getElementById('liveCompTitle').innerText = "🔥 Live Competition (Top Players)";
+        document.getElementById('liveCompTitle').style.color = '#d35400';
 
         examAudio.pause(); 
         examAudio.currentTime = 0;
@@ -728,11 +888,9 @@
         db.ref("live_competition/" + currentPassageId).on("value", (snap) => {
             let liveUsers = [];
             snap.forEach(child => { liveUsers.push(child.val()); });
-            
             liveUsers.sort((a,b) => b.wpm - a.wpm); 
             
             let html = "";
-            // FIX 1: Max 5 users shown so the layout NEVER wraps/pushes down the typing box
             liveUsers.slice(0, 5).forEach((u, i) => { 
                 let medal = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : ""));
                 html += `<span style="background: #fff; padding: 6px 12px; border-radius: 20px; border: 1px solid #e67e22; font-size: 14px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
@@ -757,7 +915,7 @@
     }
 
     function updateTimerDisplay() {
-        if(!testStarted) {
+        if(!testStarted && !isArenaMode) {
             let mins = document.getElementById('testTimeInput').value || 10;
             document.getElementById('timerDisplay').innerText = `Time Left: ${mins}:00`;
         }
@@ -838,6 +996,7 @@ signal. Do not type strokes given in the right hand margin.`;
     function resetTestUI() {
         clearInterval(timerInterval);
         clearInterval(liveUpdateInterval);
+        clearInterval(arenaWaitInterval);
         
         examAudio.pause(); 
         examAudio.currentTime = 0;
@@ -853,6 +1012,7 @@ signal. Do not type strokes given in the right hand margin.`;
         typingArea.style.display = 'block'; 
         typingArea.style.height = '250px'; 
         typingArea.disabled = true;
+        typingArea.placeholder = "Click 'Start Test' to begin typing...";
         
         document.getElementById('outputText').style.display = 'block';
         document.getElementById('readingHeader').style.display = 'block';
@@ -863,14 +1023,18 @@ signal. Do not type strokes given in the right hand margin.`;
         document.getElementById('evaluatedTitle').style.display = 'none';
         document.getElementById('errorDetailsBox').style.display = 'none';
         document.getElementById('advancedStats').style.display = 'none'; 
-        document.getElementById('liveCompetitionArea').style.display = 'none'; 
+        
+        // Hide Live Competition if it's not Arena mode. If arena, keep it block but let start logic handle it.
+        if(!isArenaMode) document.getElementById('liveCompetitionArea').style.display = 'none'; 
+        
         document.getElementById('resWeakChars').innerHTML = ''; 
-        document.getElementById('btnStart').style.display = 'block';
+        
+        // Button Logic
+        document.getElementById('btnStart').style.display = isArenaMode ? 'none' : 'block';
         document.getElementById('btnSubmit').style.display = 'none';
         document.getElementById('results').style.display = 'none';
         document.getElementById('btnDownloadScore').style.display = 'none';
         
-        // Hide drill button on reset
         document.getElementById('btnStartDrill').style.display = 'none';
         window.drillWordsList = [];
     }
@@ -878,6 +1042,12 @@ signal. Do not type strokes given in the right hand margin.`;
     function startTest() {
         if(testStarted) return;
         testStarted = true;
+        
+        // 🔥 ARENA MODE DB START 🔥
+        if (isArenaMode) {
+            let mobile = document.getElementById('userMobile').value;
+            db.ref('dsssb_global_arena/participants/' + mobile).update({ status: 'live' });
+        }
         
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().catch(e => console.log("Fullscreen not permitted"));
@@ -899,6 +1069,7 @@ signal. Do not type strokes given in the right hand margin.`;
 
         let typingArea = document.getElementById('userTyping');
         typingArea.disabled = false;
+        typingArea.placeholder = ""; // Clear Arena waiting msg
         typingArea.focus();
         
         if (document.getElementById('paperModeCheck').checked) {
@@ -912,8 +1083,11 @@ signal. Do not type strokes given in the right hand margin.`;
         document.getElementById('btnStart').style.display = 'none';
         document.getElementById('btnSubmit').style.display = 'block';
 
-        document.getElementById('liveCompetitionArea').style.display = 'block';
-        listenToLiveCompetition();
+        // Normal mode manual leaderboard trigger
+        if(!isArenaMode) {
+            document.getElementById('liveCompetitionArea').style.display = 'block';
+            listenToLiveCompetition();
+        }
 
         let disableBackspace = document.getElementById('disableBackspaceCheck').checked;
         if(disableBackspace) { document.getElementById('userTyping').addEventListener('keydown', function(e) { if (e.key === 'Backspace') { e.preventDefault(); } }); }
@@ -926,6 +1100,7 @@ signal. Do not type strokes given in the right hand margin.`;
             if(timeRemaining <= 0) { clearInterval(timerInterval); evaluateTest(true); }
         }, 1000);
         
+        // 🔥 UPDATED LIVE SYNC (Handles BOTH Normal and Arena Modes) 🔥
         liveUpdateInterval = setInterval(() => {
             let currentTyped = typingArea.value;
             let sName = document.getElementById('studentNameInput').value.trim() || "Anonymous";
@@ -937,7 +1112,15 @@ signal. Do not type strokes given in the right hand margin.`;
             
             let currentGrossWpm = (currentTyped.length / 5) / currentMins;
 
-            if (currentPassageId && mobile && currentTyped.length > 5) {
+            if (isArenaMode) {
+                // ARENA MODE: Sync Progress % and WPM
+                let progressPct = Math.min(100, (currentTyped.length / currentLoadedPassageText.length) * 100);
+                db.ref('dsssb_global_arena/participants/' + mobile).update({
+                    wpm: Math.round(currentGrossWpm),
+                    progress: progressPct
+                });
+            } else if (currentPassageId && mobile && currentTyped.length > 5) {
+                // NORMAL MODE: Sync to live_competition
                 db.ref("live_competition/" + currentPassageId + "/" + mobile).set({
                     name: sName,
                     wpm: currentGrossWpm,
@@ -949,9 +1132,15 @@ signal. Do not type strokes given in the right hand margin.`;
 
     function evaluateTest(isAutoSubmit) {
         clearInterval(timerInterval);
-        
         clearInterval(liveUpdateInterval);
-        document.getElementById('liveCompetitionArea').style.display = 'none';
+        
+        // 🔥 FINISH IN ARENA DB
+        if(isArenaMode) {
+            const mobile = document.getElementById('userMobile').value;
+            db.ref('dsssb_global_arena/participants/' + mobile).update({ status: 'finished' });
+        } else {
+            document.getElementById('liveCompetitionArea').style.display = 'none';
+        }
 
         examAudio.pause(); 
         
@@ -1004,7 +1193,7 @@ signal. Do not type strokes given in the right hand margin.`;
         let errorDetails = [];
         let originalWordStatus = new Array(originalWords.length).fill('untyped');
         let weakCharsMap = {}; 
-        let weakWordsSet = new Set(); // NEW: Tracking words for Drill
+        let weakWordsSet = new Set();
         let i = 0; let j = 0; 
         
         while (j < typedWords.length && i < originalWords.length) {
@@ -1020,7 +1209,7 @@ signal. Do not type strokes given in the right hand margin.`;
                         evaluatedHTML += `<span class="missed-word">[Missed]</span> `; 
                         originalWordStatus[i] = 'missed'; 
                         errorDetails.push(`<li>Missed word: <b>${originalWords[i]}</b></li>`);
-                        weakWordsSet.add(originalWords[i]); // Record for drill
+                        weakWordsSet.add(originalWords[i]);
                         errors++; omissionsCount++; i++; 
                     }
                 } else if (extraInTyped !== -1 && (skippedInOrig === -1 || extraInTyped < skippedInOrig)) {
@@ -1033,7 +1222,7 @@ signal. Do not type strokes given in the right hand margin.`;
                     evaluatedHTML += `<span class="wrong-word">${typedWords[j]}</span> `; 
                     originalWordStatus[i] = 'wrong'; 
                     errorDetails.push(`<li>You typed: <b style="color:#c0392b;">${typedWords[j]}</b> &rarr; Real word: <b style="color:#27ae60;">${originalWords[i]}</b></li>`);
-                    weakWordsSet.add(originalWords[i]); // Record for drill
+                    weakWordsSet.add(originalWords[i]);
                     
                     let oW = originalWords[i] || "";
                     let tW = typedWords[j] || "";
@@ -1077,8 +1266,7 @@ signal. Do not type strokes given in the right hand margin.`;
             document.getElementById('resWeakChars').innerHTML = heatmapHtml;
         }
 
-        // INIT DRILL ARRAY
-        window.drillWordsList = Array.from(weakWordsSet).filter(w => w && w.length > 1).slice(0, 15); // Max 15 words
+        window.drillWordsList = Array.from(weakWordsSet).filter(w => w && w.length > 1).slice(0, 15); 
         if (window.drillWordsList.length > 0) {
             document.getElementById('btnStartDrill').style.display = 'inline-block';
         }
@@ -1133,7 +1321,7 @@ signal. Do not type strokes given in the right hand margin.`;
             document.getElementById('btnDownloadScore').style.display = 'none';
         }
 
-        if (currentPassageId) { 
+        if (currentPassageId && !isArenaMode) { 
             db.ref("typing_leaderboard/" + currentPassageId).push({ 
                 name: sName, 
                 netWPM: netWPM, 
@@ -1151,7 +1339,7 @@ signal. Do not type strokes given in the right hand margin.`;
         }
     }
 
-    // NEW FIX 2: GAME DRILL JAVASCRIPT FUNCTIONS
+    // WEAK WORDS DRILL
     function startWordDrill() {
         if(!window.drillWordsList || window.drillWordsList.length === 0) return;
         window.activeDrillQueue = [...window.drillWordsList];
@@ -1168,11 +1356,10 @@ signal. Do not type strokes given in the right hand margin.`;
         let targetWord = window.activeDrillQueue[0];
         let typed = this.value;
         
-        // Exact match with space, or exact word followed by hitting spacebar
         if (typed === targetWord + " " || (typed === targetWord && e.data === " ")) {
-            window.activeDrillQueue.shift(); // Remove cleared word
+            window.activeDrillQueue.shift(); 
             this.value = "";
-            this.style.backgroundColor = "#dcfce7"; // Green flash
+            this.style.backgroundColor = "#dcfce7"; 
             setTimeout(() => { this.style.backgroundColor = "#fff"; }, 150);
             
             if(window.activeDrillQueue.length > 0) {
@@ -1184,9 +1371,9 @@ signal. Do not type strokes given in the right hand margin.`;
                 setTimeout(closeDrill, 3000);
             }
         } else if (targetWord.startsWith(typed.trim())) {
-            this.style.backgroundColor = "#fff"; // Normal while typing correctly
+            this.style.backgroundColor = "#fff"; 
         } else {
-            this.style.backgroundColor = "#fee2e2"; // Red background on typo
+            this.style.backgroundColor = "#fee2e2"; 
         }
     });
 
